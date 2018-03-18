@@ -1,0 +1,24 @@
+[
+    {
+        "caption": "Gem",
+        "id": "GEMStudent",
+        "children": [
+            {
+                "caption": "Test",
+                "id": "gemsTest",
+                "command": "gems_test",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Set server address",
+                "id": "gemsSetServerAddress",
+                "command": "gems_set_server_address",
+            },
+            {
+                "caption": "Register",
+                "id": "gemsRegister",
+                "command": "gems_register",
+            },
+        ]
+    }
+]

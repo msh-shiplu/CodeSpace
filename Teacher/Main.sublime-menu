@@ -1,0 +1,41 @@
+[
+    {
+        "caption": "GEM",
+        "id": "GEMTeacher",
+        "children": [
+            {
+                "caption": "Test",
+                "id": "gemtTest",
+                "command": "gemt_test",
+            },
+            {
+                "caption": "Broadcast",
+                "id": "gemtBroadcast",
+                "command": "gemt_broadcast",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Set server address",
+                "id": "gemtSetServerAddress",
+                "command": "gemt_set_server_address",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Registration",
+                "id": "gemtRegistration",
+                "children": [
+                    {
+                        "caption": "Complete registration",
+                        "id": "gemtRegister",
+                        "command": "gemt_register",
+                    },
+                    {
+                        "caption": "Add new username (on localhost)",
+                        "id": "gemtSetupNewTeacher",
+                        "command": "gemt_setup_new_teacher",
+                    },
+                ]
+            }
+        ]
+    }
+]
