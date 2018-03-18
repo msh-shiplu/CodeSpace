@@ -23,8 +23,8 @@ var AddProblemSQL *sql.Stmt
 // Authentication
 //---------------------------------------------------------
 
-var Student = make(map[string]string)
-var Teacher = make(map[string]string)
+var Student = make(map[int]string)
+var Teacher = make(map[int]string)
 var Passcode string
 
 //---------------------------------------------------------

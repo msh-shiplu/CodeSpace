@@ -8,6 +8,11 @@
                 "id": "gemsTest",
                 "command": "gems_test",
             },
+            {
+                "caption": "Get board content",
+                "id": "gemsGetBoardContent",
+                "command": "gems_get_board_content",
+            },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Set server address",
@@ -15,9 +20,20 @@
                 "command": "gems_set_server_address",
             },
             {
-                "caption": "Register",
-                "id": "gemsRegister",
-                "command": "gems_register",
+                "caption": "Setup",
+                "id": "GEMSSetup",
+                "children": [
+                    {
+                        "caption": "Local folder",
+                        "id": "gemsSetLocalFolder",
+                        "command": "gems_set_local_folder",
+                    },
+                    {
+                        "caption": "Register",
+                        "id": "gemsRegister",
+                        "command": "gems_register",
+                    },
+                ]
             },
         ]
     }

@@ -12,10 +12,15 @@ import datetime
 import webbrowser
 
 gemsFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
-gemsFOLDER = os.path.join(os.path.expanduser('~'), 'GEM')
+gemsUID = 0
+gemsFOLDER = ''
+gemsTIMEOUT = 7
+gemsAnswer = {}
+gemsAttempts = {}
 
 # ------------------------------------------------------------------------------
-def gemsRequest(path, data, headers={}, is_json=False, authenticated=True):
+def gemsRequest(path, data, authenticated=True):
+	global gemsUID, gemsFOLDER
 	try:
 		with open(gemsFILE, 'r') as f:
 			info = json.loads(f.read())
@@ -25,24 +30,27 @@ def gemsRequest(path, data, headers={}, is_json=False, authenticated=True):
 	if 'Server' not in info:
 		sublime.message_dialog("Please set server address.")
 		return None
-	data['server'] = info['Server']
 
+	if 'Folder' not in info:
+		sublime.message_dialog("Please set a local folder to store working files.")
+		return None
+
+	data['server'] = info['Server']
 	if authenticated:
-		if 'Name' not in info or 'Password' not in info:
-			sublime.message_dialog("Please ask to setup a new teacher account and register.")
+		if 'Uid' not in info:
+			sublime.message_dialog("Please register.")
 			return None
 		data['name'] = info['Name']
 		data['password'] = info['Password']
 		data['uid'] = info['Uid']
+		gemsUID = info['Uid']
+		gemsFOLDER = info['Folder']
 
 	url = urllib.parse.urljoin(info['Server'], path)
-	if is_json:
-		load = json.dumps(data).encode('utf-8')
-	else:
-		load = urllib.parse.urlencode(data).encode('utf-8')
-	req = urllib.request.Request(url, load, headers=headers)
+	load = urllib.parse.urlencode(data).encode('utf-8')
+	req = urllib.request.Request(url, load)
 	try:
-		with urllib.request.urlopen(req, None, TIMEOUT) as response:
+		with urllib.request.urlopen(req, None, gemsTIMEOUT) as response:
 			return response.read().decode(encoding="utf-8")
 	except urllib.error.HTTPError as err:
 		sublime.message_dialog("{0}".format(err))
@@ -50,6 +58,42 @@ def gemsRequest(path, data, headers={}, is_json=False, authenticated=True):
 		sublime.message_dialog("{0}\nCannot connect to server.".format(err))
 	print('Something is wrong')
 	return None
+
+# ------------------------------------------------------------------
+def gems_rand_chars(n):
+	letters = 'abcdefghijklmkopqrstuvwxyzABCDEFGHIJKLMLOPQRSTUVWXYZ'
+	return ''.join(random.choice(letters) for i in range(n))
+
+# ------------------------------------------------------------------
+class gemsGetBoardContentCommand(sublime_plugin.WindowCommand):
+	def run(self):
+		response = gemsRequest('student_get_boardcontent', {})
+		if response is None:
+			sublime.message_dialog("Failed.")
+			return
+		json_obj = json.loads(response)
+		if json_obj == []:
+			sublime.message_dialog("Whiteboard is empty.")
+			return
+		for board in json_obj:
+			content = board['Content']
+			answer = board['Answer']
+			attempts = board['Attempts']
+			ext = board['Ext']
+			pid = board['Pid']
+			today = datetime.datetime.today()
+			if pid > 0:
+				if answer!= '':
+					gemsAnswer[pid] = answer
+				gemsAttempts[pid] = attempts
+				fname = 'gemp{}_{}_{}.{}'.format(today.strftime('%m%d'), pid, gemsUID, ext)
+			else:
+				rpid = gems_rand_chars(2)
+				fname = 'gem{}_{}_{}.{}'.format(today.strftime('%m%d'), rpid, gemsUID, ext)
+			fname = os.path.join(gemsFOLDER, fname)
+			with open(fname, 'w', encoding='utf-8') as f:
+				f.write(content)
+			sublime.active_window().open_file(fname)
 
 # ------------------------------------------------------------------
 class gemsRegisterCommand(sublime_plugin.WindowCommand):
@@ -80,7 +124,46 @@ class gemsRegisterCommand(sublime_plugin.WindowCommand):
 			sublime.message_dialog('{} registered'.format(name))
 
 # ------------------------------------------------------------------
-class gemsSetServerAddress(sublime_plugin.WindowCommand):
+class gemsSetLocalFolderCommand(sublime_plugin.WindowCommand):
+	def run(self):
+		try:
+			with open(gemsFILE, 'r') as f:
+				info = json.loads(f.read())
+		except:
+			info = dict()
+		if 'Folder' not in info:
+			info['Folder'] = os.path.join(os.path.expanduser('~'), 'GEM')
+		sublime.active_window().show_input_panel("This folder will be used to store working files.",
+			info['Folder'],
+			self.set,
+			None,
+			None)
+
+	def set(self, folder):
+		folder = folder.strip()
+		if len(folder) > 0:
+			try:
+				with open(gemsFILE, 'r') as f:
+					info = json.loads(f.read())
+			except:
+				info = dict()
+			info['Folder'] = folder
+			if not os.path.exists(folder):
+				try:
+					os.mkdir(folder)
+					with open(gemsFILE, 'w') as f:
+						f.write(json.dumps(info, indent=4))
+				except:
+					sublime.message_dialog('Could not create {}.'.format(folder))
+			else:
+				with open(gemsFILE, 'w') as f:
+					f.write(json.dumps(info, indent=4))
+				sublime.message_dialog('Folder exists. Will use it to store working files.')
+		else:
+			sublime.message_dialog("Folder name cannot be empty.")
+
+# ------------------------------------------------------------------
+class gemsSetServerAddressCommand(sublime_plugin.WindowCommand):
 	def run(self):
 		try:
 			with open(gemsFILE, 'r') as f:

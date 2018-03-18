@@ -14,6 +14,7 @@ gemtFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemtPostDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Posts")
 gemtProblemDivider = '<PROBLEM DIVIDER>'
 gemtAnswerTag = 'ANSWER:'
+gemtTIMEOUT = 7
 
 # ------------------------------------------------------------------
 def gemtRequest(path, data, authenticated=True, localhost=False):
@@ -33,17 +34,13 @@ def gemtRequest(path, data, authenticated=True, localhost=False):
 		data['name'] = info['Name']
 		data['password'] = info['Password']
 		data['uid'] = info['Uid']
+		data['role'] = 'teacher'
 
 	url = urllib.parse.urljoin(info['Server'], path)
-	# headers={}
-	# if is_json:
-	# 	load = json.dumps(data).encode('utf-8')
-	# 	headers['content-type'] = 'application/json; charset=utf-8'
-	# else:
 	load = urllib.parse.urlencode(data).encode('utf-8')
 	req = urllib.request.Request(url, load)
 	try:
-		with urllib.request.urlopen(req, None, TIMEOUT) as response:
+		with urllib.request.urlopen(req, None, gemtTIMEOUT) as response:
 			return response.read().decode(encoding="utf-8")
 	except urllib.error.HTTPError as err:
 		sublime.message_dialog("{0}".format(err))
@@ -110,10 +107,8 @@ class gemtRegisterCommand(sublime_plugin.WindowCommand):
 	def process(self, name):
 		name = name.strip()
 		response = gemtRequest('register_teacher', {'name':name}, authenticated=False)
-		if response == 'exist':
-			sublime.message_dialog('{} exists. Choose a different name.'.format(name))
-		elif response == 'notsetup':
-			sublime.message_dialog('Account for {} is not setup. Ask to set it up.'.format(name))
+		if response == 'Failed':
+			sublime.message_dialog('This name is not registered. Ask the teacher in charge')
 		else:
 			uid, password = response.split(',')
 			try:

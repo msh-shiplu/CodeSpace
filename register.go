@@ -15,36 +15,34 @@ func setup_new_teacherHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer rows.Close()
-	i := 0
 	for rows.Next() {
-		i++
-	}
-	if i > 0 {
 		mesg = fmt.Sprintf("%s already exists. Choose a different name.", name)
-	} else {
-		Teacher[name] = RandStringRunes(12)
-		mesg = fmt.Sprintf("%s is temporarily added. This person needs to register under the same name", name)
+		return
 	}
+	password := RandStringRunes(12)
+	result, _ := AddTeacherSQL.Exec(name, password)
+	id, _ := result.LastInsertId()
+	Teacher[int(id)] = password
+	mesg = fmt.Sprintf("%s is added. User must register under the same name", name)
 	fmt.Fprintf(w, mesg)
 }
 
 //-----------------------------------------------------------------
 func register_teacherHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
-	if password, ok := Teacher[name]; ok {
-		result, err := AddTeacherSQL.Exec(name, password)
-		if err != nil {
-			fmt.Fprintf(w, "exist")
-		} else {
-			id, err2 := result.LastInsertId()
-			if err2 != nil {
-				panic(err2)
-			}
-			fmt.Fprintf(w, fmt.Sprintf("%d,%s", id, password))
-		}
-	} else {
-		fmt.Fprintf(w, "notsetup")
+	rows, err := Database.Query("select id, password from teacher where name=?", name)
+	if err != nil {
+		panic(err)
 	}
+	defer rows.Close()
+	var password string
+	var id int
+	for rows.Next() {
+		rows.Scan(&id, &password)
+		fmt.Fprintf(w, fmt.Sprintf("%d,%s", id, password))
+		return
+	}
+	fmt.Fprintf(w, "Failed")
 }
 
 //-----------------------------------------------------------------
@@ -71,7 +69,7 @@ func register_studentHandler(w http.ResponseWriter, r *http.Request) {
 		if err3 != nil {
 			panic(err3)
 		}
-		Student[name] = password
+		Student[int(id)] = password
 
 		// Initialize student's board
 		BoardsSem.Lock()

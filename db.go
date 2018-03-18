@@ -55,28 +55,31 @@ func init_database(db_name string) {
 
 //-----------------------------------------------------------------
 func load_students() {
-	rows, _ := Database.Query("select id from student")
+	rows, _ := Database.Query("select id, password from student")
 	defer rows.Close()
 	var stid int
+	var password string
 
 	BoardsSem.Lock()
 	defer BoardsSem.Unlock()
 
 	for rows.Next() {
-		rows.Scan(&stid)
+		rows.Scan(&stid, &password)
 		Boards[stid] = make([]*Board, 0)
+		Student[stid] = password
 	}
 	Boards[-1] = make([]*Board, 0) // content for a newly registered student
 }
 
 //-----------------------------------------------------------------
 func load_teachers() {
-	rows, _ := Database.Query("select name, password from teacher")
+	rows, _ := Database.Query("select id, password from teacher")
 	defer rows.Close()
-	var name, password string
+	var password string
+	var id int
 	for rows.Next() {
-		rows.Scan(&name, &password)
-		Teacher[name] = password
+		rows.Scan(&id, &password)
+		Teacher[id] = password
 	}
 	Passcode = RandStringRunes(20)
 }

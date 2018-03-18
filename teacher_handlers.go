@@ -69,7 +69,7 @@ func extract_problem_info(content, ext, problem_divider, answer_tag string) ([]*
 }
 
 //-----------------------------------------------------------------------------------
-func teacher_broadcastHandler(w http.ResponseWriter, r *http.Request, who string, uid string) {
+func teacher_broadcastHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	BoardsSem.Lock()
 	defer BoardsSem.Unlock()
 
@@ -104,7 +104,7 @@ func teacher_broadcastHandler(w http.ResponseWriter, r *http.Request, who string
 
 	// Insert into boards
 	i := 0
-	for uid, _ := range Boards {
+	for stid, _ := range Boards {
 		b := &Board{
 			Content:      problems[rand_idx[i]].Description,
 			Answer:       problems[rand_idx[i]].Answer,
@@ -113,19 +113,19 @@ func teacher_broadcastHandler(w http.ResponseWriter, r *http.Request, who string
 			Pid:          int(pid),
 			StartingTime: time.Now(),
 		}
-		Boards[uid] = append(Boards[uid], b)
+		Boards[stid] = append(Boards[stid], b)
 		i++
 	}
 	fmt.Fprintf(w, "Content copied to white boards.")
 }
 
 //-----------------------------------------------------------------------------------
-func teacher_get_passcodeHandler(w http.ResponseWriter, r *http.Request, who string, uid string) {
+func teacher_get_passcodeHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	fmt.Fprintf(w, Passcode)
 }
 
 //-----------------------------------------------------------------------------------
-func testHandler(w http.ResponseWriter, r *http.Request, who string, uid string) {
+func testHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	// Show content of boards
 	fmt.Println("Boards", len(Boards))
 	for uid, board_pages := range Boards {

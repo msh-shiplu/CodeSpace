@@ -17,6 +17,7 @@ import (
 //-----------------------------------------------------------------
 func init_handlers() {
 	http.HandleFunc("/test", Authorize(testHandler))
+	http.HandleFunc("/student_get_boardcontent", Authorize(student_get_boardcontentHandler))
 	http.HandleFunc("/teacher_broadcast", Authorize(teacher_broadcastHandler))
 	http.HandleFunc("/teacher_get_passcode", Authorize(teacher_get_passcodeHandler))
 	http.HandleFunc("/setup_new_teacher", AuthorizeLocalhost(setup_new_teacherHandler))
