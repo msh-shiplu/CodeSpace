@@ -9,9 +9,35 @@
                 "command": "gems_test",
             },
             {
-                "caption": "Get board content",
+                "caption": "Get from teacher",
                 "id": "gemsGetBoardContent",
                 "command": "gems_get_board_content",
+            },
+            {
+                "caption": "Send to teacher",
+                "id": "gemsSubmit",
+                "children": [
+                    {
+                        "caption": "😭 I need some serious help",
+                        "id": "gemsNeedSeriousHelp",
+                        "command": "gems_need_serious_help",
+                    },
+                    {
+                        "caption": "😥 I need just a little help",
+                        "id": "gemsNeedHelp",
+                        "command": "gems_need_help",
+                    },
+                    {
+                        "caption": "😎 I got it!!!",
+                        "id": "gemsGotIt",
+                        "command": "gems_got_it",
+                    },
+                    {
+                        "caption": "😑 Look if you have time",
+                        "id": "gemsJustShare",
+                        "command": "gems_just_share",
+                    },
+                ]
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
@@ -20,13 +46,18 @@
                 "command": "gems_set_server_address",
             },
             {
-                "caption": "Setup",
+                "caption": "Setup & information",
                 "id": "GEMSSetup",
                 "children": [
                     {
                         "caption": "Local folder",
                         "id": "gemsSetLocalFolder",
                         "command": "gems_set_local_folder",
+                    },
+                    {
+                        "caption": "Update GEM",
+                        "id": "gemsUpdate",
+                        "command": "gems_update",
                     },
                     {
                         "caption": "Register",

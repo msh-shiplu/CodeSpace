@@ -139,6 +139,7 @@ func testHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 		}
 		fmt.Println("--------------------------------")
 	}
+	fmt.Fprintf(w, Passcode)
 }
 
 //-----------------------------------------------------------------------------------

@@ -60,13 +60,75 @@ def gemsRequest(path, data, authenticated=True):
 	return None
 
 # ------------------------------------------------------------------
+def gems_get_pid(fname):
+	basename = os.path.basename(fname)
+	if not basename.startswith('gemp'):
+		return 0
+	name = fname.rsplit('.', 1)[0]
+	pid = name.rsplit('_', 1)[-1]
+	if pid.isdecimal():
+		return int(pid)
+	return 0
+
+# ------------------------------------------------------------------
+def gems_share(self, edit, level):
+	global gemsAttempts
+
+	fname = self.view.file_name()
+	if fname is None:
+		sublime.message_dialog('Cannot broadcast unsaved content.')
+		return
+	ext = fname.rsplit('.',1)[-1]
+	pid = gems_get_pid(fname)
+	expired = False
+	print(gemsAttempts, pid, pid in gemsAttempts)
+	if pid in gemsAttempts:
+		if gemsAttempts[pid] == 0:
+			expired = True
+		else:
+			gemsAttempts[pid] -= 1
+	if expired:
+		sublime.message_dialog('This problem has expired and is not submitted.')
+		return
+	content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
+	data = dict(content=content, pid=pid, ext=ext, level=level)
+	response = gemsRequest('student_share', data)
+	if response == 'OK':
+		if pid in gemsAttempts:
+			sublime.message_dialog('There are {} attempts left.'.format(gemsAttempts[pid]))
+		else:
+			sublime.message_dialog('Content submitted.')
+
+# ------------------------------------------------------------------
+class gemsNeedSeriousHelp(sublime_plugin.TextCommand):
+	def run(self, edit):
+		gems_share(self, edit, level=4)
+
+# ------------------------------------------------------------------
+class gemsNeedHelp(sublime_plugin.TextCommand):
+	def run(self, edit):
+		gems_share(self, edit, level=3)
+
+# ------------------------------------------------------------------
+class gemsGotIt(sublime_plugin.TextCommand):
+	def run(self, edit):
+		gems_share(self, edit, level=2)
+
+# ------------------------------------------------------------------
+class gemsJustShare(sublime_plugin.TextCommand):
+	def run(self, edit):
+		gems_share(self, edit, level=1)
+
+# ------------------------------------------------------------------
 def gems_rand_chars(n):
 	letters = 'abcdefghijklmkopqrstuvwxyzABCDEFGHIJKLMLOPQRSTUVWXYZ'
 	return ''.join(random.choice(letters) for i in range(n))
 
 # ------------------------------------------------------------------
-class gemsGetBoardContentCommand(sublime_plugin.WindowCommand):
+class gemsGetBoardContent(sublime_plugin.WindowCommand):
 	def run(self):
+		global gemsAttempts
+
 		response = gemsRequest('student_get_boardcontent', {})
 		if response is None:
 			sublime.message_dialog("Failed.")
@@ -86,17 +148,17 @@ class gemsGetBoardContentCommand(sublime_plugin.WindowCommand):
 				if answer!= '':
 					gemsAnswer[pid] = answer
 				gemsAttempts[pid] = attempts
-				fname = 'gemp{}_{}_{}.{}'.format(today.strftime('%m%d'), pid, gemsUID, ext)
+				fname = 'gemp{}_{}.{}'.format(today.strftime('%m%d'), pid, ext)
 			else:
 				rpid = gems_rand_chars(2)
-				fname = 'gem{}_{}_{}.{}'.format(today.strftime('%m%d'), rpid, gemsUID, ext)
+				fname = 'gem{}_{}.{}'.format(today.strftime('%m%d'), rpid, ext)
 			fname = os.path.join(gemsFOLDER, fname)
 			with open(fname, 'w', encoding='utf-8') as f:
 				f.write(content)
 			sublime.active_window().open_file(fname)
 
 # ------------------------------------------------------------------
-class gemsRegisterCommand(sublime_plugin.WindowCommand):
+class gemsRegister(sublime_plugin.WindowCommand):
 	def run(self):
 		sublime.active_window().show_input_panel('Enter username:',
 			'',
@@ -163,7 +225,7 @@ class gemsSetLocalFolderCommand(sublime_plugin.WindowCommand):
 			sublime.message_dialog("Folder name cannot be empty.")
 
 # ------------------------------------------------------------------
-class gemsSetServerAddressCommand(sublime_plugin.WindowCommand):
+class gemsSetServerAddress(sublime_plugin.WindowCommand):
 	def run(self):
 		try:
 			with open(gemsFILE, 'r') as f:

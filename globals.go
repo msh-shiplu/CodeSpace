@@ -34,7 +34,7 @@ var Passcode string
 var BoardsSem sync.Mutex
 
 //---------------------------------------------------------
-// Virtual boards for students
+// Virtual boards for students and student submissions
 //---------------------------------------------------------
 type Board struct {
 	Content      string
@@ -47,14 +47,18 @@ type Board struct {
 
 var Boards = make(map[int][]*Board)
 
-// type BroadcastData struct {
-// 	Content  string `json:"content"`
-// 	Answer   string `json:"answer"`
-// 	Merit    int    `json:"merit"`
-// 	Effort   int    `json:"effort"`
-// 	Attempts int    `json:"attempts"`
-// 	Ext      string `json:"ext"`
-// }
+type Submission struct {
+	Sid     int    // submission id
+	Uid     int    // student id
+	Pid     string // problem id
+	Content string
+	Ext     string
+	Level   string
+	Time    string
+}
+
+// var ProcessedSubs = make(map[int]*Submission)
+var WorkingSubs = make([]*Submission, 0)
 
 //---------------------------------------------------------
 // Utilities

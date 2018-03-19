@@ -21,7 +21,7 @@ func create_tables() {
 	execSQL("create table if not exists teacher (id integer primary key, name text unique, password text)")
 	execSQL("create table if not exists attendance (id integer primary key, student integer, time timestamp)")
 	execSQL("create table if not exists problem (id integer primary key, tid integer, content blob, merit integer, effort integer, attempts integer, time timestamp)")
-	// execSQL("create table if not exists submission (id integer primary key, problem integer, student integer, content blob, type text, submission_time timestamp, completion_time timestamp)")
+	// execSQL("create table if not exists submission (id integer primary key, problem integer, student integer, content blob, level text, submission_time timestamp, completion_time timestamp)")
 	// execSQL("create table if not exists score (id integer primary key, problem integer, student integer, merit_points integer, effort_points integer, attempts integer)")
 	// execSQL("create table if not exists feedback (id integer primary key, teacher integer, student integer, content text, date timestamp)")
 

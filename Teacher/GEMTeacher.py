@@ -51,21 +51,20 @@ def gemtRequest(path, data, authenticated=True, localhost=False):
 
 
 # ------------------------------------------------------------------
-class gemtTestCommand(sublime_plugin.WindowCommand):
+class gemtTest(sublime_plugin.WindowCommand):
 	def run(self):
 		response = gemtRequest('test', {})
 		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
-class gemtBroadcastCommand(sublime_plugin.TextCommand):
+class gemtBroadcast(sublime_plugin.TextCommand):
 	def run(self, edit):
 		fname = self.view.file_name()
 		if fname is None:
 			sublime.message_dialog('Cannot broadcast unsaved content.')
 			return
 		ext = fname.rsplit('.',1)[-1]
-		with open(fname, 'r', encoding='utf-8') as f:
-			content = f.read().strip()
+		content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
 		if content == '':
 			sublime.message_dialog("File is empty.")
 			return
@@ -80,7 +79,7 @@ class gemtBroadcastCommand(sublime_plugin.TextCommand):
 			sublime.status_message(response)
 
 # ------------------------------------------------------------------
-class gemtSetupNewTeacherCommand(sublime_plugin.WindowCommand):
+class gemtSetupNewTeacher(sublime_plugin.WindowCommand):
 	def run(self):
 		if sublime.ok_cancel_dialog("This can only be done if SublimeText and the server are running on localhost."):
 			sublime.active_window().show_input_panel('Enter username:',
@@ -95,7 +94,7 @@ class gemtSetupNewTeacherCommand(sublime_plugin.WindowCommand):
 		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
-class gemtRegisterCommand(sublime_plugin.WindowCommand):
+class gemtRegister(sublime_plugin.WindowCommand):
 	def run(self):
 		if sublime.ok_cancel_dialog("Register a username that was temporarily added on localhost."):
 			sublime.active_window().show_input_panel('Enter username:',
