@@ -18,6 +18,7 @@ var AddStudentSQL *sql.Stmt
 var AddTeacherSQL *sql.Stmt
 var AddAttendanceSQL *sql.Stmt
 var AddProblemSQL *sql.Stmt
+var AddSubmissionSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication
@@ -32,6 +33,7 @@ var Passcode string
 //---------------------------------------------------------
 
 var BoardsSem sync.Mutex
+var SubSem sync.Mutex
 
 //---------------------------------------------------------
 // Virtual boards for students and student submissions
@@ -48,13 +50,13 @@ type Board struct {
 var Boards = make(map[int][]*Board)
 
 type Submission struct {
-	Sid     int    // submission id
-	Uid     int    // student id
-	Pid     string // problem id
-	Content string
-	Ext     string
-	Level   string
-	Time    string
+	Sid      int // submission id
+	Uid      int // student id
+	Pid      int // problem id
+	Content  string
+	Ext      string
+	Priority string
+	At       time.Time
 }
 
 // var ProcessedSubs = make(map[int]*Submission)

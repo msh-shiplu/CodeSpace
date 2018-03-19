@@ -7,7 +7,7 @@ import (
 )
 
 //-----------------------------------------------------------------
-func setup_new_teacherHandler(w http.ResponseWriter, r *http.Request) {
+func teacher_adds_taHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	mesg := ""
 	rows, err := Database.Query("select name from teacher where name=?", name)
@@ -28,7 +28,7 @@ func setup_new_teacherHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //-----------------------------------------------------------------
-func register_teacherHandler(w http.ResponseWriter, r *http.Request) {
+func teacher_registersHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	rows, err := Database.Query("select id, password from teacher where name=?", name)
 	if err != nil {
@@ -46,7 +46,7 @@ func register_teacherHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //-----------------------------------------------------------------
-func register_studentHandler(w http.ResponseWriter, r *http.Request) {
+func student_registersHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	rows, err := Database.Query("select name from student where name=?", name)
 	if err != nil {

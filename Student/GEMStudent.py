@@ -71,7 +71,7 @@ def gems_get_pid(fname):
 	return 0
 
 # ------------------------------------------------------------------
-def gems_share(self, edit, level):
+def gems_share(self, edit, priority):
 	global gemsAttempts
 
 	fname = self.view.file_name()
@@ -91,8 +91,8 @@ def gems_share(self, edit, level):
 		sublime.message_dialog('This problem has expired and is not submitted.')
 		return
 	content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
-	data = dict(content=content, pid=pid, ext=ext, level=level)
-	response = gemsRequest('student_share', data)
+	data = dict(content=content, pid=pid, ext=ext, priority=priority)
+	response = gemsRequest('student_shares', data)
 	if response == 'OK':
 		if pid in gemsAttempts:
 			sublime.message_dialog('There are {} attempts left.'.format(gemsAttempts[pid]))
@@ -102,22 +102,22 @@ def gems_share(self, edit, level):
 # ------------------------------------------------------------------
 class gemsNeedSeriousHelp(sublime_plugin.TextCommand):
 	def run(self, edit):
-		gems_share(self, edit, level=4)
+		gems_share(self, edit, priority=4)
 
 # ------------------------------------------------------------------
 class gemsNeedHelp(sublime_plugin.TextCommand):
 	def run(self, edit):
-		gems_share(self, edit, level=3)
+		gems_share(self, edit, priority=3)
 
 # ------------------------------------------------------------------
 class gemsGotIt(sublime_plugin.TextCommand):
 	def run(self, edit):
-		gems_share(self, edit, level=2)
+		gems_share(self, edit, priority=2)
 
 # ------------------------------------------------------------------
 class gemsJustShare(sublime_plugin.TextCommand):
 	def run(self, edit):
-		gems_share(self, edit, level=1)
+		gems_share(self, edit, priority=1)
 
 # ------------------------------------------------------------------
 def gems_rand_chars(n):
@@ -129,7 +129,7 @@ class gemsGetBoardContent(sublime_plugin.WindowCommand):
 	def run(self):
 		global gemsAttempts
 
-		response = gemsRequest('student_get_boardcontent', {})
+		response = gemsRequest('student_gets', {})
 		if response is None:
 			sublime.message_dialog("Failed.")
 			return
@@ -168,7 +168,7 @@ class gemsRegister(sublime_plugin.WindowCommand):
 
 	def process(self, name):
 		name = name.strip()
-		response = gemsRequest('register_student', {'name':name}, authenticated=False)
+		response = gemsRequest('student_registers', {'name':name}, authenticated=False)
 		if response == 'exist':
 			sublime.message_dialog('{} exists. Choose a different name.'.format(name))
 		else:

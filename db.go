@@ -19,9 +19,10 @@ func create_tables() {
 	}
 	execSQL("create table if not exists student (id integer primary key, name text unique, password text)")
 	execSQL("create table if not exists teacher (id integer primary key, name text unique, password text)")
-	execSQL("create table if not exists attendance (id integer primary key, student integer, time timestamp)")
-	execSQL("create table if not exists problem (id integer primary key, tid integer, content blob, merit integer, effort integer, attempts integer, time timestamp)")
-	// execSQL("create table if not exists submission (id integer primary key, problem integer, student integer, content blob, level text, submission_time timestamp, completion_time timestamp)")
+	execSQL("create table if not exists attendance (id integer primary key, student integer, at timestamp)")
+	execSQL("create table if not exists problem (id integer primary key, tid integer, content blob, merit integer, effort integer, attempts integer, at timestamp)")
+	execSQL("create table if not exists submission (id integer primary key, pid integer, sid integer, content blob, priority text, at timestamp, completed timestamp)")
+
 	// execSQL("create table if not exists score (id integer primary key, problem integer, student integer, merit_points integer, effort_points integer, attempts integer)")
 	// execSQL("create table if not exists feedback (id integer primary key, teacher integer, student integer, content text, date timestamp)")
 
@@ -46,8 +47,9 @@ func init_database(db_name string) {
 	create_tables()
 	AddStudentSQL = prepare("insert into student (name, password) values (?, ?)")
 	AddTeacherSQL = prepare("insert into teacher (name, password) values (?, ?)")
-	AddAttendanceSQL = prepare("insert into attendance (student, time) values (?, ?)")
-	AddProblemSQL = prepare("insert into problem (tid, content, merit, effort, attempts, time) values (?, ?, ?, ?, ?, ?)")
+	AddAttendanceSQL = prepare("insert into attendance (student, at) values (?, ?)")
+	AddProblemSQL = prepare("insert into problem (tid, content, merit, effort, attempts, at) values (?, ?, ?, ?, ?, ?)")
+	AddSubmissionSQL = prepare("insert into submission (pid, sid, content, priority, at) values (?, ?, ?, ?, ?)")
 
 	// Passcode for current session
 	Passcode = RandStringRunes(12)

@@ -74,7 +74,7 @@ class gemtBroadcast(sublime_plugin.TextCommand):
 			'problem_divider': 	gemtProblemDivider,
 			'answer_tag': 		gemtAnswerTag,
 		}
-		response = gemtRequest('teacher_broadcast', data)
+		response = gemtRequest('teacher_broadcasts', data)
 		if response is not None:
 			sublime.status_message(response)
 
@@ -90,7 +90,7 @@ class gemtSetupNewTeacher(sublime_plugin.WindowCommand):
 
 	def process(self, name):
 		name = name.strip()
-		response = gemtRequest('setup_new_teacher', {'name':name}, authenticated=False, localhost=True)
+		response = gemtRequest('teacher_adds_ta', {'name':name}, authenticated=False, localhost=True)
 		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
@@ -105,7 +105,7 @@ class gemtRegister(sublime_plugin.WindowCommand):
 
 	def process(self, name):
 		name = name.strip()
-		response = gemtRequest('register_teacher', {'name':name}, authenticated=False)
+		response = gemtRequest('teacher_registers', {'name':name}, authenticated=False)
 		if response == 'Failed':
 			sublime.message_dialog('This name is not registered. Ask the teacher in charge')
 		else:
