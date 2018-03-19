@@ -12,7 +12,8 @@ import (
 
 //-----------------------------------------------------------------------------------
 func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	content, ext, priority := r.FormValue("content"), r.FormValue("ext"), r.FormValue("priority")
+	content, ext := r.FormValue("content"), r.FormValue("ext")
+	priority, _ := strconv.Atoi(r.FormValue("priority"))
 	pid, _ := strconv.Atoi(r.FormValue("pid"))
 	sid := int64(0)
 	if pid > 0 { // only keep in database submissions related to problems

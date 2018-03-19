@@ -17,13 +17,16 @@ import (
 //-----------------------------------------------------------------
 func init_handlers() {
 	http.HandleFunc("/test", Authorize(testHandler))
+
 	http.HandleFunc("/student_shares", Authorize(student_sharesHandler))
 	http.HandleFunc("/student_gets", Authorize(student_getsHandler))
+	http.HandleFunc("/student_registers", student_registersHandler)
+
+	http.HandleFunc("/teacher_gets", Authorize(teacher_getsHandler))
 	http.HandleFunc("/teacher_broadcasts", Authorize(teacher_broadcastsHandler))
 	http.HandleFunc("/teacher_gets_passcode", Authorize(teacher_gets_passcodeHandler))
 	http.HandleFunc("/teacher_adds_ta", AuthorizeLocalhost(teacher_adds_taHandler))
 	http.HandleFunc("/teacher_registers", teacher_registersHandler)
-	http.HandleFunc("/student_registers", student_registersHandler)
 }
 
 //-----------------------------------------------------------------

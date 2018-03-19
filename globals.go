@@ -55,7 +55,7 @@ type Submission struct {
 	Pid      int // problem id
 	Content  string
 	Ext      string
-	Priority string
+	Priority int
 	At       time.Time
 }
 

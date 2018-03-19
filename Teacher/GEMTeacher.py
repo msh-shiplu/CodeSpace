@@ -57,6 +57,45 @@ class gemtTest(sublime_plugin.WindowCommand):
 		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
+def gemt_gets(self, index, priority):
+	response = gemtRequest('teacher_gets', {'index':index, 'priority':priority})
+	if response is not None:
+		sub = json.loads(response)
+		if sub['Sid'] > 0:
+			ext = sub['Ext'] or 'txt'
+			pid, sid, uid = sub['Pid'], sub['Sid'], sub['Uid']
+			fname = 'gemt_{}_{}_{}.{}'.format(uid,pid,sid,ext)
+			if not os.path.isdir(gemtPostDir):
+				os.mkdir(gemtPostDir)
+			fname = os.path.join(gemtPostDir, fname)
+			with open(fname, 'w', encoding='utf-8') as fp:
+				fp.write(sub['Content'])
+			sublime.active_window().open_file(fname)
+		else:
+			sublime.message_dialog('No submission with index {} or priority {}.'.format(index,priority))
+
+# ------------------------------------------------------------------
+class gemtGetSub(sublime_plugin.WindowCommand):
+	def run(self):
+		gemt_gets(self, -1, -1)
+
+class gemtGetSubFour(sublime_plugin.WindowCommand):
+	def run(self):
+		gemt_gets(self, -1, 4)
+
+class gemtGetSubThree(sublime_plugin.WindowCommand):
+	def run(self):
+		gemt_gets(self, -1, 3)
+
+class gemtGetSubTwo(sublime_plugin.WindowCommand):
+	def run(self):
+		gemt_gets(self, -1, 2)
+
+class gemtGetSubOne(sublime_plugin.WindowCommand):
+	def run(self):
+		gemt_gets(self, -1, 1)
+
+# ------------------------------------------------------------------
 class gemtBroadcast(sublime_plugin.TextCommand):
 	def run(self, edit):
 		fname = self.view.file_name()

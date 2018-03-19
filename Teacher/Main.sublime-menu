@@ -13,6 +13,38 @@
                 "id": "gemtBroadcast",
                 "command": "gemt_broadcast",
             },
+            {
+                "caption": "Get student submission",
+                "id": "gemtGetSub",
+                "command": "gemt_get_sub",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Submissions",
+                "id": "gemtGetSubmission",
+                "children": [
+                    {
+                        "caption": "Get p4",
+                        "id": "gemtGetSubFour",
+                        "command": "gemt_get_sub_four",
+                    },
+                    {
+                        "caption": "Get p3",
+                        "id": "gemtGetSubThree",
+                        "command": "gemt_get_sub_three",
+                    },
+                    {
+                        "caption": "Get p2",
+                        "id": "gemtGetSubFour",
+                        "command": "gemt_get_sub_two",
+                    },
+                    {
+                        "caption": "Get p1",
+                        "id": "gemtGetSubFour",
+                        "command": "gemt_get_sub_one",
+                    },
+                ]
+            },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Set server address",
