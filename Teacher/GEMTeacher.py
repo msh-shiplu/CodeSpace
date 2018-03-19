@@ -57,6 +57,37 @@ class gemtTest(sublime_plugin.WindowCommand):
 		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
+class gemtPutBack(sublime_plugin.TextCommand):
+	def run(self, edit):
+		fname = self.view.file_name()
+		basename = os.path.basename(fname)
+		if not basename.startswith('gemt') or basename.count('_')!=2:
+			sublime.message_dialog('This is not a student submission.')
+			return
+		prefix, ext = basename.rsplit('.', 1)
+		prefix = prefix[4:]
+		uid, pid, sid = prefix.split('_')
+		try:
+			uid = int(uid)
+			pid = int(pid)
+			sid = int(sid)
+		except:
+			sublime.message_dialog('This is not a student submission.')
+			return
+		content = self.view.substr(sublime.Region(0, self.view.size())).strip()
+		data = dict(
+			sid = sid,
+			stid = uid,
+			pid = pid,
+			content = content,
+			ext = ext,
+			priority = 4,
+		)
+		response = gemtRequest('teacher_puts_back', data)
+		if response:
+			sublime.message_dialog(response)
+
+# ------------------------------------------------------------------
 def gemt_gets(self, index, priority):
 	response = gemtRequest('teacher_gets', {'index':index, 'priority':priority})
 	if response is not None:
@@ -64,7 +95,7 @@ def gemt_gets(self, index, priority):
 		if sub['Sid'] > 0:
 			ext = sub['Ext'] or 'txt'
 			pid, sid, uid = sub['Pid'], sub['Sid'], sub['Uid']
-			fname = 'gemt_{}_{}_{}.{}'.format(uid,pid,sid,ext)
+			fname = 'gemt{}_{}_{}.{}'.format(uid,pid,sid,ext)
 			if not os.path.isdir(gemtPostDir):
 				os.mkdir(gemtPostDir)
 			fname = os.path.join(gemtPostDir, fname)

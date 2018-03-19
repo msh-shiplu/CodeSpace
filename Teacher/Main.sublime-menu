@@ -14,7 +14,7 @@
                 "command": "gemt_broadcast",
             },
             {
-                "caption": "Get student submission",
+                "caption": "Get a submission",
                 "id": "gemtGetSub",
                 "command": "gemt_get_sub",
             },
@@ -23,6 +23,11 @@
                 "caption": "Submissions",
                 "id": "gemtGetSubmission",
                 "children": [
+                    {
+                        "caption": "Put back",
+                        "id": "gemtPutBack",
+                        "command": "gemt_put_back",
+                    },
                     {
                         "caption": "Get p4",
                         "id": "gemtGetSubFour",
