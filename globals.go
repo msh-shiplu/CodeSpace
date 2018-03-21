@@ -59,8 +59,9 @@ type Submission struct {
 	At       time.Time
 }
 
-// var ProcessedSubs = make(map[int]*Submission)
 var WorkingSubs = make([]*Submission, 0)
+
+var NextProblem = make(map[int64]int64)
 
 //---------------------------------------------------------
 // Utilities

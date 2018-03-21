@@ -122,7 +122,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 
 	BoardsSem.Lock()
 	defer BoardsSem.Unlock()
-	if mode == "unicast" {
+	if mode == "unicast" || mode == "multicast_seq" {
 		for stid, _ := range Boards {
 			b := &Board{
 				Content:      problems[0].Description,
@@ -133,6 +133,14 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				StartingTime: time.Now(),
 			}
 			Boards[stid] = append(Boards[stid], b)
+		}
+		if mode == "unicast" {
+			fmt.Fprintf(w, "Content copied to white boards.")
+		} else if mode == "multicast_seq" {
+			for i := 0; i < len(problems)-1; i++ {
+				NextProblem[problems[i].Pid] = problems[i+1].Pid
+			}
+			fmt.Fprintf(w, "First file copied to white boards.")
 		}
 	} else if mode == "multicast_or" {
 		// Initialize random indices
@@ -159,10 +167,10 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 			Boards[stid] = append(Boards[stid], b)
 			i++
 		}
-	} else if mode == "multicast_seq" {
-
+		fmt.Fprintf(w, "Content files randomly to white boards.")
+	} else {
+		fmt.Fprintf(w, "Unknown mode.")
 	}
-	fmt.Fprintf(w, "Content copied to white boards.")
 }
 
 //-----------------------------------------------------------------------------------

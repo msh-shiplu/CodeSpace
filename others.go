@@ -28,6 +28,11 @@ func testHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 		}
 		fmt.Println("--------------------------------")
 	}
+
+	fmt.Println("NextProblem")
+	for pid, p := range NextProblem {
+		fmt.Println(pid, p)
+	}
 	fmt.Fprintf(w, Passcode)
 }
 
