@@ -56,7 +56,7 @@ func extract_problem_info(content, ext, answer_tag string) *ProblemFormat {
 			items := strings.SplitN(description, answer_tag, 2)
 			if len(items) == 2 {
 				answer = strings.Trim(items[1], "\n ")
-				description = items[0] + "\n" + answer_tag + " \n"
+				description = items[0] + "\n" + answer_tag + " "
 			}
 			problem = &ProblemFormat{
 				Header:      prefix + " " + header,
@@ -90,9 +90,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 	// Extract info
 	if mode == "unicast" {
 		problems = append(problems, extract_problem_info(content, ext, answer_tag))
-	} else if mode == "multicast_or" {
-		problems = extract_problems(content, ext, answer_tag, divider_tag)
-	} else if mode == "multicast_seq" {
+	} else {
 		problems = extract_problems(content, ext, answer_tag, divider_tag)
 	}
 
@@ -100,10 +98,15 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 	for i := 0; i < len(problems); i++ {
 		pid := int64(0)
 		if problems[i].Merit > 0 {
-			// insert into database only real problems
+			// insert only real problems into database
+			content := fmt.Sprintf("%s\n%s %s\n",
+				problems[i].Header,
+				problems[i].Description,
+				problems[i].Answer,
+			)
 			result, err := AddProblemSQL.Exec(
 				uid,
-				problems[i].Header+"\n"+problems[i].Description,
+				content,
 				problems[i].Merit,
 				problems[i].Effort,
 				problems[i].Attempts,
