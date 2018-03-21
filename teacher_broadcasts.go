@@ -14,106 +14,150 @@ import (
 
 //-----------------------------------------------------------------------------------
 type ProblemFormat struct {
+	Header      string
 	Description string
 	Answer      string
+	Merit       int
+	Effort      int
+	Attempts    int
+	Pid         int64
 }
 
 //-----------------------------------------------------------------------------------
-func extract_problems(body, problem_divider, answer_tag string) []*ProblemFormat {
-	problems := make([]*ProblemFormat, 0)
-	p := strings.Split(body, problem_divider)
-	for i := 0; i < len(p); i++ {
-		items := strings.SplitN(p[i], answer_tag, 2)
-		answer := ""
-		if len(items) == 2 {
-			answer = items[1]
-		}
-		problems = append(problems, &ProblemFormat{Description: items[0], Answer: answer})
-	}
-	return problems
-}
-
-//-----------------------------------------------------------------------------------
-func extract_problem_info(content, ext, problem_divider, answer_tag string) ([]*ProblemFormat, int, int, int) {
+func extract_problem_info(content, ext, answer_tag string) *ProblemFormat {
 	var err error
-	problems := []*ProblemFormat{&ProblemFormat{Description: content}}
-	merit, effort, attempts := 0, 0, 0
+	problem := &ProblemFormat{}
+	merit, effort, attempts, answer := 0, 0, 0, ""
 	prefix := "//"
 	if ext != "java" && ext != "c++" && ext != "c" && ext != ".go" {
 		prefix = "#"
 	}
+	content = strings.Trim(content, "\n ")
 	if strings.HasPrefix(content, prefix) {
 		items := strings.SplitN(content, "\n", 2)
 		header := strings.Trim(items[0], "\n "+prefix)
-		body := items[1]
+		description := items[1]
 		items = strings.SplitN(header, " ", 2)
 		triple := items[0]
 		if strings.Count(triple, ",") == 2 {
 			items = strings.Split(triple, ",")
 			merit, err = strconv.Atoi(items[0])
 			if err != nil {
-				return problems, 0, 0, 0
+				return problem
 			}
 			effort, err = strconv.Atoi(items[1])
 			if err != nil {
-				return problems, 0, 0, 0
+				return problem
 			}
 			attempts, err = strconv.Atoi(items[2])
 			if err != nil {
-				return problems, 0, 0, 0
+				return problem
 			}
-			problems = extract_problems(body, problem_divider, answer_tag)
+			items := strings.SplitN(description, answer_tag, 2)
+			if len(items) == 2 {
+				answer = strings.Trim(items[1], "\n ")
+				description = items[0] + "\n" + answer_tag + " \n"
+			}
+			problem = &ProblemFormat{
+				Header:      prefix + " " + header,
+				Description: description,
+				Answer:      answer,
+				Merit:       merit,
+				Effort:      effort,
+				Attempts:    attempts,
+			}
 		}
 	}
-	return problems, merit, effort, attempts
+	return problem
+}
+
+//-----------------------------------------------------------------------------------
+func extract_problems(body, ext, answer_tag, divider_tag string) []*ProblemFormat {
+	problems := make([]*ProblemFormat, 0)
+	p := strings.Split(body, divider_tag)
+	for i := 0; i < len(p); i++ {
+		problems = append(problems, extract_problem_info(p[i], ext, answer_tag))
+	}
+	return problems
 }
 
 //-----------------------------------------------------------------------------------
 func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	content, ext := r.FormValue("content"), r.FormValue("ext")
-	problem_divider, answer_tag := r.FormValue("problem_divider"), r.FormValue("answer_tag")
-
+	divider_tag, answer_tag := r.FormValue("divider_tag"), r.FormValue("answer_tag")
+	mode := r.FormValue("mode")
+	problems := make([]*ProblemFormat, 0)
 	// Extract info
-	problems, merit, effort, attempts := extract_problem_info(content, ext, problem_divider, answer_tag)
+	if mode == "unicast" {
+		problems = append(problems, extract_problem_info(content, ext, answer_tag))
+	} else if mode == "multicast_or" {
+		problems = extract_problems(content, ext, answer_tag, divider_tag)
+	} else if mode == "multicast_seq" {
+		problems = extract_problems(content, ext, answer_tag, divider_tag)
+	}
 
-	// Create new problem
-	pid := int64(0)
-	if merit > 0 {
-		result, err := AddProblemSQL.Exec(uid, content, merit, effort, attempts, time.Now())
-		if err != nil {
-			panic(err)
+	// Create new problems
+	for i := 0; i < len(problems); i++ {
+		pid := int64(0)
+		if problems[i].Merit > 0 {
+			// insert into database only real problems
+			result, err := AddProblemSQL.Exec(
+				uid,
+				problems[i].Header+"\n"+problems[i].Description,
+				problems[i].Merit,
+				problems[i].Effort,
+				problems[i].Attempts,
+				time.Now(),
+			)
+			if err != nil {
+				panic(err)
+			}
+			pid, _ = result.LastInsertId()
+			problems[i].Pid = pid
 		}
-		pid, _ = result.LastInsertId()
-	}
-
-	// Initialize random indices
-	rand_idx := make([]int, len(Boards))
-	j := 0
-	for i := 0; i < len(Boards); i++ {
-		rand_idx[i] = j
-		j = (j + 1) % len(problems)
-	}
-	if len(problems) > 1 {
-		rand.Shuffle(len(rand_idx), func(i, j int) {
-			rand_idx[i], rand_idx[j] = rand_idx[j], rand_idx[i]
-		})
 	}
 
 	BoardsSem.Lock()
 	defer BoardsSem.Unlock()
-	// Insert into boards
-	i := 0
-	for stid, _ := range Boards {
-		b := &Board{
-			Content:      problems[rand_idx[i]].Description,
-			Answer:       problems[rand_idx[i]].Answer,
-			Attempts:     attempts,
-			Ext:          ext,
-			Pid:          int(pid),
-			StartingTime: time.Now(),
+	if mode == "unicast" {
+		for stid, _ := range Boards {
+			b := &Board{
+				Content:      problems[0].Description,
+				Answer:       problems[0].Answer,
+				Attempts:     problems[0].Attempts,
+				Ext:          ext,
+				Pid:          int(problems[0].Pid),
+				StartingTime: time.Now(),
+			}
+			Boards[stid] = append(Boards[stid], b)
 		}
-		Boards[stid] = append(Boards[stid], b)
-		i++
+	} else if mode == "multicast_or" {
+		// Initialize random indices
+		rand_idx := make([]int, len(Boards))
+		j := 0
+		for i := 0; i < len(Boards); i++ {
+			rand_idx[i] = j
+			j = (j + 1) % len(problems)
+		}
+		rand.Shuffle(len(rand_idx), func(i, j int) {
+			rand_idx[i], rand_idx[j] = rand_idx[j], rand_idx[i]
+		})
+		// Insert into boards
+		i := 0
+		for stid, _ := range Boards {
+			b := &Board{
+				Content:      problems[rand_idx[i]].Description,
+				Answer:       problems[rand_idx[i]].Answer,
+				Attempts:     problems[rand_idx[i]].Attempts,
+				Ext:          ext,
+				Pid:          int(problems[rand_idx[i]].Pid),
+				StartingTime: time.Now(),
+			}
+			Boards[stid] = append(Boards[stid], b)
+			i++
+		}
+	} else if mode == "multicast_seq" {
+
 	}
 	fmt.Fprintf(w, "Content copied to white boards.")
 }

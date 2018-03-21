@@ -11,7 +11,23 @@
             {
                 "caption": "Broadcast",
                 "id": "gemtBroadcast",
-                "command": "gemt_broadcast",
+                "children": [
+                    {
+                        "caption": "This file",
+                        "id": "gemtUnicast",
+                        "command": "gemt_unicast",
+                    },
+                    {
+                        "caption": "All tabs sequentially",
+                        "id": "gemtMulticastSeq",
+                        "command": "gemt_multicast_seq",
+                    },
+                    {
+                        "caption": "All tabs randomly",
+                        "id": "gemtMulticastOr",
+                        "command": "gemt_multicast_or",
+                    },
+                ]
             },
             {
                 "caption": "Get a submission",

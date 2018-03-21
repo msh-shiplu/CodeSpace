@@ -12,7 +12,8 @@ import webbrowser
 
 gemtFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemtPostDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Posts")
-gemtProblemDivider = '<PROBLEM DIVIDER>'
+gemtOrTag = '<GEM_OR>'
+gemtSeqTag = '<GEM_NEXT>'
 gemtAnswerTag = 'ANSWER:'
 gemtTIMEOUT = 7
 
@@ -127,7 +128,35 @@ class gemtGetSubOne(sublime_plugin.WindowCommand):
 		gemt_gets(self, -1, 1)
 
 # ------------------------------------------------------------------
-class gemtBroadcast(sublime_plugin.TextCommand):
+# used by gemt_multicast and gemtUnicast
+# ------------------------------------------------------------------
+def gemt_broadcast(content, ext, tag, mode):
+	data = {
+		'content': 			content,
+		'ext': 				ext,
+		'divider_tag':	 	tag,
+		'answer_tag': 		gemtAnswerTag,
+		'mode':				mode
+	}
+	response = gemtRequest('teacher_broadcasts', data)
+	if response is not None:
+		sublime.status_message(response)
+
+# ------------------------------------------------------------------
+def gemt_multicast(self, edit, tag, mode, mesg):
+	fnames = [ v.file_name() for v in sublime.active_window().views() ]
+	fnames = [ fname for fname in fnames if fname is not None ]
+	if len(fnames)>0 and sublime.ok_cancel_dialog(mesg):
+		contents = []
+		for fname in fnames:
+			ext = fname.rsplit('.',1)[-1]
+			with open(fname, 'r', encoding='utf-8') as fp:
+				contents.append(fp.read())
+		content = '\n{}\n'.format(tag).join(contents)
+		gemt_broadcast(content, ext, tag, mode)
+
+# ------------------------------------------------------------------
+class gemtUnicast(sublime_plugin.TextCommand):
 	def run(self, edit):
 		fname = self.view.file_name()
 		if fname is None:
@@ -138,15 +167,29 @@ class gemtBroadcast(sublime_plugin.TextCommand):
 		if content == '':
 			sublime.message_dialog("File is empty.")
 			return
-		data = {
-			'content': 			content,
-			'ext': 				ext,
-			'problem_divider': 	gemtProblemDivider,
-			'answer_tag': 		gemtAnswerTag,
-		}
-		response = gemtRequest('teacher_broadcasts', data)
-		if response is not None:
-			sublime.status_message(response)
+		gemt_broadcast(content, ext, tag='', mode='unicast')
+
+# ------------------------------------------------------------------
+class gemtMulticastOr(sublime_plugin.TextCommand):
+	def run(self, edit):
+		gemt_multicast(
+			self,
+			edit,
+			gemtOrTag,
+			'multicast_or',
+			'Broadcast *randomly* all non-empty tabs in this window?',
+		)
+
+# ------------------------------------------------------------------
+class gemtMulticastSeq(sublime_plugin.TextCommand):
+	def run(self, edit):
+		gemt_multicast(
+			self,
+			edit,
+			gemtSeqTag,
+			'multicast_seq',
+			'Broadcast *sequentially* all non-empty tabs in this window?',
+		)
 
 # ------------------------------------------------------------------
 class gemtSetupNewTeacher(sublime_plugin.WindowCommand):
