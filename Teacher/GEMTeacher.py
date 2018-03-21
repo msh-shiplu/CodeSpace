@@ -18,7 +18,7 @@ gemtAnswerTag = 'ANSWER:'
 gemtTIMEOUT = 7
 
 # ------------------------------------------------------------------
-def gemtRequest(path, data, authenticated=True, localhost=False):
+def gemtRequest(path, data, authenticated=True, localhost=False, method='POST'):
 	try:
 		with open(gemtFILE, 'r') as f:
 			info = json.loads(f.read())
@@ -39,7 +39,7 @@ def gemtRequest(path, data, authenticated=True, localhost=False):
 
 	url = urllib.parse.urljoin(info['Server'], path)
 	load = urllib.parse.urlencode(data).encode('utf-8')
-	req = urllib.request.Request(url, load)
+	req = urllib.request.Request(url, load, method=method)
 	try:
 		with urllib.request.urlopen(req, None, gemtTIMEOUT) as response:
 			return response.read().decode(encoding="utf-8")

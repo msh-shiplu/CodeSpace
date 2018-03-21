@@ -19,7 +19,7 @@ gemsAnswer = {}
 gemsAttempts = {}
 
 # ------------------------------------------------------------------------------
-def gemsRequest(path, data, authenticated=True):
+def gemsRequest(path, data, authenticated=True, method='POST'):
 	global gemsUID, gemsFOLDER
 	try:
 		with open(gemsFILE, 'r') as f:
@@ -48,7 +48,7 @@ def gemsRequest(path, data, authenticated=True):
 
 	url = urllib.parse.urljoin(info['Server'], path)
 	load = urllib.parse.urlencode(data).encode('utf-8')
-	req = urllib.request.Request(url, load)
+	req = urllib.request.Request(url, load, method=method)
 	try:
 		with urllib.request.urlopen(req, None, gemsTIMEOUT) as response:
 			return response.read().decode(encoding="utf-8")
