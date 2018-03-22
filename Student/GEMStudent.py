@@ -12,7 +12,6 @@ import datetime
 import webbrowser
 
 gemsFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
-gemsUID = 0
 gemsFOLDER = ''
 gemsTIMEOUT = 7
 gemsAnswer = {}
@@ -20,7 +19,7 @@ gemsAttempts = {}
 
 # ------------------------------------------------------------------------------
 def gemsRequest(path, data, authenticated=True, method='POST'):
-	global gemsUID, gemsFOLDER
+	global gemsFOLDER
 	try:
 		with open(gemsFILE, 'r') as f:
 			info = json.loads(f.read())
@@ -43,7 +42,6 @@ def gemsRequest(path, data, authenticated=True, method='POST'):
 		data['name'] = info['Name']
 		data['password'] = info['Password']
 		data['uid'] = info['Uid']
-		gemsUID = info['Uid']
 		gemsFOLDER = info['Folder']
 
 	url = urllib.parse.urljoin(info['Server'], path)
@@ -76,7 +74,7 @@ def gems_share(self, edit, priority):
 
 	fname = self.view.file_name()
 	if fname is None:
-		sublime.message_dialog('Cannot broadcast unsaved content.')
+		sublime.message_dialog('Cannot share unsaved content.')
 		return
 	ext = fname.rsplit('.',1)[-1]
 	pid = gems_get_pid(fname)
@@ -186,7 +184,7 @@ class gemsRegister(sublime_plugin.WindowCommand):
 			sublime.message_dialog('{} registered'.format(name))
 
 # ------------------------------------------------------------------
-class gemsSetLocalFolderCommand(sublime_plugin.WindowCommand):
+class gemsSetLocalFolder(sublime_plugin.WindowCommand):
 	def run(self):
 		try:
 			with open(gemsFILE, 'r') as f:

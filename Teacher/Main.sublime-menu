@@ -34,6 +34,22 @@
                 "id": "gemtGetSub",
                 "command": "gemt_get_sub",
             },
+            {
+                "caption": "Grade",
+                "id": "gemtGrade",
+                "children": [
+                    {
+                        "caption": "Correct",
+                        "id": "gemtGradeCorrect",
+                        "command": "gemt_grade_correct",
+                    },
+                    {
+                        "caption": "Incorrect",
+                        "id": "gemtGradeIncorrect",
+                        "command": "gemt_grade_incorrect",
+                    },
+                ]
+            },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Submissions",
@@ -74,18 +90,23 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Registration",
+                "caption": "Setup",
                 "id": "gemtRegistration",
                 "children": [
                     {
-                        "caption": "Complete registration",
-                        "id": "gemtRegister",
-                        "command": "gemt_register",
+                        "caption": "Set local folder",
+                        "id": "gemtSetLocalFolder",
+                        "command": "gemt_set_local_folder",
                     },
                     {
                         "caption": "Add new username (on localhost)",
                         "id": "gemtSetupNewTeacher",
                         "command": "gemt_setup_new_teacher",
+                    },
+                    {
+                        "caption": "Complete registration",
+                        "id": "gemtRegister",
+                        "command": "gemt_register",
                     },
                 ]
             }

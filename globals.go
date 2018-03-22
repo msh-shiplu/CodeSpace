@@ -19,6 +19,9 @@ var AddTeacherSQL *sql.Stmt
 var AddAttendanceSQL *sql.Stmt
 var AddProblemSQL *sql.Stmt
 var AddSubmissionSQL *sql.Stmt
+var AddFeedbackSQL *sql.Stmt
+var AddScoreSQL *sql.Stmt
+var UpdateScoreSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication
@@ -48,6 +51,8 @@ type Board struct {
 }
 
 var Boards = make(map[int][]*Board)
+
+var MessageBoards = make(map[int]string)
 
 type Submission struct {
 	Sid      int // submission id

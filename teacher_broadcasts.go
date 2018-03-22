@@ -26,7 +26,7 @@ type ProblemFormat struct {
 //-----------------------------------------------------------------------------------
 func extract_problem_info(content, ext, answer_tag string) *ProblemFormat {
 	var err error
-	problem := &ProblemFormat{}
+	problem := &ProblemFormat{Description: content}
 	merit, effort, attempts, answer := 0, 0, 0, ""
 	prefix := "//"
 	if ext != "java" && ext != "c++" && ext != "c" && ext != ".go" {
@@ -99,14 +99,15 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 		pid := int64(0)
 		if problems[i].Merit > 0 {
 			// insert only real problems into database
-			content := fmt.Sprintf("%s\n%s %s\n",
+			content := fmt.Sprintf("%s\n%s\n",
 				problems[i].Header,
 				problems[i].Description,
-				problems[i].Answer,
 			)
 			result, err := AddProblemSQL.Exec(
 				uid,
 				content,
+				problems[i].Answer,
+				ext,
 				problems[i].Merit,
 				problems[i].Effort,
 				problems[i].Attempts,
@@ -133,6 +134,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				StartingTime: time.Now(),
 			}
 			Boards[stid] = append(Boards[stid], b)
+			MessageBoards[stid] = "You have a new problem on board."
 		}
 		if mode == "unicast" {
 			fmt.Fprintf(w, "Content copied to white boards.")
@@ -165,6 +167,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				StartingTime: time.Now(),
 			}
 			Boards[stid] = append(Boards[stid], b)
+			MessageBoards[stid] = "You have a new problem on board."
 			i++
 		}
 		fmt.Fprintf(w, "Content files randomly to white boards.")

@@ -20,6 +20,7 @@ func student_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 	if board, ok := Boards[uid]; ok {
 		js, err = json.Marshal(board)
 		Boards[uid] = []*Board{}
+		MessageBoards[uid] = ""
 		if err == nil {
 			// fmt.Println(string(js))
 			w.Header().Set("Content-Type", "application/json")

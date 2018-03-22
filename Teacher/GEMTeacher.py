@@ -11,19 +11,26 @@ import socket
 import webbrowser
 
 gemtFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
-gemtPostDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Posts")
+# gemtPostDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Posts")
+gemtFOLDER = ''
 gemtOrTag = '<GEM_OR>'
 gemtSeqTag = '<GEM_NEXT>'
 gemtAnswerTag = 'ANSWER:'
 gemtTIMEOUT = 7
+gemtStudentSubmissions = {}
 
 # ------------------------------------------------------------------
 def gemtRequest(path, data, authenticated=True, localhost=False, method='POST'):
+	global gemtFOLDER
 	try:
 		with open(gemtFILE, 'r') as f:
 			info = json.loads(f.read())
 	except:
 		info = dict()
+
+	if 'Folder' not in info:
+		sublime.message_dialog("Please set a local folder for keeping working files.")
+		return None
 
 	if 'Server' not in info or localhost:
 		info['Server'] = 'http://localhost:8080'
@@ -36,6 +43,7 @@ def gemtRequest(path, data, authenticated=True, localhost=False, method='POST'):
 		data['password'] = info['Password']
 		data['uid'] = info['Uid']
 		data['role'] = 'teacher'
+		gemtFOLDER = info['Folder']
 
 	url = urllib.parse.urljoin(info['Server'], path)
 	load = urllib.parse.urlencode(data).encode('utf-8')
@@ -58,6 +66,53 @@ class gemtTest(sublime_plugin.WindowCommand):
 		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
+def gemt_grade(self, edit, decision):
+	fname = self.view.file_name()
+	basename = os.path.basename(fname)
+	if not basename.startswith('gemt') or basename.count('_')!=2:
+		sublime.message_dialog('This is not a student submission.')
+		return
+	prefix, ext = basename.rsplit('.', 1)
+	prefix = prefix[4:]
+	stid, pid, sid = prefix.split('_')
+	try:
+		stid = int(stid)
+		sid = int(sid)
+	except:
+		sublime.message_dialog('This is not a student submission.')
+		return
+	try:
+		pid = int(pid)
+	except:
+		sublime.message_dialog('This is not a graded problem.')
+		return
+
+	content = self.view.substr(sublime.Region(0, self.view.size())).strip()
+	changed = False
+	if pid in gemtStudentSubmissions and content.strip()!=gemtStudentSubmissions[pid].strip():
+		changed = True
+	data = dict(
+		stid = stid,
+		pid = pid,
+		content = content,
+		ext = ext,
+		decision = decision,
+		changed = changed,
+	)
+	response = gemtRequest('teacher_grades', data)
+	if response:
+		sublime.message_dialog(response)
+
+# ------------------------------------------------------------------
+class gemtGradeCorrect(sublime_plugin.TextCommand):
+	def run(self, edit):
+		gemt_grade(self, edit, "correct")
+
+class gemtGradeIncorrect(sublime_plugin.TextCommand):
+	def run(self, edit):
+		gemt_grade(self, edit, "incorrect")
+
+# ------------------------------------------------------------------
 class gemtPutBack(sublime_plugin.TextCommand):
 	def run(self, edit):
 		fname = self.view.file_name()
@@ -67,18 +122,21 @@ class gemtPutBack(sublime_plugin.TextCommand):
 			return
 		prefix, ext = basename.rsplit('.', 1)
 		prefix = prefix[4:]
-		uid, pid, sid = prefix.split('_')
+		stid, pid, sid = prefix.split('_')
 		try:
-			uid = int(uid)
-			pid = int(pid)
+			stid = int(stid)
 			sid = int(sid)
 		except:
 			sublime.message_dialog('This is not a student submission.')
 			return
+		try:
+			pid = int(pid)
+		except:
+			pid = 0
 		content = self.view.substr(sublime.Region(0, self.view.size())).strip()
 		data = dict(
 			sid = sid,
-			stid = uid,
+			stid = stid,
 			pid = pid,
 			content = content,
 			ext = ext,
@@ -89,19 +147,26 @@ class gemtPutBack(sublime_plugin.TextCommand):
 			sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
+def gemt_rand_chars(n):
+	letters = 'abcdefghijklmkopqrstuvwxyzABCDEFGHIJKLMLOPQRSTUVWXYZ'
+	return ''.join(random.choice(letters) for i in range(n))
+
+# ------------------------------------------------------------------
 def gemt_gets(self, index, priority):
+	global gemtStudentSubmissions
 	response = gemtRequest('teacher_gets', {'index':index, 'priority':priority})
 	if response is not None:
 		sub = json.loads(response)
-		if sub['Sid'] > 0:
+		if sub['Content'] != '':
 			ext = sub['Ext'] or 'txt'
 			pid, sid, uid = sub['Pid'], sub['Sid'], sub['Uid']
+			if pid == 0:
+				pid = gemt_rand_chars(4)
 			fname = 'gemt{}_{}_{}.{}'.format(uid,pid,sid,ext)
-			if not os.path.isdir(gemtPostDir):
-				os.mkdir(gemtPostDir)
-			fname = os.path.join(gemtPostDir, fname)
+			fname = os.path.join(gemtFOLDER, fname)
 			with open(fname, 'w', encoding='utf-8') as fp:
 				fp.write(sub['Content'])
+			gemtStudentSubmissions[pid] = sub['Content']
 			sublime.active_window().open_file(fname)
 		else:
 			sublime.message_dialog('No submission with index {} or priority {}.'.format(index,priority))
@@ -266,5 +331,45 @@ class gemtSetServerAddress(sublime_plugin.WindowCommand):
 				f.write(json.dumps(info, indent=4))
 		else:
 			sublime.message_dialog("Server address cannot be empty.")
+
+# ------------------------------------------------------------------
+class gemtSetLocalFolder(sublime_plugin.WindowCommand):
+	def run(self):
+		try:
+			with open(gemtFILE, 'r') as f:
+				info = json.loads(f.read())
+		except:
+			info = dict()
+		if 'Folder' not in info:
+			info['Folder'] = os.path.join(os.path.expanduser('~'), 'GEMT')
+		sublime.active_window().show_input_panel("This folder will be used to store working files.",
+			info['Folder'],
+			self.set,
+			None,
+			None)
+
+	def set(self, folder):
+		folder = folder.strip()
+		if len(folder) > 0:
+			try:
+				with open(gemtFILE, 'r') as f:
+					info = json.loads(f.read())
+			except:
+				info = dict()
+			info['Folder'] = folder
+			print(info)
+			if not os.path.exists(folder):
+				try:
+					os.mkdir(folder)
+					with open(gemtFILE, 'w') as f:
+						f.write(json.dumps(info, indent=4))
+				except:
+					sublime.message_dialog('Could not create {}.'.format(folder))
+			else:
+				with open(gemsFILE, 'w') as f:
+					f.write(json.dumps(info, indent=4))
+				sublime.message_dialog('Folder exists. Will use it to store working files.')
+		else:
+			sublime.message_dialog("Folder name cannot be empty.")
 
 # ------------------------------------------------------------------
