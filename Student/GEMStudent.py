@@ -80,15 +80,15 @@ class gemsTracking(sublime_plugin.WindowCommand):
 		webbrowser.open(info['Server'] + '/student_tracking?' + u)
 
 # ------------------------------------------------------------------
-def gems_get_pid(fname):
+def gems_get_pid_attempts(fname):
 	basename = os.path.basename(fname)
 	if not basename.startswith('gemp'):
-		return 0
-	name = fname.rsplit('.', 1)[0]
-	pid = name.rsplit('_', 1)[-1]
-	if pid.isdecimal():
-		return int(pid)
-	return 0
+		return 0, 0
+	name = basename.rsplit('.', 1)[0]
+	items = name.rsplit('_', 2)
+	if len(items)!=3 or  not items[1].isdecimal() or not items[2].isdecimal():
+		return 0, 0
+	return int(items[1]), int(items[2])
 
 # ------------------------------------------------------------------
 def gems_share(self, edit, priority):
@@ -99,9 +99,8 @@ def gems_share(self, edit, priority):
 		sublime.message_dialog('Cannot share unsaved content.')
 		return
 	ext = fname.rsplit('.',1)[-1]
-	pid = gems_get_pid(fname)
+	pid, attempts = gems_get_pid_attempts(fname)
 	expired = False
-	print(gemsAttempts, pid, pid in gemsAttempts)
 	if pid in gemsAttempts:
 		if gemsAttempts[pid] == 0:
 			expired = True
@@ -168,11 +167,13 @@ class gemsGetBoardContent(sublime_plugin.WindowCommand):
 				if answer!= '':
 					gemsAnswer[pid] = answer
 				gemsAttempts[pid] = attempts
-				fname = 'gemp{}_{}.{}'.format(today.strftime('%m%d'), pid, ext)
+				prefix = 'gemp{}_{}'.format(today.strftime('%m%d'), pid)
 			else:
 				rpid = gems_rand_chars(2)
-				fname = 'gem{}_{}.{}'.format(today.strftime('%m%d'), rpid, ext)
-			fname = os.path.join(gemsFOLDER, fname)
+				prefix = 'gem{}_{}'.format(today.strftime('%m%d'), rpid)
+			tmp = [os.path.basename(f) for f in os.listdir(gemsFOLDER)]
+			count = len([f for f in tmp if f.startswith(prefix)])
+			fname = os.path.join(gemsFOLDER, '{}_{}.{}'.format(prefix,count+1,ext))
 			with open(fname, 'w', encoding='utf-8') as f:
 				f.write(content)
 			sublime.active_window().open_file(fname)

@@ -7,8 +7,25 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
+
+//-----------------------------------------------------------------------------------
+func remove_header(content, ext string) string {
+	prefix := "//"
+	if ext != "java" && ext != "c++" && ext != "c" && ext != ".go" {
+		prefix = "#"
+	}
+	content = strings.Trim(content, "\n ")
+	if strings.HasPrefix(content, prefix) {
+		items := strings.SplitN(content, "\n", 2)
+		if len(items) > 1 {
+			return items[1]
+		}
+	}
+	return content
+}
 
 //-----------------------------------------------------------------------------------
 func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
@@ -16,10 +33,11 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	changed := r.FormValue("changed")
 	pid, _ := strconv.Atoi(r.FormValue("pid"))
 	stid, _ := strconv.Atoi(r.FormValue("stid"))
-	mesg := ""
+	mesg, student_mesg := "", ""
 	if changed == "True" {
 		AddFeedbackSQL.Exec(uid, stid, content, time.Now())
 		mesg = "Feedback saved to student's board."
+		student_mesg += "You've got feedback."
 		BoardsSem.Lock()
 		defer BoardsSem.Unlock()
 		b := &Board{
@@ -59,8 +77,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			}
 		}
 		mesg = "Problem graded correct.\n" + mesg
-		MessageBoards[stid] = "Your submission was correct."
-
+		student_mesg += " Your submission was correct."
 		next_pid, ok := NextProblem[int64(pid)]
 		if ok {
 			new_content, new_answer, new_ext, new_merit, new_effort, new_attempts := "", "", "", 0, 0, 0
@@ -70,6 +87,10 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 				break
 			}
 			rows.Close()
+
+			// this is done to be consistent.
+			new_content = remove_header(new_content, new_ext)
+
 			b := &Board{
 				Content:      new_content,
 				Answer:       new_answer,
@@ -80,7 +101,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			}
 			Boards[stid] = append(Boards[stid], b)
 			mesg = "Next problem added to student's board\n" + mesg
-			MessageBoards[stid] += " You have a new problem on board."
+			student_mesg += " A new problem is added to your board."
 		}
 	} else {
 		if score_id == 0 {
@@ -95,8 +116,9 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			}
 		}
 		mesg = "Problem graded incorrect.\n" + mesg
-		MessageBoards[stid] = "Your submission was not correct.  Try again."
+		student_mesg += " Your submssion was not correct. Try again."
 	}
+	MessageBoards[stid] = student_mesg
 	fmt.Fprintf(w, mesg)
 }
 
