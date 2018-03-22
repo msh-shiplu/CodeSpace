@@ -21,6 +21,7 @@ func init_handlers() {
 	http.HandleFunc("/student_shares", Authorize(student_sharesHandler))
 	http.HandleFunc("/student_gets", Authorize(student_getsHandler))
 	http.HandleFunc("/student_registers", student_registersHandler)
+	http.HandleFunc("/student_tracking", student_trackingHandler)
 
 	http.HandleFunc("/teacher_grades", Authorize(teacher_gradesHandler))
 	http.HandleFunc("/teacher_puts_back", Authorize(teacher_puts_backHandler))

@@ -13,13 +13,14 @@ import webbrowser
 
 gemsFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemsFOLDER = ''
+gemsUID = 0
 gemsTIMEOUT = 7
 gemsAnswer = {}
 gemsAttempts = {}
 
 # ------------------------------------------------------------------------------
 def gemsRequest(path, data, authenticated=True, method='POST'):
-	global gemsFOLDER
+	global gemsUID, gemsFOLDER
 	try:
 		with open(gemsFILE, 'r') as f:
 			info = json.loads(f.read())
@@ -43,6 +44,7 @@ def gemsRequest(path, data, authenticated=True, method='POST'):
 		data['password'] = info['Password']
 		data['uid'] = info['Uid']
 		gemsFOLDER = info['Folder']
+		gemsUID = info['Uid']
 
 	url = urllib.parse.urljoin(info['Server'], path)
 	load = urllib.parse.urlencode(data).encode('utf-8')
@@ -56,6 +58,26 @@ def gemsRequest(path, data, authenticated=True, method='POST'):
 		sublime.message_dialog("{0}\nCannot connect to server.".format(err))
 	print('Something is wrong')
 	return None
+
+# ------------------------------------------------------------------
+class gemsTracking(sublime_plugin.WindowCommand):
+	def run(self):
+		try:
+			with open(gemsFILE, 'r') as f:
+				info = json.loads(f.read())
+		except:
+			info = dict()
+
+		if 'Server' not in info:
+			sublime.message_dialog("Please set server address.")
+			return None
+
+		if 'Uid' not in info:
+			sublime.message_dialog("Please register.")
+			return None
+
+		u = urllib.parse.urlencode({'stid' : info['Uid']})
+		webbrowser.open(info['Server'] + '/student_tracking?' + u)
 
 # ------------------------------------------------------------------
 def gems_get_pid(fname):
