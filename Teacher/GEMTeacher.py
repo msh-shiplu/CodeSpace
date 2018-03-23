@@ -9,6 +9,7 @@ import os
 import json
 import socket
 import webbrowser
+import random
 
 gemtFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 # gemtPostDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Posts")
@@ -86,11 +87,13 @@ def gemt_grade(self, edit, decision):
 	except:
 		sublime.message_dialog('This is not a graded problem.')
 		return
-
-	content = self.view.substr(sublime.Region(0, self.view.size())).strip()
 	changed = False
-	if pid in gemtStudentSubmissions and content.strip()!=gemtStudentSubmissions[pid].strip():
-		changed = True
+	if decision=='dismiss':
+		content = ''
+	else:
+		content = self.view.substr(sublime.Region(0, self.view.size())).strip()
+		if pid in gemtStudentSubmissions and content.strip()!=gemtStudentSubmissions[pid].strip():
+			changed = True
 	data = dict(
 		stid = stid,
 		pid = pid,
@@ -111,6 +114,10 @@ class gemtGradeCorrect(sublime_plugin.TextCommand):
 class gemtGradeIncorrect(sublime_plugin.TextCommand):
 	def run(self, edit):
 		gemt_grade(self, edit, "incorrect")
+
+class gemtDismiss(sublime_plugin.TextCommand):
+	def run(self, edit):
+		gemt_grade(self, edit, "dismiss")
 
 # ------------------------------------------------------------------
 class gemtPutBack(sublime_plugin.TextCommand):

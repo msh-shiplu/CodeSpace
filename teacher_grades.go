@@ -34,6 +34,11 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	pid, _ := strconv.Atoi(r.FormValue("pid"))
 	stid, _ := strconv.Atoi(r.FormValue("stid"))
 	mesg, student_mesg := "", ""
+	if decision == "dismiss" {
+		MessageBoards[stid] = "This was probably submitted by mistake."
+		fmt.Fprintf(w, "Submission dismissed.")
+		return
+	}
 	if changed == "True" {
 		AddFeedbackSQL.Exec(uid, stid, content, time.Now())
 		mesg = "Feedback saved to student's board."
@@ -50,10 +55,11 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 		}
 		Boards[stid] = append(Boards[stid], b)
 	}
-	score_id, current_merit, current_attempts := 0, 0, 0
-	rows, _ := Database.Query("select id, merit, attempts from score where pid=? and stid=?", pid, stid)
+	score_id, current_points, current_attempts := 0, 0, 0
+	// change this to query by score id
+	rows, _ := Database.Query("select id, points, attempts from score where pid=? and stid=?", pid, stid)
 	for rows.Next() {
-		rows.Scan(&score_id, &current_merit, &current_attempts)
+		rows.Scan(&score_id, &current_points, &current_attempts)
 		break
 	}
 	rows.Close()
@@ -66,12 +72,12 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	rows.Close()
 	if decision == "correct" {
 		if score_id == 0 {
-			_, err := AddScoreSQL.Exec(pid, stid, merit, effort, 1)
+			_, err := AddScoreSQL.Exec(pid, stid, merit, 1)
 			if err != nil {
 				panic(err)
 			}
 		} else {
-			_, err := UpdateScoreSQL.Exec(merit, effort, current_attempts+1, score_id)
+			_, err := UpdateScoreSQL.Exec(merit, current_attempts+1, score_id)
 			if err != nil {
 				panic(err)
 			}
@@ -105,12 +111,12 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 		}
 	} else {
 		if score_id == 0 {
-			_, err := AddScoreSQL.Exec(pid, stid, 0, effort, 1)
+			_, err := AddScoreSQL.Exec(pid, stid, effort, 1)
 			if err != nil {
 				panic(err)
 			}
 		} else {
-			_, err := UpdateScoreSQL.Exec(current_merit, effort, current_attempts+1, score_id)
+			_, err := UpdateScoreSQL.Exec(current_points, current_attempts+1, score_id)
 			if err != nil {
 				panic(err)
 			}

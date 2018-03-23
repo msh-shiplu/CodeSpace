@@ -48,6 +48,11 @@
                         "id": "gemtGradeIncorrect",
                         "command": "gemt_grade_incorrect",
                     },
+                    {
+                        "caption": "Dismiss",
+                        "id": "gemtDismiss",
+                        "command": "gemt_dismiss",
+                    },
                 ]
             },
             {"caption":"-", "id":"side-bar-separator"},
