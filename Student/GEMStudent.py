@@ -100,23 +100,24 @@ def gems_share(self, edit, priority):
 		return
 	ext = fname.rsplit('.',1)[-1]
 	pid, attempts = gems_get_pid_attempts(fname)
-	expired = False
-	if pid in gemsAttempts:
-		if gemsAttempts[pid] == 0:
-			expired = True
-		else:
-			gemsAttempts[pid] -= 1
-	if expired:
-		sublime.message_dialog('This problem has expired and is not submitted.')
-		return
-	content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
-	data = dict(content=content, pid=pid, ext=ext, priority=priority)
-	response = gemsRequest('student_shares', data)
-	if response == 'OK':
+	if sublime.ok_cancel_dialog('This file is not a graded problem. Do you want to send it?'):
+		expired = False
 		if pid in gemsAttempts:
-			sublime.message_dialog('There are {} attempts left.'.format(gemsAttempts[pid]))
-		else:
-			sublime.message_dialog('Content submitted.')
+			if gemsAttempts[pid] == 0:
+				expired = True
+			else:
+				gemsAttempts[pid] -= 1
+		if expired:
+			sublime.message_dialog('This problem has expired and is not submitted.')
+			return
+		content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
+		data = dict(content=content, pid=pid, ext=ext, priority=priority)
+		response = gemsRequest('student_shares', data)
+		if response == 'OK':
+			if pid in gemsAttempts and gemsAttempts[pid]<=3:
+				sublime.message_dialog('There are {} attempts left.'.format(gemsAttempts[pid]))
+			else:
+				sublime.message_dialog('Content submitted.')
 
 # ------------------------------------------------------------------
 class gemsNeedSeriousHelp(sublime_plugin.TextCommand):

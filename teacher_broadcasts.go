@@ -170,7 +170,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 			MessageBoards[stid] = "You have a new problem on board."
 			i++
 		}
-		fmt.Fprintf(w, "Content files randomly to white boards.")
+		fmt.Fprintf(w, "Files saved randomly to white boards.")
 	} else {
 		fmt.Fprintf(w, "Unknown mode.")
 	}

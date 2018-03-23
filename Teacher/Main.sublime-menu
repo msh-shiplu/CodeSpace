@@ -4,26 +4,27 @@
         "id": "GEMTeacher",
         "children": [
             {
-                "caption": "Test",
-                "id": "gemtTest",
-                "command": "gemt_test",
+                "caption": "Share this file",
+                "id": "gemtShare",
+                "command": "gemt_share",
             },
+            {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Broadcast",
+                "caption": "Start problem",
                 "id": "gemtBroadcast",
                 "children": [
                     {
-                        "caption": "This file",
+                        "caption": "With this file",
                         "id": "gemtUnicast",
                         "command": "gemt_unicast",
                     },
                     {
-                        "caption": "All tabs sequentially",
+                        "caption": "With all tabs (sequentially)",
                         "id": "gemtMulticastSeq",
                         "command": "gemt_multicast_seq",
                     },
                     {
-                        "caption": "All tabs randomly",
+                        "caption": "With all tabs (randomly)",
                         "id": "gemtMulticastOr",
                         "command": "gemt_multicast_or",
                     },
@@ -54,6 +55,11 @@
                         "command": "gemt_dismiss",
                     },
                 ]
+            },
+            {
+                "caption": "End problem",
+                "id": "gemtEndProblem",
+                "command": "gemt_end_problem",
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
@@ -93,6 +99,11 @@
                 "id": "gemtSetServerAddress",
                 "command": "gemt_set_server_address",
             },
+            {
+                "caption": "Test",
+                "id": "gemtTest",
+                "command": "gemt_test",
+            },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Setup",
@@ -104,7 +115,7 @@
                         "command": "gemt_set_local_folder",
                     },
                     {
-                        "caption": "Add new username (on localhost)",
+                        "caption": "Add new TA/teacher",
                         "id": "gemtSetupNewTeacher",
                         "command": "gemt_setup_new_teacher",
                     },

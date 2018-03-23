@@ -200,6 +200,26 @@ class gemtGetSubOne(sublime_plugin.WindowCommand):
 		gemt_gets(self, -1, 1)
 
 # ------------------------------------------------------------------
+class gemtShare(sublime_plugin.TextCommand):
+	def run(self, edit):
+		fname = self.view.file_name()
+		if fname is None:
+			sublime.message_dialog('Cannot share unsaved content.')
+			return
+		ext = fname.rsplit('.',1)[-1]
+		content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
+		if content == '':
+			sublime.message_dialog("File is empty.")
+			return
+		data = {
+			'content': 			content,
+			'ext': 				ext,
+		}
+		response = gemtRequest('teacher_shares', data)
+		if response is not None:
+			sublime.status_message(response)
+
+# ------------------------------------------------------------------
 # used by gemt_multicast and gemtUnicast
 # ------------------------------------------------------------------
 def gemt_broadcast(content, ext, tag, mode):
