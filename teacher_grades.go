@@ -7,25 +7,25 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
+	// "strings"
 	"time"
 )
 
 //-----------------------------------------------------------------------------------
-func remove_header(content, ext string) string {
-	prefix := "//"
-	if ext != "java" && ext != "c++" && ext != "c" && ext != ".go" {
-		prefix = "#"
-	}
-	content = strings.Trim(content, "\n ")
-	if strings.HasPrefix(content, prefix) {
-		items := strings.SplitN(content, "\n", 2)
-		if len(items) > 1 {
-			return items[1]
-		}
-	}
-	return content
-}
+// func remove_header(content, ext string) string {
+// 	prefix := "//"
+// 	if ext != "java" && ext != "c++" && ext != "c" && ext != ".go" {
+// 		prefix = "#"
+// 	}
+// 	content = strings.Trim(content, "\n ")
+// 	if strings.HasPrefix(content, prefix) {
+// 		items := strings.SplitN(content, "\n", 2)
+// 		if len(items) > 1 {
+// 			return items[1]
+// 		}
+// 	}
+// 	return content
+// }
 
 //-----------------------------------------------------------------------------------
 func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
@@ -95,7 +95,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			rows.Close()
 
 			// this is done to be consistent.
-			new_content = remove_header(new_content, new_ext)
+			// new_content = remove_header(new_content, new_ext)
 
 			b := &Board{
 				Content:      new_content,

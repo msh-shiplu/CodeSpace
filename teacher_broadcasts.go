@@ -14,8 +14,8 @@ import (
 
 //-----------------------------------------------------------------------------------
 type ProblemFormat struct {
-	Header      string
 	Description string
+	Ext         string
 	Answer      string
 	Merit       int
 	Effort      int
@@ -24,90 +24,119 @@ type ProblemFormat struct {
 }
 
 //-----------------------------------------------------------------------------------
-func extract_problem_info(content, ext, answer_tag string) *ProblemFormat {
-	var err error
-	problem := &ProblemFormat{Description: content}
-	merit, effort, attempts, answer := 0, 0, 0, ""
-	prefix := "//"
-	if ext != "java" && ext != "c++" && ext != "c" && ext != ".go" {
-		prefix = "#"
-	}
-	content = strings.Trim(content, "\n ")
-	if strings.HasPrefix(content, prefix) {
-		items := strings.SplitN(content, "\n", 2)
-		header := strings.Trim(items[0], "\n "+prefix)
-		description := items[1]
-		items = strings.SplitN(header, " ", 2)
-		triple := items[0]
-		if strings.Count(triple, ",") == 2 {
-			items = strings.Split(triple, ",")
-			merit, err = strconv.Atoi(items[0])
-			if err != nil {
-				return problem
-			}
-			effort, err = strconv.Atoi(items[1])
-			if err != nil {
-				return problem
-			}
-			attempts, err = strconv.Atoi(items[2])
-			if err != nil {
-				return problem
-			}
-			items := strings.SplitN(description, answer_tag, 2)
-			if len(items) == 2 {
-				answer = strings.Trim(items[1], "\n ")
-				description = items[0] + "\n" + answer_tag + " "
-			}
-			problem = &ProblemFormat{
-				Header:      prefix + " " + header,
-				Description: description,
-				Answer:      answer,
-				Merit:       merit,
-				Effort:      effort,
-				Attempts:    attempts,
-			}
-		}
-	}
-	return problem
-}
+// func extract_problem_info(content, ext, answer_tag string) *ProblemFormat {
+// 	var err error
+// 	problem := &ProblemFormat{Description: content}
+// 	merit, effort, attempts, answer := 0, 0, 0, ""
+// 	prefix := "//"
+// 	if ext != "java" && ext != "c++" && ext != "c" && ext != ".go" {
+// 		prefix = "#"
+// 	}
+// 	content = strings.Trim(content, "\n ")
+// 	if strings.HasPrefix(content, prefix) {
+// 		items := strings.SplitN(content, "\n", 2)
+// 		header := strings.Trim(items[0], "\n "+prefix)
+// 		description := items[1]
+// 		items = strings.SplitN(header, " ", 2)
+// 		triple := items[0]
+// 		if strings.Count(triple, ",") == 2 {
+// 			items = strings.Split(triple, ",")
+// 			merit, err = strconv.Atoi(items[0])
+// 			if err != nil {
+// 				return problem
+// 			}
+// 			effort, err = strconv.Atoi(items[1])
+// 			if err != nil {
+// 				return problem
+// 			}
+// 			attempts, err = strconv.Atoi(items[2])
+// 			if err != nil {
+// 				return problem
+// 			}
+// 			items := strings.SplitN(description, answer_tag, 2)
+// 			if len(items) == 2 {
+// 				answer = strings.Trim(items[1], "\n ")
+// 				description = items[0] + "\n" + answer_tag + " "
+// 			}
+// 			problem = &ProblemFormat{
+// 				Header:      prefix + " " + header,
+// 				Description: description,
+// 				Answer:      answer,
+// 				Merit:       merit,
+// 				Effort:      effort,
+// 				Attempts:    attempts,
+// 			}
+// 		}
+// 	}
+// 	return problem
+// }
 
 //-----------------------------------------------------------------------------------
-func extract_problems(body, ext, answer_tag, divider_tag string) []*ProblemFormat {
+func extract_problems(content, answers, merits, efforts, attempts, exts, divider_tag string) []*ProblemFormat {
+	if divider_tag == "" {
+		merit, _ := strconv.Atoi(merits)
+		effort, _ := strconv.Atoi(efforts)
+		attempt, _ := strconv.Atoi(attempts)
+		return []*ProblemFormat{&ProblemFormat{
+			Description: content,
+			Ext:         exts,
+			Answer:      answers,
+			Merit:       merit,
+			Effort:      effort,
+			Attempts:    attempt,
+		}}
+	}
+	c := strings.Split(content, divider_tag)
+	an := strings.Split(answers, "\n")
+	m := strings.Split(merits, "\n")
+	ef := strings.Split(efforts, "\n")
+	at := strings.Split(attempts, "\n")
+	ex := strings.Split(exts, "\n")
+
 	problems := make([]*ProblemFormat, 0)
-	p := strings.Split(body, divider_tag)
-	for i := 0; i < len(p); i++ {
-		problems = append(problems, extract_problem_info(p[i], ext, answer_tag))
+	for i := 0; i < len(c); i++ {
+		merit, _ := strconv.Atoi(m[i])
+		effort, _ := strconv.Atoi(ef[i])
+		attempt, _ := strconv.Atoi(at[i])
+		p := &ProblemFormat{
+			Description: c[i],
+			Ext:         ex[i],
+			Answer:      an[i],
+			Merit:       merit,
+			Effort:      effort,
+			Attempts:    attempt,
+		}
+		problems = append(problems, p)
+		// fmt.Println(p)
 	}
 	return problems
 }
 
 //-----------------------------------------------------------------------------------
 func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	content, ext := r.FormValue("content"), r.FormValue("ext")
-	divider_tag, answer_tag := r.FormValue("divider_tag"), r.FormValue("answer_tag")
+	content := r.FormValue("content")
+	answers := r.FormValue("answers")
+	merits := r.FormValue("merits")
+	efforts := r.FormValue("efforts")
+	attempts := r.FormValue("attempts")
+	exts := r.FormValue("exts")
+	divider_tag := r.FormValue("divider_tag")
 	mode := r.FormValue("mode")
 	problems := make([]*ProblemFormat, 0)
+
 	// Extract info
-	if mode == "unicast" {
-		problems = append(problems, extract_problem_info(content, ext, answer_tag))
-	} else {
-		problems = extract_problems(content, ext, answer_tag, divider_tag)
-	}
+	problems = extract_problems(content, answers, merits, efforts, attempts, exts, divider_tag)
 
 	// Create new problems
 	for i := 0; i < len(problems); i++ {
 		pid := int64(0)
 		if problems[i].Merit > 0 {
 			// insert only real problems into database
-			content := fmt.Sprintf("%s\n%s\n",
-				problems[i].Header,
-				problems[i].Description,
-			)
 			result, err := AddProblemSQL.Exec(
 				uid,
-				content,
+				problems[i].Description,
 				problems[i].Answer,
-				ext,
+				problems[i].Ext,
 				problems[i].Merit,
 				problems[i].Effort,
 				problems[i].Attempts,
@@ -129,7 +158,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				Content:      problems[0].Description,
 				Answer:       problems[0].Answer,
 				Attempts:     problems[0].Attempts,
-				Ext:          ext,
+				Ext:          problems[0].Ext,
 				Pid:          int(problems[0].Pid),
 				StartingTime: time.Now(),
 			}
@@ -162,7 +191,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				Content:      problems[rand_idx[i]].Description,
 				Answer:       problems[rand_idx[i]].Answer,
 				Attempts:     problems[rand_idx[i]].Attempts,
-				Ext:          ext,
+				Ext:          problems[rand_idx[i]].Ext,
 				Pid:          int(problems[rand_idx[i]].Pid),
 				StartingTime: time.Now(),
 			}

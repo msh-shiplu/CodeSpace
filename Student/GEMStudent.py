@@ -100,7 +100,7 @@ def gems_share(self, edit, priority):
 		return
 	ext = fname.rsplit('.',1)[-1]
 	pid, attempts = gems_get_pid_attempts(fname)
-	if sublime.ok_cancel_dialog('This file is not a graded problem. Do you want to send it?'):
+	if pid > 0 or sublime.ok_cancel_dialog('This file is not a graded problem. Do you want to send it?'):
 		expired = False
 		if pid in gemsAttempts:
 			if gemsAttempts[pid] == 0:
@@ -167,7 +167,8 @@ class gemsGetBoardContent(sublime_plugin.WindowCommand):
 			if pid > 0:
 				if answer!= '':
 					gemsAnswer[pid] = answer
-				gemsAttempts[pid] = attempts
+				if attempts > 0:
+					gemsAttempts[pid] = attempts
 				prefix = 'gemp{}_{}'.format(today.strftime('%m%d'), pid)
 			else:
 				rpid = gems_rand_chars(2)

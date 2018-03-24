@@ -220,32 +220,90 @@ class gemtShare(sublime_plugin.TextCommand):
 			sublime.status_message(response)
 
 # ------------------------------------------------------------------
-# used by gemt_multicast and gemtUnicast
+# used by gemt_multicast and gemtUnicast to start a new problem
 # ------------------------------------------------------------------
-def gemt_broadcast(content, ext, tag, mode):
+def gemt_broadcast(content, answers, merits, efforts, attempts, exts, tag, mode):
 	data = {
 		'content': 			content,
-		'ext': 				ext,
+		'answers':			answers,
+		'exts': 			exts,
+		'merits':			merits,
+		'efforts':			efforts,
+		'attempts':			attempts,
 		'divider_tag':	 	tag,
-		'answer_tag': 		gemtAnswerTag,
 		'mode':				mode
 	}
+	# print(data)
 	response = gemtRequest('teacher_broadcasts', data)
 	if response is not None:
 		sublime.status_message(response)
+
+# ------------------------------------------------------------------
+def gemt_get_problem_info(fname):
+	merit, effort, attempts = 0, 0, -1
+	ext = fname.rsplit('.', 1)[-1]
+	with open(fname, 'r', encoding='utf-8') as fp:
+		content = fp.read()
+	items = content.split('\n',1)
+	if len(items)==1:
+		sublime.message_dialog('Improper problem definition')
+		raise Exception('Improper problem definition')
+	first_line, body = items[0], items[1]
+	if first_line.startswith('#'):
+		first_line = first_line.strip('# ')
+	elif first_line.startswith('/'):
+		first_line = first_line.strip('/ ')
+	try:
+		items = first_line.split(' ')
+		merit, effort = int(items[0]), int(items[1])
+		if len(items) > 2:
+			attempts = int(items[2])
+	except:
+		sublime.message_dialog('Improper problem definition')
+		raise Exception('Improper problem definition')
+	if merit < effort:
+		sublime.message_dialog('Merit points ({}) should be higher than effort points {}.'.format(merit, effort))
+		raise Exception('Merit points lower than effort points.')
+
+	items = body.split(gemtAnswerTag)
+	if len(items) > 2:
+		sublime.message_dialog('This problem has {} answers. There should be at most 1.'.format(len(items)-1))
+		raise Exception('Too many answers')
+
+	body = items[0]
+	answer = ''
+	if len(items) == 2:
+		body += '\n{} '.format(gemtAnswerTag)
+		answer = items[1].strip()
+
+	return body, answer, str(merit), str(effort), str(attempts), ext
+
 
 # ------------------------------------------------------------------
 def gemt_multicast(self, edit, tag, mode, mesg):
 	fnames = [ v.file_name() for v in sublime.active_window().views() ]
 	fnames = [ fname for fname in fnames if fname is not None ]
 	if len(fnames)>0 and sublime.ok_cancel_dialog(mesg):
-		contents = []
+		content, answers, merits, efforts, attempts, exts = [],[],[],[],[],[]
 		for fname in fnames:
-			ext = fname.rsplit('.',1)[-1]
-			with open(fname, 'r', encoding='utf-8') as fp:
-				contents.append(fp.read())
-		content = '\n{}\n'.format(tag).join(contents)
-		gemt_broadcast(content, ext, tag, mode)
+			# ext = fname.rsplit('.',1)[-1]
+			# with open(fname, 'r', encoding='utf-8') as fp:
+			# 	contents.append(fp.read())
+			c, an, m, e, at, ex = gemt_get_problem_info(fname)
+			content.append(c)
+			answers.append(an)
+			merits.append(m)
+			efforts.append(e)
+			attempts.append(at)
+			exts.append(ex)
+
+		content = '\n{}\n'.format(tag).join(content)
+		answers = '\n'.join(answers)
+		merits = '\n'.join(merits)
+		efforts = '\n'.join(efforts)
+		attempts = '\n'.join(attempts)
+		exts = '\n'.join(exts)
+		gemt_broadcast(content, answers, merits, efforts, attempts, exts, tag, mode)
 
 # ------------------------------------------------------------------
 class gemtUnicast(sublime_plugin.TextCommand):
@@ -254,12 +312,13 @@ class gemtUnicast(sublime_plugin.TextCommand):
 		if fname is None:
 			sublime.message_dialog('Cannot broadcast unsaved content.')
 			return
-		ext = fname.rsplit('.',1)[-1]
-		content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
-		if content == '':
-			sublime.message_dialog("File is empty.")
-			return
-		gemt_broadcast(content, ext, tag='', mode='unicast')
+		# ext = fname.rsplit('.',1)[-1]
+		# content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
+		# if content == '':
+		# 	sublime.message_dialog("File is empty.")
+		# 	return
+		content, answers, merits, efforts, attempts, exts = gemt_get_problem_info(fname)
+		gemt_broadcast(content, answers, merits, efforts, attempts, exts, tag='', mode='unicast')
 
 # ------------------------------------------------------------------
 class gemtMulticastOr(sublime_plugin.TextCommand):
