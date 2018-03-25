@@ -18,12 +18,7 @@
                 "id": "gemsSubmit",
                 "children": [
                     {
-                        "caption": "😭 I need some serious help",
-                        "id": "gemsNeedSeriousHelp",
-                        "command": "gems_need_serious_help",
-                    },
-                    {
-                        "caption": "😥 I need just a little help",
+                        "caption": "😥 I need help",
                         "id": "gemsNeedHelp",
                         "command": "gems_need_help",
                     },
@@ -31,11 +26,6 @@
                         "caption": "😎 I got it!!!",
                         "id": "gemsGotIt",
                         "command": "gems_got_it",
-                    },
-                    {
-                        "caption": "😑 Look if you have time",
-                        "id": "gemsJustShare",
-                        "command": "gems_just_share",
                     },
                 ]
             },

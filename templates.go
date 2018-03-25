@@ -35,23 +35,20 @@ var TEACHER_MESSAGING_TEMPLATE = `
 			bottom: 0;
 		}
 		.label{ display: inline; }
-		.p1, .p2, .p3, .p4 {
+		.p1, .p2, .item {
 			padding: 0.75em;
 			display: inline;
 		}
-		.p2 { color: green; }
-		.p3 { color: orange; }
-		.p4 { color: red; }
+		.p1 { color: green; }
+		.p2 { color: red; }
 	</style>
 	<body>
 	<div class="bottom">
 	<div class="label">Submissions:</div>
-	<div class="p4">{{.P4}}</div>
-	<div class="p3">{{.P3}}</div>
-	<div class="p2">{{.P2}}</div>
-	<div class="p1">{{.P1}}</div>
+	<div class="p2">😥 {{.P2}}</div>
+	<div class="p1">😎 {{.P1}}</div>
 	<div class="label">Active problems:</div>
-	<div class="p1">{{.ActiveProblems}}</div>
+	<div class="item">{{.ActiveProblems}}</div>
 	</div>
 	</body>
 </html>

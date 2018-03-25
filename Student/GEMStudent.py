@@ -122,22 +122,17 @@ def gems_share(self, edit, priority):
 			sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
-class gemsNeedSeriousHelp(sublime_plugin.TextCommand):
-	def run(self, edit):
-		gems_share(self, edit, priority=4)
+# class gemsNeedSeriousHelp(sublime_plugin.TextCommand):
+# 	def run(self, edit):
+# 		gems_share(self, edit, priority=4)
 
 # ------------------------------------------------------------------
 class gemsNeedHelp(sublime_plugin.TextCommand):
 	def run(self, edit):
-		gems_share(self, edit, priority=3)
-
-# ------------------------------------------------------------------
-class gemsGotIt(sublime_plugin.TextCommand):
-	def run(self, edit):
 		gems_share(self, edit, priority=2)
 
 # ------------------------------------------------------------------
-class gemsJustShare(sublime_plugin.TextCommand):
+class gemsGotIt(sublime_plugin.TextCommand):
 	def run(self, edit):
 		gems_share(self, edit, priority=1)
 

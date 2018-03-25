@@ -31,9 +31,20 @@
                 ]
             },
             {
-                "caption": "Get a submission",
-                "id": "gemtGetSub",
-                "command": "gemt_get_sub",
+                "caption": "Get",
+                "id": "gemtGetSubmission",
+                "children": [
+                    {
+                        "caption": "from Help group",
+                        "id": "gemtGetFromNeedHelp",
+                        "command": "gemt_get_from_need_help",
+                    },
+                    {
+                        "caption": "from OK group",
+                        "id": "gemtGetFromOk",
+                        "command": "gemt_get_from_ok",
+                    },
+                ]
             },
             {
                 "caption": "Grade",
@@ -72,38 +83,12 @@
                 "id": "gemtShowMessages",
                 "command": "gemt_show_messages",
             },
-            {
-                "caption": "Submissions",
-                "id": "gemtGetSubmission",
-                "children": [
-                    {
-                        "caption": "Put back",
-                        "id": "gemtPutBack",
-                        "command": "gemt_put_back",
-                    },
-                    {
-                        "caption": "Get p4",
-                        "id": "gemtGetSubFour",
-                        "command": "gemt_get_sub_four",
-                    },
-                    {
-                        "caption": "Get p3",
-                        "id": "gemtGetSubThree",
-                        "command": "gemt_get_sub_three",
-                    },
-                    {
-                        "caption": "Get p2",
-                        "id": "gemtGetSubFour",
-                        "command": "gemt_get_sub_two",
-                    },
-                    {
-                        "caption": "Get p1",
-                        "id": "gemtGetSubFour",
-                        "command": "gemt_get_sub_one",
-                    },
-                ]
-            },
             {"caption":"-", "id":"side-bar-separator"},
+            // {
+            //     "caption": "Put back",
+            //     "id": "gemtPutBack",
+            //     "command": "gemt_put_back",
+            // },
             {
                 "caption": "Set server address",
                 "id": "gemtSetServerAddress",

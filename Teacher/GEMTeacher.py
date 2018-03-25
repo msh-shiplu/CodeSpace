@@ -16,6 +16,7 @@ gemtFOLDER = ''
 gemtOrTag = '<GEM_OR>'
 gemtSeqTag = '<GEM_NEXT>'
 gemtAnswerTag = 'ANSWER:'
+gemsHighestPriority = 2
 gemtTIMEOUT = 7
 gemtStudentSubmissions = {}
 
@@ -146,7 +147,7 @@ class gemtPutBack(sublime_plugin.TextCommand):
 			pid = pid,
 			content = content,
 			ext = ext,
-			priority = 4,
+			priority = gemsHighestPriority,
 		)
 		response = gemtRequest('teacher_puts_back', data)
 		if response:
@@ -178,23 +179,11 @@ def gemt_gets(self, index, priority):
 			sublime.message_dialog('No submission with index {} or priority {}.'.format(index,priority))
 
 # ------------------------------------------------------------------
-class gemtGetSub(sublime_plugin.WindowCommand):
-	def run(self):
-		gemt_gets(self, -1, -1)
-
-class gemtGetSubFour(sublime_plugin.WindowCommand):
-	def run(self):
-		gemt_gets(self, -1, 4)
-
-class gemtGetSubThree(sublime_plugin.WindowCommand):
-	def run(self):
-		gemt_gets(self, -1, 3)
-
-class gemtGetSubTwo(sublime_plugin.WindowCommand):
+class gemtGetFromNeedHelp(sublime_plugin.WindowCommand):
 	def run(self):
 		gemt_gets(self, -1, 2)
 
-class gemtGetSubOne(sublime_plugin.WindowCommand):
+class gemtGetFromOk(sublime_plugin.WindowCommand):
 	def run(self):
 		gemt_gets(self, -1, 1)
 

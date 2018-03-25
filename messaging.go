@@ -13,8 +13,6 @@ import (
 type TeacherMessage struct {
 	P1             int
 	P2             int
-	P3             int
-	P4             int
 	ActiveProblems int
 }
 
@@ -25,15 +23,13 @@ func teacher_messagesHandler(w http.ResponseWriter, r *http.Request) {
 		t := template.New("")
 		t, err := t.Parse(TEACHER_MESSAGING_TEMPLATE)
 		if err == nil {
-			priority := []int{0, 0, 0, 0, 0}
+			priority := []int{0, 0, 0}
 			for i := 0; i < len(WorkingSubs); i++ {
 				priority[WorkingSubs[i].Priority]++
 			}
 			data := &TeacherMessage{
 				P1:             priority[1],
 				P2:             priority[2],
-				P3:             priority[3],
-				P4:             priority[4],
 				ActiveProblems: len(ActiveProblems),
 			}
 			w.Header().Set("Content-Type", "text/html")
