@@ -24,54 +24,6 @@ type ProblemFormat struct {
 }
 
 //-----------------------------------------------------------------------------------
-// func extract_problem_info(content, ext, answer_tag string) *ProblemFormat {
-// 	var err error
-// 	problem := &ProblemFormat{Description: content}
-// 	merit, effort, attempts, answer := 0, 0, 0, ""
-// 	prefix := "//"
-// 	if ext != "java" && ext != "c++" && ext != "c" && ext != ".go" {
-// 		prefix = "#"
-// 	}
-// 	content = strings.Trim(content, "\n ")
-// 	if strings.HasPrefix(content, prefix) {
-// 		items := strings.SplitN(content, "\n", 2)
-// 		header := strings.Trim(items[0], "\n "+prefix)
-// 		description := items[1]
-// 		items = strings.SplitN(header, " ", 2)
-// 		triple := items[0]
-// 		if strings.Count(triple, ",") == 2 {
-// 			items = strings.Split(triple, ",")
-// 			merit, err = strconv.Atoi(items[0])
-// 			if err != nil {
-// 				return problem
-// 			}
-// 			effort, err = strconv.Atoi(items[1])
-// 			if err != nil {
-// 				return problem
-// 			}
-// 			attempts, err = strconv.Atoi(items[2])
-// 			if err != nil {
-// 				return problem
-// 			}
-// 			items := strings.SplitN(description, answer_tag, 2)
-// 			if len(items) == 2 {
-// 				answer = strings.Trim(items[1], "\n ")
-// 				description = items[0] + "\n" + answer_tag + " "
-// 			}
-// 			problem = &ProblemFormat{
-// 				Header:      prefix + " " + header,
-// 				Description: description,
-// 				Answer:      answer,
-// 				Merit:       merit,
-// 				Effort:      effort,
-// 				Attempts:    attempts,
-// 			}
-// 		}
-// 	}
-// 	return problem
-// }
-
-//-----------------------------------------------------------------------------------
 func extract_problems(content, answers, merits, efforts, attempts, exts, divider_tag string) []*ProblemFormat {
 	if divider_tag == "" {
 		merit, _ := strconv.Atoi(merits)
@@ -147,6 +99,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 			}
 			pid, _ = result.LastInsertId()
 			problems[i].Pid = pid
+			ActiveProblems[int(pid)] = struct{}{}
 		}
 	}
 

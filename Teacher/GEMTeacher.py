@@ -12,7 +12,6 @@ import webbrowser
 import random
 
 gemtFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
-# gemtPostDir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "Posts")
 gemtFOLDER = ''
 gemtOrTag = '<GEM_OR>'
 gemtSeqTag = '<GEM_NEXT>'
@@ -341,6 +340,29 @@ class gemtMulticastSeq(sublime_plugin.TextCommand):
 			'multicast_seq',
 			'Broadcast *sequentially* all non-empty tabs in this window?',
 		)
+
+# ------------------------------------------------------------------
+class gemtClearBoards(sublime_plugin.WindowCommand):
+	def run(self):
+		response = gemtRequest('teacher_clears_boards', {})
+
+# ------------------------------------------------------------------
+class gemtShowMessages(sublime_plugin.WindowCommand):
+	def run(self):
+		response = gemtRequest('teacher_gets_passcode', {})
+		if response.startswith('Unauthorized'):
+			sublime.message_dialog('Unauthorized')
+		else:
+			p = urllib.parse.urlencode({'pc' : response})
+			with open(gemtFILE, 'r') as f:
+				info = json.loads(f.read())
+			webbrowser.open(info['Server'] + '/show_teacher_messages?' + p)
+
+# ------------------------------------------------------------------
+class gemtDeactivateProblems(sublime_plugin.WindowCommand):
+	def run(self):
+		response = gemtRequest('teacher_deactivates_problems', {})
+		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
 class gemtSetupNewTeacher(sublime_plugin.WindowCommand):

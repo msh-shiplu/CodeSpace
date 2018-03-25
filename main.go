@@ -21,8 +21,11 @@ func init_handlers() {
 	http.HandleFunc("/student_shares", Authorize(student_sharesHandler))
 	http.HandleFunc("/student_gets", Authorize(student_getsHandler))
 	http.HandleFunc("/student_registers", student_registersHandler)
-	http.HandleFunc("/student_tracking", student_trackingHandler)
+	http.HandleFunc("/show_student_messages", student_messagesHandler)
+	http.HandleFunc("/show_teacher_messages", teacher_messagesHandler)
 
+	http.HandleFunc("/teacher_clears_boards", Authorize(teacher_clears_boardsHandler))
+	http.HandleFunc("/teacher_deactivates_problems", Authorize(teacher_deactivates_problemsHandler))
 	http.HandleFunc("/teacher_shares", Authorize(teacher_sharesHandler))
 	http.HandleFunc("/teacher_grades", Authorize(teacher_gradesHandler))
 	http.HandleFunc("/teacher_puts_back", Authorize(teacher_puts_backHandler))

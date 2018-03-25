@@ -68,6 +68,8 @@ var WorkingSubs = make([]*Submission, 0)
 
 var NextProblem = make(map[int64]int64)
 
+var ActiveProblems = make(map[int]struct{})
+
 //---------------------------------------------------------
 // Utilities
 //---------------------------------------------------------

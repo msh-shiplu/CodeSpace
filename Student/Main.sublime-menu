@@ -41,9 +41,9 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Tracking",
-                "id": "gemsTracking",
-                "command": "gems_tracking",
+                "caption": "Messages",
+                "id": "gemsShowMessages",
+                "command": "gems_show_messages",
             },
             {
                 "caption": "Set server address",

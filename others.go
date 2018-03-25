@@ -42,6 +42,7 @@ func testHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 		fmt.Println(uid, mesg)
 	}
 
+	fmt.Println("ActiveProblems:", ActiveProblems)
 	fmt.Fprintf(w, Passcode)
 }
 

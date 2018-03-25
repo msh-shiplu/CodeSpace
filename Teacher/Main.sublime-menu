@@ -57,11 +57,21 @@
                 ]
             },
             {
-                "caption": "End problem",
-                "id": "gemtEndProblem",
-                "command": "gemt_end_problem",
+                "caption": "Done with all problems",
+                "id": "gemtDeactivateProblems",
+                "command": "gemt_deactivate_problems",
             },
             {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Clear white boards",
+                "id": "gemtClearBoards",
+                "command": "gemt_clear_boards",
+            },
+            {
+                "caption": "Messages",
+                "id": "gemtShowMessages",
+                "command": "gemt_show_messages",
+            },
             {
                 "caption": "Submissions",
                 "id": "gemtGetSubmission",

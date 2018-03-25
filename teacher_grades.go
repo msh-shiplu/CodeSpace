@@ -35,7 +35,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	stid, _ := strconv.Atoi(r.FormValue("stid"))
 	mesg, student_mesg := "", ""
 	if decision == "dismiss" {
-		MessageBoards[stid] = "This was probably submitted by mistake."
+		MessageBoards[stid] = "Teacher looked at but did not grade your submission."
 		fmt.Fprintf(w, "Submission dismissed.")
 		return
 	}

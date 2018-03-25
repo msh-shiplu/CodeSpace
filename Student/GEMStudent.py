@@ -60,7 +60,7 @@ def gemsRequest(path, data, authenticated=True, method='POST'):
 	return None
 
 # ------------------------------------------------------------------
-class gemsTracking(sublime_plugin.WindowCommand):
+class gemsShowMessages(sublime_plugin.WindowCommand):
 	def run(self):
 		try:
 			with open(gemsFILE, 'r') as f:
@@ -77,7 +77,7 @@ class gemsTracking(sublime_plugin.WindowCommand):
 			return None
 
 		u = urllib.parse.urlencode({'stid' : info['Uid']})
-		webbrowser.open(info['Server'] + '/student_tracking?' + u)
+		webbrowser.open(info['Server'] + '/show_student_messages?' + u)
 
 # ------------------------------------------------------------------
 def gems_get_pid_attempts(fname):
@@ -118,6 +118,8 @@ def gems_share(self, edit, priority):
 				sublime.message_dialog('There are {} attempts left.'.format(gemsAttempts[pid]))
 			else:
 				sublime.message_dialog('Content submitted.')
+		else:
+			sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
 class gemsNeedSeriousHelp(sublime_plugin.TextCommand):
