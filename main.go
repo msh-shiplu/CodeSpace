@@ -18,6 +18,7 @@ import (
 func init_handlers() {
 	http.HandleFunc("/test", Authorize(testHandler))
 
+	http.HandleFunc("/student_checks_in", Authorize(student_checks_inHandler))
 	http.HandleFunc("/student_shares", Authorize(student_sharesHandler))
 	http.HandleFunc("/student_gets", Authorize(student_getsHandler))
 	http.HandleFunc("/student_registers", student_registersHandler)
@@ -65,7 +66,6 @@ func main() {
 	init_handlers()
 	init_database(db_name)
 	load_teachers()
-	load_students()
 	err := http.ListenAndServe("0.0.0.0:"+port, nil)
 	if err != nil {
 		panic(err.Error() + "\n")

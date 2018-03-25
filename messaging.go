@@ -14,6 +14,7 @@ type TeacherMessage struct {
 	P1             int
 	P2             int
 	ActiveProblems int
+	Attendance     int
 }
 
 //-----------------------------------------------------------------------------------
@@ -31,6 +32,7 @@ func teacher_messagesHandler(w http.ResponseWriter, r *http.Request) {
 				P1:             priority[1],
 				P2:             priority[2],
 				ActiveProblems: len(ActiveProblems),
+				Attendance:     len(Student),
 			}
 			w.Header().Set("Content-Type", "text/html")
 			t.Execute(w, data)

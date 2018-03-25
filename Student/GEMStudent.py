@@ -122,9 +122,10 @@ def gems_share(self, edit, priority):
 			sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
-# class gemsNeedSeriousHelp(sublime_plugin.TextCommand):
-# 	def run(self, edit):
-# 		gems_share(self, edit, priority=4)
+class gemsCheckin(sublime_plugin.WindowCommand):
+	def run(self):
+		response = gemsRequest('student_checks_in', {})
+		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
 class gemsNeedHelp(sublime_plugin.TextCommand):

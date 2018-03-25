@@ -36,6 +36,11 @@
                 "command": "gems_show_messages",
             },
             {
+                "caption": "Check in",
+                "id": "gemsCheckin",
+                "command": "gems_checkin",
+            },
+            {
                 "caption": "Set server address",
                 "id": "gemsSetServerAddress",
                 "command": "gems_set_server_address",

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"time"
 )
 
 //-----------------------------------------------------------------
@@ -69,24 +68,7 @@ func student_registersHandler(w http.ResponseWriter, r *http.Request) {
 		if err3 != nil {
 			panic(err3)
 		}
-		Student[int(id)] = password
-
-		// Initialize student's board
-		BoardsSem.Lock()
-		defer BoardsSem.Unlock()
-		Boards[int(id)] = make([]*Board, 0)
-		for i := 0; i < len(Boards[-1]); i++ {
-			b := &Board{
-				Content:      Boards[-1][i].Content,
-				Answer:       Boards[-1][i].Answer,
-				Attempts:     Boards[-1][i].Attempts,
-				Ext:          Boards[-1][i].Ext,
-				Pid:          Boards[-1][i].Pid,
-				StartingTime: time.Now(),
-			}
-			Boards[int(id)] = append(Boards[int(id)], b)
-		}
-
+		init_student(int(id), password)
 		// Send password back to student
 		fmt.Fprintf(w, fmt.Sprintf("%d,%s", id, password))
 	}
