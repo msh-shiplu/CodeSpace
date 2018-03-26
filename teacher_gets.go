@@ -27,7 +27,7 @@ func teacher_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 		selected = WorkingSubs[index]
 		WorkingSubs = append(WorkingSubs[:index], WorkingSubs[index+1:]...)
 	} else if priority > 0 {
-		// Try to select by priority
+		// Try to select by priority: 1 (got it), 2 (help me)
 		for i := 0; i < len(WorkingSubs); i++ {
 			if WorkingSubs[i].Priority == priority {
 				selected = WorkingSubs[i]
@@ -38,8 +38,7 @@ func teacher_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 		}
 	} else {
 		// Try to select the first highest priority
-		// 4 levels of priority: 1, 2, 3, 4
-		first_sub_w_priority := []int{-1, -1, -1, -1, -1}
+		first_sub_w_priority := []int{-1, -1, -1}
 		for i := 0; i < len(WorkingSubs); i++ {
 			p := WorkingSubs[i].Priority
 			if first_sub_w_priority[p] == -1 {

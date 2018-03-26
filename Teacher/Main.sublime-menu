@@ -31,14 +31,25 @@
                 ]
             },
             {
-                "caption": "Get a submission 😎",
-                "id": "gemtGetFromOk",
-                "command": "gemt_get_from_ok",
-            },
-            {
-                "caption": "Get a submission 😥",
-                "id": "gemtGetFromNeedHelp",
-                "command": "gemt_get_from_need_help",
+                "caption": "Get a submission",
+                "id": "gemtGetSubmission",
+                "children": [
+                    {
+                        "caption": "Prioritized",
+                        "id": "gemtGetPrioritized",
+                        "command": "gemt_get_prioritized",
+                    },
+                    {
+                        "caption": "😎 OK",
+                        "id": "gemtGetFromOk",
+                        "command": "gemt_get_from_ok",
+                    },
+                    {
+                        "caption": "😥 Help-me",
+                        "id": "gemtGetFromNeedHelp",
+                        "command": "gemt_get_from_need_help",
+                    },
+                ]
             },
             {
                 "caption": "Grade",
@@ -63,18 +74,17 @@
             },
             {
                 "caption": "Done with all problems",
-                "id": "gemtDeactivateProblems",
+                "id": "gemtDeactivateProblem",
                 "command": "gemt_deactivate_problems",
             },
-            {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Clear white boards",
-                "id": "gemtClearBoards",
-                "command": "gemt_clear_boards",
+                "caption": "Clear boards and submissions",
+                "id": "gemtClearSubmissions",
+                "command": "gemt_clear_submissions",
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Copy to bullentin board",
+                "caption": "Excerpt to bullentin board",
                 "id": "gemtAddBulletin",
                 "command": "gemt_add_bulletin",
             },

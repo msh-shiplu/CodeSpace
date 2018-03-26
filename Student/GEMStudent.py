@@ -101,6 +101,11 @@ def gems_share(self, edit, priority):
 		return
 	ext = fname.rsplit('.',1)[-1]
 	pid, attempts = gems_get_pid_attempts(fname)
+	
+	# Lower priority if it's not a problem.
+	if pid == 0:
+		priority = 1   
+
 	if pid > 0 or sublime.ok_cancel_dialog('This file is not a graded problem. Do you want to send it?'):
 		expired = False
 		if pid in gemsAttempts:

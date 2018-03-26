@@ -161,6 +161,12 @@ def gemt_gets(self, index, priority):
 			sublime.message_dialog('No submission with index {} or priority {}.'.format(index,priority))
 
 # ------------------------------------------------------------------
+# Priorities: 1 (I got it), 2 (I need help), 
+# ------------------------------------------------------------------
+class gemtGetPrioritized(sublime_plugin.WindowCommand):
+	def run(self):
+		gemt_gets(self, -1, 0)
+
 class gemtGetFromNeedHelp(sublime_plugin.WindowCommand):
 	def run(self):
 		gemt_gets(self, -1, 2)
@@ -313,9 +319,18 @@ class gemtMulticastSeq(sublime_plugin.TextCommand):
 		)
 
 # ------------------------------------------------------------------
-class gemtClearBoards(sublime_plugin.WindowCommand):
+class gemtDeactivateProblems(sublime_plugin.WindowCommand):
 	def run(self):
-		response = gemtRequest('teacher_clears_boards', {})
+		if sublime.ok_cancel_dialog('Do you want to close active problems?  No more submissions are possible until a new problem is started.'):
+			response = gemtRequest('teacher_deactivates_problems', {})
+			sublime.message_dialog(response)
+
+# ------------------------------------------------------------------
+class gemtClearSubmissions(sublime_plugin.WindowCommand):
+	def run(self):
+		if sublime.ok_cancel_dialog('Do you want to clear all submissions and white boards?'):
+			response = gemtRequest('teacher_clears', {})
+			sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
 class gemtViewBulletinBoard(sublime_plugin.WindowCommand):
@@ -328,12 +343,6 @@ class gemtViewBulletinBoard(sublime_plugin.WindowCommand):
 			with open(gemtFILE, 'r') as f:
 				info = json.loads(f.read())
 			webbrowser.open(info['Server'] + '/view_bulletin_board?' + p)
-
-# ------------------------------------------------------------------
-class gemtDeactivateProblems(sublime_plugin.WindowCommand):
-	def run(self):
-		response = gemtRequest('teacher_deactivates_problems', {})
-		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
 class gemtSetupNewTeacher(sublime_plugin.WindowCommand):
