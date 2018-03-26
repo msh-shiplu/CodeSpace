@@ -120,40 +120,6 @@ class gemtDismiss(sublime_plugin.TextCommand):
 		gemt_grade(self, edit, "dismiss")
 
 # ------------------------------------------------------------------
-class gemtPutBack(sublime_plugin.TextCommand):
-	def run(self, edit):
-		fname = self.view.file_name()
-		basename = os.path.basename(fname)
-		if not basename.startswith('gemt') or basename.count('_')!=2:
-			sublime.message_dialog('This is not a student submission.')
-			return
-		prefix, ext = basename.rsplit('.', 1)
-		prefix = prefix[4:]
-		stid, pid, sid = prefix.split('_')
-		try:
-			stid = int(stid)
-			sid = int(sid)
-		except:
-			sublime.message_dialog('This is not a student submission.')
-			return
-		try:
-			pid = int(pid)
-		except:
-			pid = 0
-		content = self.view.substr(sublime.Region(0, self.view.size())).strip()
-		data = dict(
-			sid = sid,
-			stid = stid,
-			pid = pid,
-			content = content,
-			ext = ext,
-			priority = gemsHighestPriority,
-		)
-		response = gemtRequest('teacher_puts_back', data)
-		if response:
-			sublime.message_dialog(response)
-
-# ------------------------------------------------------------------
 def gemt_rand_chars(n):
 	letters = 'abcdefghijklmkopqrstuvwxyzABCDEFGHIJKLMLOPQRSTUVWXYZ'
 	return ''.join(random.choice(letters) for i in range(n))
@@ -368,34 +334,6 @@ class gemtSetupNewTeacher(sublime_plugin.WindowCommand):
 		response = gemtRequest('teacher_adds_ta', {'name':name}, authenticated=False, localhost=True)
 		sublime.message_dialog(response)
 
-# ------------------------------------------------------------------
-class gemtRegister(sublime_plugin.WindowCommand):
-	def run(self):
-		if sublime.ok_cancel_dialog("Register a username that was temporarily added on localhost."):
-			sublime.active_window().show_input_panel('Enter username:',
-				'',
-				self.process,
-				None,
-				None)
-
-	def process(self, name):
-		name = name.strip()
-		response = gemtRequest('teacher_registers', {'name':name}, authenticated=False)
-		if response == 'Failed':
-			sublime.message_dialog('This name is not registered. Ask the teacher in charge')
-		else:
-			uid, password = response.split(',')
-			try:
-				with open(gemtFILE, 'r') as f:
-					info = json.loads(f.read())
-			except:
-				info = dict()
-			info['Uid'] = int(uid)
-			info['Password'] = password
-			info['Name'] = name
-			with open(gemtFILE, 'w') as f:
-				f.write(json.dumps(info, indent=4))
-			sublime.message_dialog('{} registered'.format(name))
 
 # ------------------------------------------------------------------
 class gemtSetServerAddress(sublime_plugin.WindowCommand):

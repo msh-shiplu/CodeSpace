@@ -72,12 +72,12 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	rows.Close()
 	if decision == "correct" {
 		if score_id == 0 {
-			_, err := AddScoreSQL.Exec(pid, stid, merit, 1)
+			_, err := AddScoreSQL.Exec(pid, stid, uid, merit, 1)
 			if err != nil {
 				panic(err)
 			}
 		} else {
-			_, err := UpdateScoreSQL.Exec(merit, current_attempts+1, score_id)
+			_, err := UpdateScoreSQL.Exec(uid, merit, current_attempts+1, score_id)
 			if err != nil {
 				panic(err)
 			}
@@ -111,12 +111,12 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 		}
 	} else {
 		if score_id == 0 {
-			_, err := AddScoreSQL.Exec(pid, stid, effort, 1)
+			_, err := AddScoreSQL.Exec(pid, stid, uid, effort, 1)
 			if err != nil {
 				panic(err)
 			}
 		} else {
-			_, err := UpdateScoreSQL.Exec(current_points, current_attempts+1, score_id)
+			_, err := UpdateScoreSQL.Exec(uid, current_points, current_attempts+1, score_id)
 			if err != nil {
 				panic(err)
 			}

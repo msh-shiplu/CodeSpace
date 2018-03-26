@@ -13,14 +13,15 @@ import webbrowser
 
 gemsFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemsFOLDER = ''
-gemsUID = 0
+# gemsUID = 0
 gemsTIMEOUT = 7
 gemsAnswer = {}
 gemsAttempts = {}
 
 # ------------------------------------------------------------------------------
 def gemsRequest(path, data, authenticated=True, method='POST'):
-	global gemsUID, gemsFOLDER
+	# global gemsUID
+	global gemsFOLDER
 	try:
 		with open(gemsFILE, 'r') as f:
 			info = json.loads(f.read())
@@ -35,7 +36,7 @@ def gemsRequest(path, data, authenticated=True, method='POST'):
 		sublime.message_dialog("Please set a local folder to store working files.")
 		return None
 
-	data['server'] = info['Server']
+	# data['server'] = info['Server']
 	if authenticated:
 		if 'Uid' not in info:
 			sublime.message_dialog("Please register.")
@@ -44,7 +45,7 @@ def gemsRequest(path, data, authenticated=True, method='POST'):
 		data['password'] = info['Password']
 		data['uid'] = info['Uid']
 		gemsFOLDER = info['Folder']
-		gemsUID = info['Uid']
+		# gemsUID = info['Uid']
 
 	url = urllib.parse.urljoin(info['Server'], path)
 	load = urllib.parse.urlencode(data).encode('utf-8')
@@ -181,11 +182,34 @@ class gemsGetBoardContent(sublime_plugin.WindowCommand):
 # ------------------------------------------------------------------
 class gemsRegister(sublime_plugin.WindowCommand):
 	def run(self):
-		sublime.active_window().show_input_panel('Enter username:',
-			'',
+		try:
+			with open(gemsFILE, 'r') as f:
+				info = json.loads(f.read())
+		except:
+			info = dict()
+
+		if 'Server' not in info:
+			sublime.message_dialog("Please set server address.")
+			return None
+
+		if 'Folder' not in info:
+			sublime.message_dialog("Please set a local folder to store working files.")
+			return None
+
+		mesg = 'Enter a new name'
+		if 'Name' in info:
+			mesg = '{} is already registered. Enter a new name or Esc:'.format(info['Name'])
+
+		if 'Name' not in info:
+			info['Name'] = ''
+
+		sublime.active_window().show_input_panel(
+			mesg,
+			info['Name'],
 			self.process,
 			None,
-			None)
+			None,
+		)
 
 	def process(self, name):
 		name = name.strip()

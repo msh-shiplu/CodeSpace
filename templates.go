@@ -45,7 +45,7 @@ var TEACHER_MESSAGING_TEMPLATE = `
 	<body>
 	<div class="bottom">
 	<div class="label">Submissions:</div>
-	<div class="p2"> &#9785; {{.P2}}</div>
+	<div class="p2"> &#128546; {{.P2}}</div>
 	<div class="p1"> &#128526; {{.P1}}</div>
 	<div class="label">Active problems:</div>
 	<div class="item">{{.ActiveProblems}}</div>

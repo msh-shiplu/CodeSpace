@@ -34,7 +34,8 @@ func init_handlers() {
 	http.HandleFunc("/teacher_broadcasts", Authorize(teacher_broadcastsHandler))
 	http.HandleFunc("/teacher_gets_passcode", Authorize(teacher_gets_passcodeHandler))
 	http.HandleFunc("/teacher_adds_ta", AuthorizeLocalhost(teacher_adds_taHandler))
-	http.HandleFunc("/teacher_registers", teacher_registersHandler)
+
+	http.HandleFunc("/ta_registers", ta_registersHandler)
 }
 
 //-----------------------------------------------------------------

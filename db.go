@@ -22,7 +22,7 @@ func create_tables() {
 	execSQL("create table if not exists teacher (id integer primary key, name text unique, password text)")
 	execSQL("create table if not exists problem (id integer primary key, tid integer, content blob, answer text, ext text, merit integer, effort integer, attempts integer, at timestamp)")
 	execSQL("create table if not exists submission (id integer primary key, pid integer, sid integer, content blob, priority integer, at timestamp, completed timestamp)")
-	execSQL("create table if not exists score (id integer primary key, pid integer, stid integer, points integer, attempts integer, unique(pid,stid))")
+	execSQL("create table if not exists score (id integer primary key, pid integer, stid integer, tid integer, points integer, attempts integer, unique(pid,stid))")
 	execSQL("create table if not exists feedback (id integer primary key, tid integer, stid integer, content text, date timestamp)")
 	execSQL("create table if not exists attendance (id integer primary key, stid integer, at timestamp)")
 
@@ -49,9 +49,9 @@ func init_database(db_name string) {
 	AddTeacherSQL = prepare("insert into teacher (name, password) values (?, ?)")
 	AddProblemSQL = prepare("insert into problem (tid, content, answer, ext, merit, effort, attempts, at) values (?, ?, ?, ?, ?, ?, ?, ?)")
 	AddSubmissionSQL = prepare("insert into submission (pid, sid, content, priority, at) values (?, ?, ?, ?, ?)")
-	AddScoreSQL = prepare("insert into score (pid, stid, points, attempts) values (?, ?, ?, ?)")
+	AddScoreSQL = prepare("insert into score (pid, stid, tid, points, attempts) values (?, ?, ?, ?, ?)")
 	AddFeedbackSQL = prepare("insert into feedback (tid, stid, content, date) values (?, ?, ?, ?)")
-	UpdateScoreSQL = prepare("update score set points=?, attempts=? where id=?")
+	UpdateScoreSQL = prepare("update score set tid=?, points=?, attempts=? where id=?")
 	AddAttendanceSQL = prepare("insert into attendance (stid, at) values (?, ?)")
 
 	// Initialize passcode for current session and default board

@@ -31,20 +31,14 @@
                 ]
             },
             {
-                "caption": "Get",
-                "id": "gemtGetSubmission",
-                "children": [
-                    {
-                        "caption": "from Help group",
-                        "id": "gemtGetFromNeedHelp",
-                        "command": "gemt_get_from_need_help",
-                    },
-                    {
-                        "caption": "from OK group",
-                        "id": "gemtGetFromOk",
-                        "command": "gemt_get_from_ok",
-                    },
-                ]
+                "caption": "Get a submission 😎",
+                "id": "gemtGetFromOk",
+                "command": "gemt_get_from_ok",
+            },
+            {
+                "caption": "Get a submission 😥",
+                "id": "gemtGetFromNeedHelp",
+                "command": "gemt_get_from_need_help",
             },
             {
                 "caption": "Grade",

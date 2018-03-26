@@ -27,7 +27,7 @@ func teacher_adds_taHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //-----------------------------------------------------------------
-func teacher_registersHandler(w http.ResponseWriter, r *http.Request) {
+func ta_registersHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	rows, err := Database.Query("select id, password from teacher where name=?", name)
 	if err != nil {
