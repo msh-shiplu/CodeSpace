@@ -23,8 +23,10 @@ func init_handlers() {
 	http.HandleFunc("/student_gets", Authorize(student_getsHandler))
 	http.HandleFunc("/student_registers", student_registersHandler)
 	http.HandleFunc("/show_student_messages", student_messagesHandler)
-	http.HandleFunc("/show_teacher_messages", teacher_messagesHandler)
+	http.HandleFunc("/view_bulletin_board", view_bulletin_boardHandler)
+	http.HandleFunc("/remove_bulletin_page", remove_bulletin_pageHandler)
 
+	http.HandleFunc("/teacher_adds_bulletin_page", Authorize(teacher_adds_bulletin_pageHandler))
 	http.HandleFunc("/teacher_clears_boards", Authorize(teacher_clears_boardsHandler))
 	http.HandleFunc("/teacher_deactivates_problems", Authorize(teacher_deactivates_problemsHandler))
 	http.HandleFunc("/teacher_shares", Authorize(teacher_sharesHandler))
@@ -35,6 +37,7 @@ func init_handlers() {
 	http.HandleFunc("/teacher_gets_passcode", Authorize(teacher_gets_passcodeHandler))
 	http.HandleFunc("/teacher_adds_ta", AuthorizeLocalhost(teacher_adds_taHandler))
 
+	// this should be teacher_registers
 	http.HandleFunc("/ta_registers", ta_registersHandler)
 }
 

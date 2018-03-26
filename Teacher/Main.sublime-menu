@@ -72,49 +72,44 @@
                 "id": "gemtClearBoards",
                 "command": "gemt_clear_boards",
             },
+            {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Messages",
-                "id": "gemtShowMessages",
-                "command": "gemt_show_messages",
+                "caption": "Copy to bullentin board",
+                "id": "gemtAddBulletin",
+                "command": "gemt_add_bulletin",
+            },
+            {
+                "caption": "View bullentin board",
+                "id": "gemtViewBulletinBoard",
+                "command": "gemt_view_bulletin_board",
             },
             {"caption":"-", "id":"side-bar-separator"},
-            // {
-            //     "caption": "Put back",
-            //     "id": "gemtPutBack",
-            //     "command": "gemt_put_back",
-            // },
             {
                 "caption": "Set server address",
                 "id": "gemtSetServerAddress",
                 "command": "gemt_set_server_address",
             },
             {
+                "caption": "Set local folder",
+                "id": "gemtSetLocalFolder",
+                "command": "gemt_set_local_folder",
+            },
+            {
+                "caption": "Add new TA/teacher",
+                "id": "gemtSetupNewTeacher",
+                "command": "gemt_setup_new_teacher",
+            },
+            {
+                "caption": "Complete registration",
+                "id": "gemtRegister",
+                "command": "gemt_register",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
                 "caption": "Test",
                 "id": "gemtTest",
                 "command": "gemt_test",
             },
-            {"caption":"-", "id":"side-bar-separator"},
-            {
-                "caption": "Setup",
-                "id": "gemtRegistration",
-                "children": [
-                    {
-                        "caption": "Set local folder",
-                        "id": "gemtSetLocalFolder",
-                        "command": "gemt_set_local_folder",
-                    },
-                    {
-                        "caption": "Add new TA/teacher",
-                        "id": "gemtSetupNewTeacher",
-                        "command": "gemt_setup_new_teacher",
-                    },
-                    {
-                        "caption": "Complete registration",
-                        "id": "gemtRegister",
-                        "command": "gemt_register",
-                    },
-                ]
-            }
         ]
     }
 ]

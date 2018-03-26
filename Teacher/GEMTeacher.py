@@ -67,6 +67,22 @@ class gemtTest(sublime_plugin.WindowCommand):
 		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
+class gemtAddBulletin(sublime_plugin.TextCommand):
+	def run(self, edit):
+		this_file_name = self.view.file_name()
+		if this_file_name is None:
+			sublime.message_dialog('Error: file is empty.')
+			return
+		beg, end = self.view.sel()[0].begin(), self.view.sel()[0].end()
+		content = '\n' + self.view.substr(sublime.Region(beg,end)) + '\n'
+		if len(content) <= 20:
+			sublime.message_dialog('Select more text to show on the bulletin board.')
+			return
+		response = gemtRequest('teacher_adds_bulletin_page', {'content':content})
+		if response:
+			sublime.message_dialog(response)
+
+# ------------------------------------------------------------------
 def gemt_grade(self, edit, decision):
 	fname = self.view.file_name()
 	basename = os.path.basename(fname)
@@ -302,7 +318,7 @@ class gemtClearBoards(sublime_plugin.WindowCommand):
 		response = gemtRequest('teacher_clears_boards', {})
 
 # ------------------------------------------------------------------
-class gemtShowMessages(sublime_plugin.WindowCommand):
+class gemtViewBulletinBoard(sublime_plugin.WindowCommand):
 	def run(self):
 		response = gemtRequest('teacher_gets_passcode', {})
 		if response.startswith('Unauthorized'):
@@ -311,7 +327,7 @@ class gemtShowMessages(sublime_plugin.WindowCommand):
 			p = urllib.parse.urlencode({'pc' : response})
 			with open(gemtFILE, 'r') as f:
 				info = json.loads(f.read())
-			webbrowser.open(info['Server'] + '/show_teacher_messages?' + p)
+			webbrowser.open(info['Server'] + '/view_bulletin_board?' + p)
 
 # ------------------------------------------------------------------
 class gemtDeactivateProblems(sublime_plugin.WindowCommand):

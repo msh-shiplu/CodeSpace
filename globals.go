@@ -37,6 +37,7 @@ var Passcode string
 
 var BoardsSem sync.Mutex
 var SubSem sync.Mutex
+var BulletinSem sync.Mutex
 
 //---------------------------------------------------------
 // Virtual boards for students and student submissions
@@ -53,6 +54,8 @@ type Board struct {
 var Boards = make(map[int][]*Board)
 
 var MessageBoards = make(map[int]string)
+
+var BulletinBoard = make([]string, 0)
 
 type Submission struct {
 	Sid      int // submission id
