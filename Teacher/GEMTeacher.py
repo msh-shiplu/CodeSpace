@@ -67,6 +67,18 @@ class gemtTest(sublime_plugin.WindowCommand):
 		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
+class gemtViewBulletinBoard(sublime_plugin.WindowCommand):
+	def run(self):
+		response = gemtRequest('teacher_gets_passcode', {})
+		if response.startswith('Unauthorized'):
+			sublime.message_dialog('Unauthorized')
+		else:
+			p = urllib.parse.urlencode({'pc' : response})
+			with open(gemtFILE, 'r') as f:
+				info = json.loads(f.read())
+			webbrowser.open(info['Server'] + '/view_bulletin_board?' + p)
+
+# ------------------------------------------------------------------
 class gemtAddBulletin(sublime_plugin.TextCommand):
 	def run(self, edit):
 		this_file_name = self.view.file_name()
@@ -104,7 +116,7 @@ def gemt_grade(self, edit, decision):
 		sublime.message_dialog('This is not a graded problem.')
 		return
 	changed = False
-	if decision=='dismiss':
+	if decision=='dismissed':
 		content = ''
 	else:
 		content = self.view.substr(sublime.Region(0, self.view.size())).strip()
@@ -121,6 +133,7 @@ def gemt_grade(self, edit, decision):
 	response = gemtRequest('teacher_grades', data)
 	if response:
 		sublime.message_dialog(response)
+		self.view.window().run_command('close')
 
 # ------------------------------------------------------------------
 class gemtGradeCorrect(sublime_plugin.TextCommand):
@@ -131,9 +144,9 @@ class gemtGradeIncorrect(sublime_plugin.TextCommand):
 	def run(self, edit):
 		gemt_grade(self, edit, "incorrect")
 
-class gemtDismiss(sublime_plugin.TextCommand):
+class gemtDismissed(sublime_plugin.TextCommand):
 	def run(self, edit):
-		gemt_grade(self, edit, "dismiss")
+		gemt_grade(self, edit, "dismissed")
 
 # ------------------------------------------------------------------
 def gemt_rand_chars(n):
@@ -161,7 +174,7 @@ def gemt_gets(self, index, priority):
 			sublime.message_dialog('No submission with index {} or priority {}.'.format(index,priority))
 
 # ------------------------------------------------------------------
-# Priorities: 1 (I got it), 2 (I need help), 
+# Priorities: 1 (I got it), 2 (I need help),
 # ------------------------------------------------------------------
 class gemtGetPrioritized(sublime_plugin.WindowCommand):
 	def run(self):
@@ -331,18 +344,6 @@ class gemtClearSubmissions(sublime_plugin.WindowCommand):
 		if sublime.ok_cancel_dialog('Do you want to clear all submissions and white boards?'):
 			response = gemtRequest('teacher_clears', {})
 			sublime.message_dialog(response)
-
-# ------------------------------------------------------------------
-class gemtViewBulletinBoard(sublime_plugin.WindowCommand):
-	def run(self):
-		response = gemtRequest('teacher_gets_passcode', {})
-		if response.startswith('Unauthorized'):
-			sublime.message_dialog('Unauthorized')
-		else:
-			p = urllib.parse.urlencode({'pc' : response})
-			with open(gemtFILE, 'r') as f:
-				info = json.loads(f.read())
-			webbrowser.open(info['Server'] + '/view_bulletin_board?' + p)
 
 # ------------------------------------------------------------------
 class gemtSetupNewTeacher(sublime_plugin.WindowCommand):

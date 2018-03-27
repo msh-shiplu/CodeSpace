@@ -56,8 +56,9 @@ def gemaRequest(path, data, authenticated=True, localhost=False, method='POST'):
 	print('Something is wrong')
 	return None
 
+
 # ------------------------------------------------------------------
-class gemaShowMessages(sublime_plugin.WindowCommand):
+class gemaViewBulletinBoard(sublime_plugin.WindowCommand):
 	def run(self):
 		response = gemaRequest('teacher_gets_passcode', {})
 		if response.startswith('Unauthorized'):
@@ -66,7 +67,23 @@ class gemaShowMessages(sublime_plugin.WindowCommand):
 			p = urllib.parse.urlencode({'pc' : response})
 			with open(gemaFILE, 'r') as f:
 				info = json.loads(f.read())
-			webbrowser.open(info['Server'] + '/show_teacher_messages?' + p)
+			webbrowser.open(info['Server'] + '/view_bulletin_board?' + p)
+
+# ------------------------------------------------------------------
+class gemaAddBulletin(sublime_plugin.TextCommand):
+	def run(self, edit):
+		this_file_name = self.view.file_name()
+		if this_file_name is None:
+			sublime.message_dialog('Error: file is empty.')
+			return
+		beg, end = self.view.sel()[0].begin(), self.view.sel()[0].end()
+		content = '\n' + self.view.substr(sublime.Region(beg,end)) + '\n'
+		if len(content) <= 20:
+			sublime.message_dialog('Select more text to show on the bulletin board.')
+			return
+		response = gemaRequest('teacher_adds_bulletin_page', {'content':content})
+		if response:
+			sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
 class gemaPutBack(sublime_plugin.TextCommand):
@@ -124,7 +141,7 @@ def gema_grade(self, edit, decision):
 		sublime.message_dialog('This is not a graded problem.')
 		return
 	changed = False
-	if decision=='dismiss':
+	if decision=='dismissed':
 		content = ''
 	else:
 		content = self.view.substr(sublime.Region(0, self.view.size())).strip()
@@ -141,6 +158,7 @@ def gema_grade(self, edit, decision):
 	response = gemaRequest('teacher_grades', data)
 	if response:
 		sublime.message_dialog(response)
+		self.view.window().run_command('close')
 
 # ------------------------------------------------------------------
 class gemaGradeCorrect(sublime_plugin.TextCommand):
@@ -151,9 +169,9 @@ class gemaGradeIncorrect(sublime_plugin.TextCommand):
 	def run(self, edit):
 		gema_grade(self, edit, "incorrect")
 
-class gemaDismiss(sublime_plugin.TextCommand):
+class gemaDismissed(sublime_plugin.TextCommand):
 	def run(self, edit):
-		gema_grade(self, edit, "dismiss")
+		gema_grade(self, edit, "dismissed")
 
 # ------------------------------------------------------------------
 def gema_rand_chars(n):
@@ -181,6 +199,12 @@ def gema_gets(self, index, priority):
 			sublime.message_dialog('No submission with index {} or priority {}.'.format(index,priority))
 
 # ------------------------------------------------------------------
+# Priorities: 1 (I got it), 2 (I need help),
+# ------------------------------------------------------------------
+class gemtGetPrioritized(sublime_plugin.WindowCommand):
+	def run(self):
+		gemt_gets(self, -1, 0)
+
 class gemaGetFromNeedHelp(sublime_plugin.WindowCommand):
 	def run(self):
 		gema_gets(self, -1, 2)

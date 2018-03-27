@@ -4,46 +4,51 @@
         "id": "GemTA",
         "children": [
             {
-                "caption": "Get a submission 😎",
+                "caption": "Get a submission",
+                "id": "gemtGetPrioritized",
+                "command": "gemt_get_prioritized",
+            },
+            {
+                "caption": "Get a 😎 submission",
                 "id": "gemaGetFromOk",
                 "command": "gema_get_from_ok",
             },
             {
-                "caption": "Get a submission 😥",
+                "caption": "Get a 😥 submission",
                 "id": "gemaGetFromNeedHelp",
                 "command": "gema_get_from_need_help",
             },
+            {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Grade",
-                "id": "gemaGrade",
-                "children": [
-                    {
-                        "caption": "Correct",
-                        "id": "gemaGradeCorrect",
-                        "command": "gema_grade_correct",
-                    },
-                    {
-                        "caption": "Incorrect",
-                        "id": "gemaGradeIncorrect",
-                        "command": "gema_grade_incorrect",
-                    },
-                    {
-                        "caption": "Dismiss",
-                        "id": "gemaDismiss",
-                        "command": "gema_dismiss",
-                    },
-                    {
-                        "caption": "Put back",
-                        "id": "gemaPutBack",
-                        "command": "gema_put_back",
-                    },
-                ]
+                "caption": "✔  Mark correct",
+                "id": "gemaGradeCorrect",
+                "command": "gema_grade_correct",
+            },
+            {
+                "caption": "✘  Mark incorrect",
+                "id": "gemaGradeIncorrect",
+                "command": "gema_grade_incorrect",
+            },
+            {
+                "caption": "✂ Mark dismissed",
+                "id": "gemaDismiss",
+                "command": "gema_dismissed",
+            },
+            {
+                "caption": "⏎ Put back",
+                "id": "gemaPutBack",
+                "command": "gema_put_back",
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Messages",
-                "id": "gemaShowMessages",
-                "command": "gema_show_messages",
+                "caption": "Excerpt to bullentin board",
+                "id": "gemaAddBulletin",
+                "command": "gema_add_bulletin",
+            },
+            {
+                "caption": "View bullentin board",
+                "id": "gemaViewBulletinBoard",
+                "command": "gema_view_bulletin_board",
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
@@ -52,7 +57,7 @@
                 "command": "gema_set_server_address",
             },
             {
-                "caption": "Set local folder",
+                "caption": "Set working folder",
                 "id": "gemaSetLocalFolder",
                 "command": "gema_set_local_folder",
             },

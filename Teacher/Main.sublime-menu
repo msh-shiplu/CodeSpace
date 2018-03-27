@@ -8,70 +8,54 @@
                 "id": "gemtShare",
                 "command": "gemt_share",
             },
-            {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Start problem",
-                "id": "gemtBroadcast",
-                "children": [
-                    {
-                        "caption": "With this file",
-                        "id": "gemtUnicast",
-                        "command": "gemt_unicast",
-                    },
-                    {
-                        "caption": "With all tabs (sequentially)",
-                        "id": "gemtMulticastSeq",
-                        "command": "gemt_multicast_seq",
-                    },
-                    {
-                        "caption": "With all tabs (randomly)",
-                        "id": "gemtMulticastOr",
-                        "command": "gemt_multicast_or",
-                    },
-                ]
+                "id": "gemtUnicast",
+                "command": "gemt_unicast",
             },
             {
-                "caption": "Get a submission",
-                "id": "gemtGetSubmission",
-                "children": [
-                    {
-                        "caption": "Prioritized",
-                        "id": "gemtGetPrioritized",
-                        "command": "gemt_get_prioritized",
-                    },
-                    {
-                        "caption": "😎 OK",
-                        "id": "gemtGetFromOk",
-                        "command": "gemt_get_from_ok",
-                    },
-                    {
-                        "caption": "😥 Help-me",
-                        "id": "gemtGetFromNeedHelp",
-                        "command": "gemt_get_from_need_help",
-                    },
-                ]
+                "caption": "Start list of problems",
+                "id": "gemtMulticastSeq",
+                "command": "gemt_multicast_seq",
             },
             {
-                "caption": "Grade",
-                "id": "gemtGrade",
-                "children": [
-                    {
-                        "caption": "Correct",
-                        "id": "gemtGradeCorrect",
-                        "command": "gemt_grade_correct",
-                    },
-                    {
-                        "caption": "Incorrect",
-                        "id": "gemtGradeIncorrect",
-                        "command": "gemt_grade_incorrect",
-                    },
-                    {
-                        "caption": "Dismiss",
-                        "id": "gemtDismiss",
-                        "command": "gemt_dismiss",
-                    },
-                ]
+                "caption": "Start randomized problem",
+                "id": "gemtMulticastOr",
+                "command": "gemt_multicast_or",
             },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Get submission",
+                "id": "gemtGetPrioritized",
+                "command": "gemt_get_prioritized",
+            },
+            {
+                "caption": "Get 😎 submission",
+                "id": "gemtGetFromOk",
+                "command": "gemt_get_from_ok",
+            },
+            {
+                "caption": "Get 😥 submission",
+                "id": "gemtGetFromNeedHelp",
+                "command": "gemt_get_from_need_help",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "✔  Mark correct",
+                "id": "gemtGradeCorrect",
+                "command": "gemt_grade_correct",
+            },
+            {
+                "caption": "✘  Mark incorrect",
+                "id": "gemtGradeIncorrect",
+                "command": "gemt_grade_incorrect",
+            },
+            {
+                "caption": "✂ Mark dismissed",
+                "id": "gemtDismissed",
+                "command": "gemt_dismissed",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Done with all problems",
                 "id": "gemtDeactivateProblem",
@@ -100,7 +84,7 @@
                 "command": "gemt_set_server_address",
             },
             {
-                "caption": "Set local folder",
+                "caption": "Set working folder",
                 "id": "gemtSetLocalFolder",
                 "command": "gemt_set_local_folder",
             },
