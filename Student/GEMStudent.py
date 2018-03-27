@@ -57,7 +57,7 @@ def gemsRequest(path, data, authenticated=True, method='POST'):
 		sublime.message_dialog("{0}".format(err))
 	except urllib.error.URLError as err:
 		sublime.message_dialog("{0}\nCannot connect to server.".format(err))
-	print('Something is wrong')
+	print('Error making request')
 	return None
 
 # ------------------------------------------------------------------
@@ -155,7 +155,6 @@ class gemsGetBoardContent(sublime_plugin.WindowCommand):
 
 		response = gemsRequest('student_gets', {})
 		if response is None:
-			sublime.message_dialog("Failed.")
 			return
 		json_obj = json.loads(response)
 		if json_obj == []:

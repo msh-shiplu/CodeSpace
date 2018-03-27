@@ -53,7 +53,7 @@ func Authorize(fn func(http.ResponseWriter, *http.Request, string, int)) http.Ha
 		}
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Println("Unauthorized access:", r.FormValue("name"))
-		fmt.Fprint(w, "Unauthorized access")
+		fmt.Fprint(w, "Unauthorized access. Please register again.")
 	}
 }
 

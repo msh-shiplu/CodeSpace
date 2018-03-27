@@ -6,28 +6,46 @@ import (
 )
 
 //-----------------------------------------------------------------
-func teacher_adds_taHandler(w http.ResponseWriter, r *http.Request) {
-	name := r.FormValue("name")
-	mesg := ""
+func add_teacher(name string) {
 	rows, err := Database.Query("select name from teacher where name=?", name)
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		mesg = fmt.Sprintf("%s already exists. Choose a different name.", name)
+		fmt.Printf("%s already exists. Choose a different name.\n", name)
 		return
 	}
 	password := RandStringRunes(12)
 	result, _ := AddTeacherSQL.Exec(name, password)
 	id, _ := result.LastInsertId()
 	Teacher[int(id)] = password
-	mesg = fmt.Sprintf("%s is added. User must register under the same name", name)
-	fmt.Fprintf(w, mesg)
+	fmt.Printf("%s is added. User must register under the same name.\n", name)
 }
 
 //-----------------------------------------------------------------
-func ta_registersHandler(w http.ResponseWriter, r *http.Request) {
+// func teacher_adds_taHandler(w http.ResponseWriter, r *http.Request) {
+// 	name := r.FormValue("name")
+// 	mesg := ""
+// 	rows, err := Database.Query("select name from teacher where name=?", name)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	defer rows.Close()
+// 	for rows.Next() {
+// 		mesg = fmt.Sprintf("%s already exists. Choose a different name.", name)
+// 		return
+// 	}
+// 	password := RandStringRunes(12)
+// 	result, _ := AddTeacherSQL.Exec(name, password)
+// 	id, _ := result.LastInsertId()
+// 	Teacher[int(id)] = password
+// 	mesg = fmt.Sprintf("%s is added. User must register under the same name", name)
+// 	fmt.Fprintf(w, mesg)
+// }
+
+//-----------------------------------------------------------------
+func teacher_completes_registrationHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	rows, err := Database.Query("select id, password from teacher where name=?", name)
 	if err != nil {

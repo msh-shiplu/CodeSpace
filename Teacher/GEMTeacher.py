@@ -16,7 +16,6 @@ gemtFOLDER = ''
 gemtOrTag = '<GEM_OR>'
 gemtSeqTag = '<GEM_NEXT>'
 gemtAnswerTag = 'ANSWER:'
-gemsHighestPriority = 2
 gemtTIMEOUT = 7
 gemtStudentSubmissions = {}
 
@@ -170,8 +169,12 @@ def gemt_gets(self, index, priority):
 				fp.write(sub['Content'])
 			gemtStudentSubmissions[pid] = sub['Content']
 			sublime.active_window().open_file(fname)
-		else:
-			sublime.message_dialog('No submission with index {} or priority {}.'.format(index,priority))
+		elif priority == 0:
+			sublime.message_dialog('There are no submissions.')
+		elif priority > 0:
+			sublime.message_dialog('There are no submissions with priority {}.'.format(priority))
+		elif index >= 0:
+			sublime.message_dialog('There are no submission with index {}.'.format(index))
 
 # ------------------------------------------------------------------
 # Priorities: 1 (I got it), 2 (I need help),
@@ -346,20 +349,71 @@ class gemtClearSubmissions(sublime_plugin.WindowCommand):
 			sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
-class gemtSetupNewTeacher(sublime_plugin.WindowCommand):
+# class gemtSetupNewTeacher(sublime_plugin.WindowCommand):
+# 	def run(self):
+# 		if sublime.ok_cancel_dialog("This can only be done if SublimeText and the server are running on localhost."):
+# 			sublime.active_window().show_input_panel('Enter username:',
+# 				'',
+# 				self.process,
+# 				None,
+# 				None)
+
+# 	def process(self, name):
+# 		name = name.strip()
+# 		response = gemtRequest('teacher_adds_ta', {'name':name}, authenticated=False, localhost=True)
+# 		sublime.message_dialog(response)
+
+# ------------------------------------------------------------------
+class gemtCompleteRegistration(sublime_plugin.WindowCommand):
 	def run(self):
-		if sublime.ok_cancel_dialog("This can only be done if SublimeText and the server are running on localhost."):
-			sublime.active_window().show_input_panel('Enter username:',
-				'',
+		try:
+			with open(gemtFILE, 'r') as f:
+				info = json.loads(f.read())
+		except:
+			info = dict()
+		if 'Folder' not in info:
+			sublime.message_dialog("Please set a local folder for keeping working files.")
+			return None
+
+		if 'Server' not in info:
+			sublime.message_dialog("Please set server address.")
+			return None
+
+		mesg = 'Enter a new name'
+		if 'Name' in info:
+			mesg = '{} is already registered. Enter a new name or Esc:'.format(info['Name'])
+
+		if 'Name' not in info:
+			info['Name'] = ''
+
+		if sublime.ok_cancel_dialog("Register a username that has been added by the teacher."):
+			sublime.active_window().show_input_panel(
+				mesg,
+				info['Name'],
 				self.process,
 				None,
-				None)
+				None,
+			)
 
 	def process(self, name):
 		name = name.strip()
-		response = gemtRequest('teacher_adds_ta', {'name':name}, authenticated=False, localhost=True)
-		sublime.message_dialog(response)
-
+		response = gemtRequest('teacher_completes_registration', {'name':name}, authenticated=False)
+		if response == 'Failed':
+			sublime.message_dialog('This name is not registered. Ask the teacher to add it.')
+		else:
+			uid, password = response.split(',')
+			try:
+				with open(gemtFILE, 'r') as f:
+					info = json.loads(f.read())
+			except:
+				info = dict()
+			info['Uid'] = int(uid)
+			info['Password'] = password
+			info['Name'] = name
+			with open(gemtFILE, 'w') as f:
+				f.write(json.dumps(info, indent=4))
+			sublime.message_dialog('{} registered'.format(name))
+			
 
 # ------------------------------------------------------------------
 class gemtSetServerAddress(sublime_plugin.WindowCommand):
@@ -427,7 +481,7 @@ class gemtSetLocalFolder(sublime_plugin.WindowCommand):
 				except:
 					sublime.message_dialog('Could not create {}.'.format(folder))
 			else:
-				with open(gemsFILE, 'w') as f:
+				with open(gemtFILE, 'w') as f:
 					f.write(json.dumps(info, indent=4))
 				sublime.message_dialog('Folder exists. Will use it to store working files.')
 		else:

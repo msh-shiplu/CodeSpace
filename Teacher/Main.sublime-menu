@@ -89,14 +89,9 @@
                 "command": "gemt_set_local_folder",
             },
             {
-                "caption": "Add new TA/teacher",
-                "id": "gemtSetupNewTeacher",
-                "command": "gemt_setup_new_teacher",
-            },
-            {
                 "caption": "Complete registration",
-                "id": "gemtRegister",
-                "command": "gemt_register",
+                "id": "gemtCompleteRegistration",
+                "command": "gemt_complete_registration",
             },
             {"caption":"-", "id":"side-bar-separator"},
             {

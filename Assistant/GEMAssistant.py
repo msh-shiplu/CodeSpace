@@ -14,6 +14,7 @@ import random
 gemaFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemaFOLDER = ''
 gemaTIMEOUT = 7
+gemaHighestPriority = 2
 gemaStudentSubmissions = {}
 
 # ------------------------------------------------------------------
@@ -113,7 +114,7 @@ class gemaPutBack(sublime_plugin.TextCommand):
 			pid = pid,
 			content = content,
 			ext = ext,
-			priority = gemsHighestPriority,
+			priority = gemaHighestPriority,
 		)
 		response = gemaRequest('teacher_puts_back', data)
 		if response:
@@ -196,14 +197,17 @@ def gema_gets(self, index, priority):
 			gemaStudentSubmissions[pid] = sub['Content']
 			sublime.active_window().open_file(fname)
 		else:
-			sublime.message_dialog('No submission with index {} or priority {}.'.format(index,priority))
+			if priority > 0:
+				sublime.message_dialog('There are no submission with priority {}.'.format(priority))
+			elif index >= 0:
+				sublime.message_dialog('There are no submission with index.'.format(index))
 
 # ------------------------------------------------------------------
 # Priorities: 1 (I got it), 2 (I need help),
 # ------------------------------------------------------------------
-class gemtGetPrioritized(sublime_plugin.WindowCommand):
+class gemaGetPrioritized(sublime_plugin.WindowCommand):
 	def run(self):
-		gemt_gets(self, -1, 0)
+		gema_gets(self, -1, 0)
 
 class gemaGetFromNeedHelp(sublime_plugin.WindowCommand):
 	def run(self):
@@ -284,7 +288,7 @@ class gemaSetLocalFolder(sublime_plugin.WindowCommand):
 			sublime.message_dialog("Folder name cannot be empty.")
 
 # ------------------------------------------------------------------
-class gemaRegister(sublime_plugin.WindowCommand):
+class gemaCompleteRegistration(sublime_plugin.WindowCommand):
 	def run(self):
 		try:
 			with open(gemaFILE, 'r') as f:
@@ -317,10 +321,10 @@ class gemaRegister(sublime_plugin.WindowCommand):
 
 	def process(self, name):
 		name = name.strip()
-		response = gemaRequest('ta_registers', {'name':name}, authenticated=False)
+		response = gemaRequest('teacher_completes_registration', {'name':name}, authenticated=False)
 		if response == 'Failed':
 			sublime.message_dialog('This name is not registered. Ask the teacher to add it.')
-		else:
+		elif response!=None:
 			uid, password = response.split(',')
 			try:
 				with open(gemaFILE, 'r') as f:

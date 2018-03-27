@@ -35,10 +35,9 @@ func init_handlers() {
 	http.HandleFunc("/teacher_gets", Authorize(teacher_getsHandler))
 	http.HandleFunc("/teacher_broadcasts", Authorize(teacher_broadcastsHandler))
 	http.HandleFunc("/teacher_gets_passcode", Authorize(teacher_gets_passcodeHandler))
-	http.HandleFunc("/teacher_adds_ta", AuthorizeLocalhost(teacher_adds_taHandler))
 
 	// this should be teacher_registers
-	http.HandleFunc("/ta_registers", ta_registersHandler)
+	http.HandleFunc("/teacher_completes_registration", teacher_completes_registrationHandler)
 }
 
 //-----------------------------------------------------------------
@@ -65,13 +64,22 @@ func main() {
 	fmt.Println("*********************************************\n")
 	rand.Seed(time.Now().UnixNano())
 	db_name := filepath.Join(".", "gem.sqlite3")
+	new_teacher, new_ta := "", ""
 	flag.StringVar(&db_name, "db", db_name, "user database (sqlite).")
+	flag.StringVar(&new_teacher, "add_teacher", new_teacher, "add a new teacher.")
+	flag.StringVar(&new_ta, "add_ta", new_ta, "add a new teaching assistant.")
 	flag.Parse()
-	init_handlers()
 	init_database(db_name)
-	load_teachers()
-	err := http.ListenAndServe("0.0.0.0:"+port, nil)
-	if err != nil {
-		panic(err.Error() + "\n")
+	if new_teacher != "" {
+		add_teacher(new_teacher)
+	} else if new_ta != "" {
+		add_teacher(new_ta)
+	} else {
+		init_handlers()
+		load_teachers()
+		err := http.ListenAndServe("0.0.0.0:"+port, nil)
+		if err != nil {
+			panic(err.Error() + "\n")
+		}
 	}
 }

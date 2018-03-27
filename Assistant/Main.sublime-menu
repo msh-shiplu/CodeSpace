@@ -63,8 +63,8 @@
             },
             {
                 "caption": "Complete registration",
-                "id": "gemaRegister",
-                "command": "gema_register",
+                "id": "gemaCompleteRegistration",
+                "command": "gema_complete_registration",
             },
         ]
     }
