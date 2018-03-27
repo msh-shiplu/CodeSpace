@@ -302,7 +302,7 @@ class gemtUnicast(sublime_plugin.TextCommand):
 	def run(self, edit):
 		fname = self.view.file_name()
 		if fname is None:
-			sublime.message_dialog('Cannot broadcast unsaved content.')
+			sublime.message_dialog('Content must be saved first.')
 			return
 		# ext = fname.rsplit('.',1)[-1]
 		# content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
@@ -320,7 +320,7 @@ class gemtMulticastOr(sublime_plugin.TextCommand):
 			edit,
 			gemtOrTag,
 			'multicast_or',
-			'Broadcast *randomly* all non-empty tabs in this window?',
+			'Send problems *randomly* to students, where problems are defined in all non-empty tabs in this window?',
 		)
 
 # ------------------------------------------------------------------
@@ -331,7 +331,7 @@ class gemtMulticastSeq(sublime_plugin.TextCommand):
 			edit,
 			gemtSeqTag,
 			'multicast_seq',
-			'Broadcast *sequentially* all non-empty tabs in this window?',
+			'Send problems *sequentially* to students, where problems are defined in all non-empty tabs in this window?',
 		)
 
 # ------------------------------------------------------------------
