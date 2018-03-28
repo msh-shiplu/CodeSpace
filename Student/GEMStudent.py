@@ -15,7 +15,6 @@ gemsFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemsFOLDER = ''
 # gemsUID = 0
 gemsTIMEOUT = 7
-gemsAnswer = {}
 gemsAttempts = {}
 gemsAnswerTag = 'ANSWER:'
 
@@ -157,7 +156,7 @@ def gems_rand_chars(n):
 # ------------------------------------------------------------------
 class gemsGetBoardContent(sublime_plugin.WindowCommand):
 	def run(self):
-		global gemsAttempts, gemsAnswer
+		global gemsAttempts
 
 		response = gemsRequest('student_gets', {})
 		if response is None:
@@ -168,14 +167,11 @@ class gemsGetBoardContent(sublime_plugin.WindowCommand):
 			return
 		for board in json_obj:
 			content = board['Content']
-			answer = board['Answer']
 			attempts = board['Attempts']
 			ext = board['Ext']
 			pid = board['Pid']
 			today = datetime.datetime.today()
 			if pid > 0:
-				if answer!= '':
-					gemsAnswer[pid] = answer
 				if attempts > 0:
 					gemsAttempts[pid] = attempts
 				prefix = 'gemp{}_{}'.format(today.strftime('%m%d'), pid)
