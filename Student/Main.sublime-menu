@@ -21,14 +21,19 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
+                "caption": "Check in",
+                "id": "gemsCheckin",
+                "command": "gems_checkin",
+            },
+            {
                 "caption": "Messages",
                 "id": "gemsShowMessages",
                 "command": "gems_show_messages",
             },
             {
-                "caption": "Check in",
-                "id": "gemsCheckin",
-                "command": "gems_checkin",
+                "caption": "Points",
+                "id": "gemsGetReport",
+                "command": "gems_get_report",
             },
             {"caption":"-", "id":"side-bar-separator"},
             {

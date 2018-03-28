@@ -61,6 +61,32 @@ def gemsRequest(path, data, authenticated=True, method='POST'):
 	return None
 
 # ------------------------------------------------------------------
+class gemsGetReport(sublime_plugin.WindowCommand):
+	def run(self):
+		response = gemsRequest('student_gets_report', {})
+		if response != None:
+			json_obj = json.loads(response)
+			report = {}
+			total_points = 0
+			for i in json_obj:
+				Date, Points = i['Date'], i['Points']
+				if Date not in report:
+					report[Date] = []
+				report[Date].append(Points)
+				total_points += Points
+			
+			with open(gemsFILE, 'r') as f:
+				info = json.loads(f.read())
+			report_file = os.path.join(info['Folder'], 'report.txt')
+			with open(report_file, 'w', encoding='utf-8') as f:
+				f.write('Total points: {}\n'.format(total_points))
+				for d,v in reversed(sorted(report.items())):
+					date = datetime.datetime.fromtimestamp(d).strftime('%Y-%m-%d')
+					for p in v:
+						f.write('{}\t{}\n'.format(date,p))
+			new_view = sublime.active_window().open_file(report_file)
+
+# ------------------------------------------------------------------
 class gemsShowMessages(sublime_plugin.WindowCommand):
 	def run(self):
 		try:

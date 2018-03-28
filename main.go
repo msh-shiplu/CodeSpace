@@ -18,6 +18,7 @@ import (
 func init_handlers() {
 	http.HandleFunc("/test", Authorize(testHandler))
 
+	http.HandleFunc("/student_gets_report", Authorize(student_gets_reportHandler))
 	http.HandleFunc("/student_checks_in", Authorize(student_checks_inHandler))
 	http.HandleFunc("/student_shares", Authorize(student_sharesHandler))
 	http.HandleFunc("/student_gets", Authorize(student_getsHandler))
