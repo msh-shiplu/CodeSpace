@@ -60,6 +60,88 @@ func init_database(db_name string) {
 }
 
 //-----------------------------------------------------------------
+func add_next_problem_to_board(pid, stid int) string {
+	next_pid, ok := NextProblem[int64(pid)]
+	if ok {
+		new_content, new_answer, new_ext, new_merit, new_effort, new_attempts := "", "", "", 0, 0, 0
+		rows, _ := Database.Query("select content, answer, ext, merit, effort, attempts from problem where id=?", next_pid)
+		for rows.Next() {
+			rows.Scan(&new_content, &new_answer, &new_ext, &new_merit, &new_effort, &new_attempts)
+			break
+		}
+		rows.Close()
+		b := &Board{
+			Content:      new_content,
+			Answer:       new_answer,
+			Attempts:     new_attempts,
+			Ext:          new_ext,
+			Pid:          int(next_pid),
+			StartingTime: time.Now(),
+		}
+		Boards[stid] = append(Boards[stid], b)
+		return "New problem added to white board."
+	}
+	return ""
+}
+
+//-----------------------------------------------------------------
+// Add or update score based on a decision. If decision is "correct"
+// a new problem, if there's one, is added to student's board.
+//-----------------------------------------------------------------
+func add_or_update_score(decision string, pid, stid, tid int) string {
+	mesg := ""
+
+	// Find score information for this student (stid) for this problem (pid)
+	score_id, current_points, current_attempts, current_tid := 0, 0, 0, 0
+	rows, _ := Database.Query("select id, points, attempts, tid from score where pid=? and stid=?", pid, stid)
+	for rows.Next() {
+		rows.Scan(&score_id, &current_points, &current_attempts, &current_tid)
+		break
+	}
+	rows.Close()
+
+	// Find merit points and effort points for this problem (pid)
+	merit, effort := 0, 0
+	rows, _ = Database.Query("select merit, effort from problem where id=?", pid)
+	for rows.Next() {
+		rows.Scan(&merit, &effort)
+		break
+	}
+	rows.Close()
+
+	// Determine points for this student
+	points, teacher := 0, tid
+	if decision == "correct" {
+		points = merit
+		m := add_next_problem_to_board(pid, stid)
+		mesg = "Answer is correct. " + m
+	} else {
+		points = effort
+		// If the problem was previously graded correct, this submission
+		// does not reduce it.  Grading is asynchronous.
+		if points < current_points {
+			points = current_points
+			teacher = current_tid
+		}
+		mesg = "Answer is incorrect."
+	}
+
+	// Add a new score or update a current score for this student & problem
+	if score_id == 0 {
+		_, err := AddScoreSQL.Exec(pid, stid, tid, points, current_attempts+1)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		_, err := UpdateScoreSQL.Exec(teacher, points, current_attempts+1, score_id)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return mesg
+}
+
+//-----------------------------------------------------------------
 // initialize once per session
 //-----------------------------------------------------------------
 func init_student(stid int, password string) {

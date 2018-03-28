@@ -12,7 +12,7 @@ import (
 // When problems are deactivated, no new submissions are possibile.
 //-----------------------------------------------------------------------------------
 func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	ActiveProblems = make(map[int]struct{})
+	ActiveProblems = make(map[int]*ProblemFormat)
 	fmt.Fprintf(w, "Done.")
 }
 

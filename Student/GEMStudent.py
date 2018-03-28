@@ -17,6 +17,7 @@ gemsFOLDER = ''
 gemsTIMEOUT = 7
 gemsAnswer = {}
 gemsAttempts = {}
+gemsAnswerTag = 'ANSWER:'
 
 # ------------------------------------------------------------------------------
 def gemsRequest(path, data, authenticated=True, method='POST'):
@@ -101,10 +102,10 @@ def gems_share(self, edit, priority):
 		return
 	ext = fname.rsplit('.',1)[-1]
 	pid, attempts = gems_get_pid_attempts(fname)
-	
+
 	# Lower priority if it's not a problem.
 	if pid == 0:
-		priority = 1   
+		priority = 1
 
 	if pid > 0 or sublime.ok_cancel_dialog('This file is not a graded problem. Do you want to send it?'):
 		expired = False
@@ -117,7 +118,12 @@ def gems_share(self, edit, priority):
 			sublime.message_dialog('This problem has expired and is not submitted.')
 			return
 		content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
-		data = dict(content=content, pid=pid, ext=ext, priority=priority)
+		items = content.rsplit(gemsAnswerTag, 1)
+		if len(items)==2:
+			answer = items[1].strip()
+		else:
+			answer = ''
+		data = dict(content=content, answer=answer, pid=pid, ext=ext, priority=priority)
 		response = gemsRequest('student_shares', data)
 		if response == 'OK':
 			if pid in gemsAttempts and gemsAttempts[pid]<=3:
@@ -151,7 +157,7 @@ def gems_rand_chars(n):
 # ------------------------------------------------------------------
 class gemsGetBoardContent(sublime_plugin.WindowCommand):
 	def run(self):
-		global gemsAttempts
+		global gemsAttempts, gemsAnswer
 
 		response = gemsRequest('student_gets', {})
 		if response is None:

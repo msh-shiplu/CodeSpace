@@ -13,17 +13,6 @@ import (
 )
 
 //-----------------------------------------------------------------------------------
-type ProblemFormat struct {
-	Description string
-	Ext         string
-	Answer      string
-	Merit       int
-	Effort      int
-	Attempts    int
-	Pid         int64
-}
-
-//-----------------------------------------------------------------------------------
 func extract_problems(content, answers, merits, efforts, attempts, exts, divider_tag string) []*ProblemFormat {
 	if divider_tag == "" {
 		merit, _ := strconv.Atoi(merits)
@@ -99,7 +88,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 			}
 			pid, _ = result.LastInsertId()
 			problems[i].Pid = pid
-			ActiveProblems[int(pid)] = struct{}{}
+			ActiveProblems[int(pid)] = problems[i]
 		}
 	}
 

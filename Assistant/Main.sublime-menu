@@ -5,8 +5,8 @@
         "children": [
             {
                 "caption": "Get a submission",
-                "id": "gemtGetPrioritized",
-                "command": "gemt_get_prioritized",
+                "id": "gemaGetPrioritized",
+                "command": "gema_get_prioritized",
             },
             {
                 "caption": "Get a 😎 submission",

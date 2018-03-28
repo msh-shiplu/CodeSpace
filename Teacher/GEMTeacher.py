@@ -241,7 +241,9 @@ def gemt_get_problem_info(fname):
 		sublime.message_dialog('Improper problem definition')
 		raise Exception('Improper problem definition')
 	first_line, body = items[0], items[1]
+	prefix = '//'
 	if first_line.startswith('#'):
+		prefix = '#'
 		first_line = first_line.strip('# ')
 	elif first_line.startswith('/'):
 		first_line = first_line.strip('/ ')
@@ -262,7 +264,8 @@ def gemt_get_problem_info(fname):
 		sublime.message_dialog('This problem has {} answers. There should be at most 1.'.format(len(items)-1))
 		raise Exception('Too many answers')
 
-	body = items[0]
+	body = '{} {} points, {} for effort. Maximum attempts: {}.\n{}'.format(
+		prefix, merit, effort, attempts, items[0])
 	answer = ''
 	if len(items) == 2:
 		body += '\n{} '.format(gemtAnswerTag)
@@ -304,11 +307,6 @@ class gemtUnicast(sublime_plugin.TextCommand):
 		if fname is None:
 			sublime.message_dialog('Content must be saved first.')
 			return
-		# ext = fname.rsplit('.',1)[-1]
-		# content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
-		# if content == '':
-		# 	sublime.message_dialog("File is empty.")
-		# 	return
 		content, answers, merits, efforts, attempts, exts = gemt_get_problem_info(fname)
 		gemt_broadcast(content, answers, merits, efforts, attempts, exts, tag='', mode='unicast')
 
@@ -413,7 +411,7 @@ class gemtCompleteRegistration(sublime_plugin.WindowCommand):
 			with open(gemtFILE, 'w') as f:
 				f.write(json.dumps(info, indent=4))
 			sublime.message_dialog('{} registered'.format(name))
-			
+
 
 # ------------------------------------------------------------------
 class gemtSetServerAddress(sublime_plugin.WindowCommand):
