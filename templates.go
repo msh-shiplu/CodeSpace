@@ -27,8 +27,28 @@ var TEACHER_MESSAGING_TEMPLATE = `
 <html>
 	<head>
   		<title>Teacher messaging</title>
-		<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true&skin=desert"></script>
-		<meta http-equiv="refresh" content="10" />
+		<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true&skin=sons-of-obsidian"></script>
+  		<script src="http://code.jquery.com/jquery-3.1.1.min.js"></script>
+	    <script type="text/javascript">
+			var updateInterval = 5000;		// 5 sec update interval
+			var maxUpdateTime =  1800000;   // no longer update after 30 min.
+			var totalUpdateTime = 0;
+			function getData() {
+				var url = "http://{{.Address}}/bulletin_board_data";
+				$.getJSON(url, function( data ) {
+					console.log(data);
+					$("#p1").html(data["P1"]);
+					$("#p2").html(data["P2"]);
+					$("#ap").html(data["ActiveProblems"]);
+					$("#bu").html(data["BulletinItems"]);
+					$("#at").html(data["Attendance"]);
+				});
+			}
+			$(document).ready(function(){
+				getData();
+				handle = setInterval(getData, updateInterval);
+			});
+	    </script>
 	</head>
 	<style>
 		.bottom {
@@ -38,16 +58,17 @@ var TEACHER_MESSAGING_TEMPLATE = `
 			width: 100%;
 		}
 		.label{ display: inline; }
-		.p1, .p2, .item {
+		#p1, #p2, #ap, #bu, #at {
 			padding: 0.75em;
 			display: inline;
 		}
-		.p1 { color: green; }
-		.p2 { color: red; }
+		#p1 { color: green; }
+		#p2 { color: red; }
 		pre {
 			font-family: monospace;
-			font-size:110%;
-			padding:1em;
+			font-size:120%;
+			margin-top:50px;
+			padding-left:2em;
 			overflow-x:scroll;
 			overflow-y:scroll;
 			tab-size: 4;
@@ -77,32 +98,29 @@ var TEACHER_MESSAGING_TEMPLATE = `
 		    border-radius: 5px;
 		}
 		.pagination a:hover:not(.active) {background-color: #ddd;}
-		.remove { text-align:right; padding-right:10px; margin-bottom:-15px; }
-		.remove a { text-decoration: none; }
+		.nav a { text-decoration: none; padding:3px;}
+		.nav { display: inline-block; vertical-align: baseline;}
+		#navWrap{position:absolute;top:20;right:10;}
 	</style>
 	<body>
-	<div class="center">
-	<div class="pagination">
-	{{range $i, $a := .Idx}}
-	    <a href="view_bulletin_board?i={{$i}}&pc={{$.PC}}" class="{{$a}}">{{inc $i}}</a>
-	{{end}}
-	</div>
-	</div>
+	<div id="navWrap">
 	{{ if .Authenticated }}
-	<div class="remove"><a href="remove_bulletin_page?i={{.Tbr}}&pc={{.PC}}">&#x2718;</a></div>
+	<div class="nav"><a href="view_bulletin_board?i=0&pc={{.PC}}">First<a></div>
+	<div class="nav"><a href="view_bulletin_board?i={{.PrevI}}&pc={{.PC}}">Prev<a></div>
+	<div class="nav"><a href="view_bulletin_board?i={{.NextI}}&pc={{.PC}}">Next<a></div>
+	<div class="nav"><a href="remove_bulletin_page?i={{.I}}&pc={{.PC}}">&#x2718;</a></div>
 	{{ end }}
-	<pre class="prettyprint">
+	</div>
+	<pre class="prettyprint linenums">
 	{{.Code}}
 	</pre>
 
 	<div class="bottom">
-	<div class="label">Submissions:</div>
-	<div class="p2"> &#128546; {{.P2}}</div>
-	<div class="p1"> &#128526; {{.P1}}</div>
-	<div class="label">Active problems:</div>
-	<div class="item">{{.ActiveProblems}}</div>
-	<div class="label">Attendance:</div>
-	<div class="item">{{.Attendance}}</div>
+	<div class="label">&#128546;</div><div id="p2">{{.P2}}</div>
+	<div class="label">&#128526;</div><div id="p1">{{.P1}}</div>
+	<div class="label">Problems:</div><div id="ap">{{.ActiveProblems}}</div>
+	<div class="label">Bulletin:</div><div id="bu">{{.BulletinItems}}</div>
+	<div class="label">Attendance:</div><div id="at">{{.Attendance}}</div>
 	</div>
 	</body>
 </html>

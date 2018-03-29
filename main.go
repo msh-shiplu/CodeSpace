@@ -26,6 +26,7 @@ func init_handlers() {
 	http.HandleFunc("/show_student_messages", student_messagesHandler)
 	http.HandleFunc("/view_bulletin_board", view_bulletin_boardHandler)
 	http.HandleFunc("/remove_bulletin_page", remove_bulletin_pageHandler)
+	http.HandleFunc("/bulletin_board_data", bulletin_board_dataHandler)
 
 	http.HandleFunc("/teacher_adds_bulletin_page", Authorize(teacher_adds_bulletin_pageHandler))
 	http.HandleFunc("/teacher_clears", Authorize(teacher_clearsHandler))
@@ -59,6 +60,7 @@ func informIPAddress() string {
 func main() {
 	server := informIPAddress()
 	port := "8080"
+	ADDRESS = server + ":" + port
 	fmt.Println("*********************************************")
 	fmt.Printf("*   GEM (%s)\n", VERSION)
 	fmt.Printf("*   Server address: %s:%s\n", server, port)
