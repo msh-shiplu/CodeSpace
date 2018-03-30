@@ -85,7 +85,7 @@ class gemtAddBulletin(sublime_plugin.TextCommand):
 			sublime.message_dialog('Error: file is empty.')
 			return
 		beg, end = self.view.sel()[0].begin(), self.view.sel()[0].end()
-		content = '\n' + self.view.substr(sublime.Region(beg,end))
+		content = '\n\n' + self.view.substr(sublime.Region(beg,end)) + '\n\n'
 		if len(content) <= 20:
 			sublime.message_dialog('Select more text to show on the bulletin board.')
 			return

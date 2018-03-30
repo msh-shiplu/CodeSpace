@@ -111,9 +111,7 @@ var TEACHER_MESSAGING_TEMPLATE = `
 	<div class="nav"><a href="remove_bulletin_page?i={{.I}}&pc={{.PC}}">&#x2718;</a></div>
 	{{ end }}
 	</div>
-	<pre class="prettyprint linenums">
-	{{.Code}}
-	</pre>
+	<pre class="prettyprint linenums">{{.Code}}</pre>
 
 	<div class="bottom">
 	<div class="label">&#128546;</div><div id="p2">{{.P2}}</div>

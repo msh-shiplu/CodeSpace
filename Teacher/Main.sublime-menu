@@ -4,11 +4,6 @@
         "id": "GEMTeacher",
         "children": [
             {
-                "caption": "Share this file",
-                "id": "gemtShare",
-                "command": "gemt_share",
-            },
-            {
                 "caption": "Start problem",
                 "id": "gemtUnicast",
                 "command": "gemt_unicast",
@@ -76,6 +71,12 @@
                 "caption": "View bullentin board",
                 "id": "gemtViewBulletinBoard",
                 "command": "gemt_view_bulletin_board",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Copy tab to white boards",
+                "id": "gemtShare",
+                "command": "gemt_share",
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
