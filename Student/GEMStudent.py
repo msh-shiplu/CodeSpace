@@ -117,12 +117,11 @@ def gems_problem_info(fname):
 		prefix, ext = fname.rsplit('.',1)
 	else:
 		prefix, ext = fname, ''
-	if prefix.count('_') < 2:
+	if prefix.count('_') < 1:
 		return basename, 0
-	prefix, pid, a = prefix.rsplit('_', 2)
+	prefix, pid = prefix.rsplit('_', 1)
 	try:
 		pid = int(pid)
-		a = int(a)
 	except:
 		return basename, 0
 	if ext == '':
@@ -221,10 +220,14 @@ class gemsGetBoardContent(sublime_plugin.WindowCommand):
 				fname, ext = filename.rsplit('.',1)
 			else:
 				fname, ext = filename, ''
-			prefix = '{}_{}'.format(fname, pid)
-			tmp = [os.path.basename(f) for f in os.listdir(gemsFOLDER)]
-			count = len([f for f in tmp if f.startswith(prefix)])
-			new_fname = os.path.join(gemsFOLDER, '{}_{}.{}'.format(prefix,count+1,ext))
+			# prefix = '{}_{}'.format(fname, pid)
+			# tmp = [os.path.basename(f) for f in os.listdir(gemsFOLDER)]
+			# count = len([f for f in tmp if f.startswith(prefix)])
+			# new_fname = os.path.join(gemsFOLDER, '{}_{}.{}'.format(prefix,count+1,ext))
+			new_fname = os.path.join(gemsFOLDER, '{}_{}.{}'.format(fname,pid,ext))
+			count = len([f for f in os.listdir(gemsFOLDER) if f==os.path.basename(new_fname)])
+			if count > 0:
+				new_fname = os.path.join(gemsFOLDER, 'FEEDBACK.' + ext)
 			with open(new_fname, 'w', encoding='utf-8') as f:
 				f.write(content)
 			sublime.active_window().open_file(new_fname)

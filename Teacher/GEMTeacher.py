@@ -231,10 +231,9 @@ def gemt_broadcast(content, answers, merits, efforts, attempts, filenames, exts,
 		'divider_tag':	 	tag,
 		'mode':				mode
 	}
-	# print(data)
 	response = gemtRequest('teacher_broadcasts', data)
 	if response is not None:
-		sublime.status_message(response)
+		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
 def gemt_get_problem_info(fname):
@@ -345,9 +344,18 @@ class gemtMulticastSeq(sublime_plugin.TextCommand):
 class gemtDeactivateProblems(sublime_plugin.WindowCommand):
 	def run(self):
 		if sublime.ok_cancel_dialog('Do you want to close active problems?  No more submissions are possible until a new problem is started.'):
-			response = gemtRequest('teacher_deactivates_problems', {})
-			json_obj = json.loads(response)
-			print(json_obj)
+			passcode = gemtRequest('teacher_gets_passcode', {})
+			json_response = gemtRequest('teacher_deactivates_problems', {})
+			with open(gemtFILE, 'r') as f:
+				info = json.loads(f.read())
+			active_pids = json.loads(json_response)
+			mesg = "Problems closed."
+			if len(active_pids) > 0:
+				mesg += " Answered to be summarized."
+			sublime.message_dialog(mesg)
+			for pid in active_pids:
+				p = urllib.parse.urlencode({'pc' : passcode, 'pid':pid})
+				webbrowser.open(info['Server'] + '/view_answers?' + p)
 
 # ------------------------------------------------------------------
 class gemtClearSubmissions(sublime_plugin.WindowCommand):

@@ -13,8 +13,14 @@ import (
 // When problems are deactivated, no new submissions are possibile.
 //-----------------------------------------------------------------------------------
 func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	active_pids := make([]int, 0)
+	for pid, _ := range ActiveProblems {
+		if _, ok := Answers[pid]; ok && len(Answers[pid]) > 0 {
+			active_pids = append(active_pids, pid)
+		}
+	}
 	ActiveProblems = make(map[int]*ProblemFormat)
-	js, err := json.Marshal(Answers)
+	js, err := json.Marshal(active_pids)
 	if err == nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(js)

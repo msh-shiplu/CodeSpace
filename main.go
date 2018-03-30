@@ -27,6 +27,7 @@ func init_handlers() {
 	http.HandleFunc("/view_bulletin_board", view_bulletin_boardHandler)
 	http.HandleFunc("/remove_bulletin_page", remove_bulletin_pageHandler)
 	http.HandleFunc("/bulletin_board_data", bulletin_board_dataHandler)
+	http.HandleFunc("/view_answers", view_answersHandler)
 
 	http.HandleFunc("/teacher_adds_bulletin_page", Authorize(teacher_adds_bulletin_pageHandler))
 	http.HandleFunc("/teacher_clears", Authorize(teacher_clearsHandler))

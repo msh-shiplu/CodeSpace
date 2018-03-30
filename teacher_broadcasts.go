@@ -32,7 +32,7 @@ func extract_problems(content, answers, merits, efforts, attempts, filenames, di
 	m := strings.Split(merits, "\n")
 	ef := strings.Split(efforts, "\n")
 	at := strings.Split(attempts, "\n")
-	fn := strings.Split(attempts, "\n")
+	fn := strings.Split(filenames, "\n")
 
 	problems := make([]*ProblemFormat, 0)
 	for i := 0; i < len(c); i++ {

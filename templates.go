@@ -123,3 +123,40 @@ var TEACHER_MESSAGING_TEMPLATE = `
 	</body>
 </html>
 `
+
+var VIEW_ANSWERS_TEMPLATE = `
+<html>
+  <head>
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Answer');
+        data.addColumn('number', 'Count');
+        data.addRows([
+			{{ range $key, $value := .Counts }}
+				[{{ $key }}, {{ $value }}],
+			{{ end }}
+        ]);
+        var options = {'title':'',
+                       'width':"70%",
+                       'height':600};
+        var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+      }
+    </script>
+    <style>
+    #chart_div{ margin: auto; }
+    pre{ margin: auto; width:70%}
+    </style>
+  </head>
+
+  <body>
+    <div id="chart_div"></div>
+    <pre id="content">{{ .Content }}</pre>
+  </body>
+</html>
+`

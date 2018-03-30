@@ -26,6 +26,39 @@ type BulletinBoardMessage struct {
 	Authenticated  bool
 }
 
+type AnswersBoardMessage struct {
+	Counts  map[string]int
+	Content string
+}
+
+//-----------------------------------------------------------------------------------
+func view_answersHandler(w http.ResponseWriter, r *http.Request) {
+	pid, err := strconv.Atoi(r.FormValue("pid"))
+	passcode := r.FormValue("pc")
+	if _, ok := Answers[pid]; err == nil && ok && passcode == Passcode {
+		t := template.New("")
+		t, err := t.Parse(VIEW_ANSWERS_TEMPLATE)
+		if err == nil {
+			answers := Answers[pid]
+			counts := make(map[string]int)
+			for i := 0; i < len(answers); i++ {
+				counts[answers[i]]++
+			}
+
+			rows, _ := Database.Query("select content from problem where id=?", pid)
+			defer rows.Close()
+			content := ""
+			for rows.Next() {
+				rows.Scan(&content)
+			}
+			w.Header().Set("Content-Type", "text/html")
+			t.Execute(w, &AnswersBoardMessage{Counts: counts, Content: content})
+		} else {
+			fmt.Println(err)
+		}
+	}
+}
+
 //-----------------------------------------------------------------------------------
 func teacher_adds_bulletin_pageHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	BulletinSem.Lock()

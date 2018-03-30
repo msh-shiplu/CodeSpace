@@ -32,7 +32,6 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	}
 	if answer != "" {
 		if _, ok := Answers[pid]; ok {
-			fmt.Println(pid, answer, Answers[pid])
 			Answers[pid] = append(Answers[pid], answer)
 		}
 	}
