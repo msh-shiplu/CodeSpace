@@ -346,7 +346,8 @@ class gemtDeactivateProblems(sublime_plugin.WindowCommand):
 	def run(self):
 		if sublime.ok_cancel_dialog('Do you want to close active problems?  No more submissions are possible until a new problem is started.'):
 			response = gemtRequest('teacher_deactivates_problems', {})
-			sublime.message_dialog(response)
+			json_obj = json.loads(response)
+			print(json_obj)
 
 # ------------------------------------------------------------------
 class gemtClearSubmissions(sublime_plugin.WindowCommand):

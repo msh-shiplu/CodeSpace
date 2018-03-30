@@ -85,6 +85,8 @@ var NextProblem = make(map[int64]int64)
 
 var ActiveProblems = make(map[int]*ProblemFormat)
 
+var Answers = make(map[int][]string)
+
 //---------------------------------------------------------
 // Utilities
 //---------------------------------------------------------

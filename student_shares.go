@@ -30,6 +30,12 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 		sid, _ = result.LastInsertId()
 		correct_answer = ActiveProblems[pid].Answer
 	}
+	if answer != "" {
+		if _, ok := Answers[pid]; ok {
+			fmt.Println(pid, answer, Answers[pid])
+			Answers[pid] = append(Answers[pid], answer)
+		}
+	}
 	if pid > 0 && answer != "" && correct_answer == answer {
 		// Auto-grading: set tid to 0
 		scoring_mesg := add_or_update_score("correct", pid, uid, 0)

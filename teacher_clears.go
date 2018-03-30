@@ -4,6 +4,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -13,7 +14,13 @@ import (
 //-----------------------------------------------------------------------------------
 func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	ActiveProblems = make(map[int]*ProblemFormat)
-	fmt.Fprintf(w, "Done.")
+	js, err := json.Marshal(Answers)
+	if err == nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	} else {
+		panic(err)
+	}
 }
 
 //-----------------------------------------------------------------------------------

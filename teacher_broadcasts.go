@@ -89,6 +89,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 			pid, _ = result.LastInsertId()
 			problems[i].Pid = pid
 			ActiveProblems[int(pid)] = problems[i]
+			Answers[int(pid)] = make([]string, 0)
 		}
 	}
 
