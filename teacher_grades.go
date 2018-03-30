@@ -12,24 +12,8 @@ import (
 )
 
 //-----------------------------------------------------------------------------------
-// func remove_header(content, ext string) string {
-// 	prefix := "//"
-// 	if ext != "java" && ext != "c++" && ext != "c" && ext != ".go" {
-// 		prefix = "#"
-// 	}
-// 	content = strings.Trim(content, "\n ")
-// 	if strings.HasPrefix(content, prefix) {
-// 		items := strings.SplitN(content, "\n", 2)
-// 		if len(items) > 1 {
-// 			return items[1]
-// 		}
-// 	}
-// 	return content
-// }
-
-//-----------------------------------------------------------------------------------
 func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	content, ext, decision := r.FormValue("content"), r.FormValue("ext"), r.FormValue("decision")
+	content, decision := r.FormValue("content"), r.FormValue("decision")
 	changed := r.FormValue("changed")
 	pid, _ := strconv.Atoi(r.FormValue("pid"))
 	stid, _ := strconv.Atoi(r.FormValue("stid"))
@@ -40,20 +24,22 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 		return
 	}
 	if changed == "True" {
-		AddFeedbackSQL.Exec(uid, stid, content, time.Now())
-		mesg = "Feedback saved to student's board."
-		student_mesg += "You've got feedback."
-		BoardsSem.Lock()
-		defer BoardsSem.Unlock()
-		b := &Board{
-			Content:      content,
-			Answer:       "",
-			Attempts:     100,
-			Ext:          ext,
-			Pid:          pid,
-			StartingTime: time.Now(),
+		if prob, ok := ActiveProblems[pid]; ok {
+			AddFeedbackSQL.Exec(uid, stid, content, time.Now())
+			mesg = "Feedback saved to student's board."
+			student_mesg += "You've got feedback."
+			BoardsSem.Lock()
+			defer BoardsSem.Unlock()
+			b := &Board{
+				Content:      content,
+				Answer:       prob.Answer,
+				Attempts:     0, // This tells the client this is an existing problem
+				Filename:     prob.Filename,
+				Pid:          pid,
+				StartingTime: time.Now(),
+			}
+			Boards[stid] = append(Boards[stid], b)
 		}
-		Boards[stid] = append(Boards[stid], b)
 	}
 	scoring_mesg := add_or_update_score(decision, pid, stid, uid)
 	mesg = scoring_mesg + "\n" + mesg

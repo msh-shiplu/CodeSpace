@@ -97,21 +97,23 @@ class gemtAddBulletin(sublime_plugin.TextCommand):
 def gemt_grade(self, edit, decision):
 	fname = self.view.file_name()
 	basename = os.path.basename(fname)
-	if not basename.startswith('gemt') or basename.count('_')!=2:
+	if not basename.startswith('gemt') or basename.count('_') < 2:
 		sublime.message_dialog('This is not a student submission.')
 		return
-	prefix, ext = basename.rsplit('.', 1)
+	if '.' in basename:
+		prefix, ext = basename.rsplit('.', 1)
+	else:
+		prefix = basename
 	prefix = prefix[4:]
 	stid, pid, sid = prefix.split('_')
 	try:
 		stid = int(stid)
+		pid = int(pid)
 		sid = int(sid)
 	except:
 		sublime.message_dialog('This is not a student submission.')
 		return
-	try:
-		pid = int(pid)
-	except:
+	if pid == 0:
 		sublime.message_dialog('This is not a graded problem.')
 		return
 	changed = False
@@ -125,7 +127,6 @@ def gemt_grade(self, edit, decision):
 		stid = stid,
 		pid = pid,
 		content = content,
-		ext = ext,
 		decision = decision,
 		changed = changed,
 	)
@@ -159,10 +160,12 @@ def gemt_gets(self, index, priority):
 	if response is not None:
 		sub = json.loads(response)
 		if sub['Content'] != '':
-			ext = sub['Ext'] or 'txt'
+			filename = sub['Filename']
+			if '.' in filename:
+				ext = filename.rsplit('.',1)[1]
+			else:
+				ext = 'txt'
 			pid, sid, uid = sub['Pid'], sub['Sid'], sub['Uid']
-			if pid == 0:
-				pid = gemt_rand_chars(4)
 			fname = 'gemt{}_{}_{}.{}'.format(uid,pid,sid,ext)
 			fname = os.path.join(gemtFOLDER, fname)
 			with open(fname, 'w', encoding='utf-8') as fp:
@@ -198,14 +201,16 @@ class gemtShare(sublime_plugin.TextCommand):
 		if fname is None:
 			sublime.message_dialog('Cannot share unsaved content.')
 			return
-		ext = fname.rsplit('.',1)[-1]
+		basename = os.path.basename(fname)
+		# ext = basename.rsplit('.',1)[-1]
 		content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
 		if content == '':
 			sublime.message_dialog("File is empty.")
 			return
 		data = {
-			'content': 			content,
-			'ext': 				ext,
+			'content': 	content,
+			'filename': basename,
+			# 'ext': 		ext,
 		}
 		response = gemtRequest('teacher_shares', data)
 		if response is not None:
@@ -214,10 +219,11 @@ class gemtShare(sublime_plugin.TextCommand):
 # ------------------------------------------------------------------
 # used by gemt_multicast and gemtUnicast to start a new problem
 # ------------------------------------------------------------------
-def gemt_broadcast(content, answers, merits, efforts, attempts, exts, tag, mode):
+def gemt_broadcast(content, answers, merits, efforts, attempts, filenames, exts, tag, mode):
 	data = {
 		'content': 			content,
 		'answers':			answers,
+		'filenames':		filenames,
 		'exts': 			exts,
 		'merits':			merits,
 		'efforts':			efforts,
@@ -271,7 +277,8 @@ def gemt_get_problem_info(fname):
 		body += '\n{} '.format(gemtAnswerTag)
 		answer = items[1].strip()
 
-	return body, answer, str(merit), str(effort), str(attempts), ext
+	basename = os.path.basename(fname)
+	return body, answer, str(merit), str(effort), str(attempts), basename, ext
 
 
 # ------------------------------------------------------------------
@@ -279,17 +286,18 @@ def gemt_multicast(self, edit, tag, mode, mesg):
 	fnames = [ v.file_name() for v in sublime.active_window().views() ]
 	fnames = [ fname for fname in fnames if fname is not None ]
 	if len(fnames)>0 and sublime.ok_cancel_dialog(mesg):
-		content, answers, merits, efforts, attempts, exts = [],[],[],[],[],[]
+		content, answers, merits, efforts, attempts, fns, exts = [],[],[],[],[],[],[]
 		for fname in fnames:
 			# ext = fname.rsplit('.',1)[-1]
 			# with open(fname, 'r', encoding='utf-8') as fp:
 			# 	contents.append(fp.read())
-			c, an, m, e, at, ex = gemt_get_problem_info(fname)
+			c, an, m, e, at, fn, ex = gemt_get_problem_info(fname)
 			content.append(c)
 			answers.append(an)
 			merits.append(m)
 			efforts.append(e)
 			attempts.append(at)
+			fns.append(fn)
 			exts.append(ex)
 
 		content = '\n{}\n'.format(tag).join(content)
@@ -297,8 +305,9 @@ def gemt_multicast(self, edit, tag, mode, mesg):
 		merits = '\n'.join(merits)
 		efforts = '\n'.join(efforts)
 		attempts = '\n'.join(attempts)
+		fns = '\n'.join(fns)
 		exts = '\n'.join(exts)
-		gemt_broadcast(content, answers, merits, efforts, attempts, exts, tag, mode)
+		gemt_broadcast(content, answers, merits, efforts, attempts, fns, exts, tag, mode)
 
 # ------------------------------------------------------------------
 class gemtUnicast(sublime_plugin.TextCommand):
@@ -307,8 +316,8 @@ class gemtUnicast(sublime_plugin.TextCommand):
 		if fname is None:
 			sublime.message_dialog('Content must be saved first.')
 			return
-		content, answers, merits, efforts, attempts, exts = gemt_get_problem_info(fname)
-		gemt_broadcast(content, answers, merits, efforts, attempts, exts, tag='', mode='unicast')
+		content, answers, merits, efforts, attempts, fns, exts = gemt_get_problem_info(fname)
+		gemt_broadcast(content, answers, merits, efforts, attempts, fns, exts, tag='', mode='unicast')
 
 # ------------------------------------------------------------------
 class gemtMulticastOr(sublime_plugin.TextCommand):

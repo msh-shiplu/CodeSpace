@@ -69,12 +69,16 @@ class gemsGetReport(sublime_plugin.WindowCommand):
 			report = {}
 			total_points = 0
 			for i in json_obj:
-				Date, Points = i['Date'], i['Points']
+				Date, Points, Filename = i['Date'], i['Points'], i['Filename']
 				if Date not in report:
 					report[Date] = []
-				report[Date].append(Points)
+				if '.' in Filename:
+					prefix, ext = Filename.rsplit('.',1)
+				else:
+					prefix = Filename
+				report[Date].append((Points,prefix))
 				total_points += Points
-			
+
 			with open(gemsFILE, 'r') as f:
 				info = json.loads(f.read())
 			report_file = os.path.join(info['Folder'], 'report.txt')
@@ -82,8 +86,8 @@ class gemsGetReport(sublime_plugin.WindowCommand):
 				f.write('Total points: {}\n'.format(total_points))
 				for d,v in reversed(sorted(report.items())):
 					date = datetime.datetime.fromtimestamp(d).strftime('%Y-%m-%d')
-					for p in v:
-						f.write('{}\t{}\n'.format(date,p))
+					for entry in v:
+						f.write('{}\t{}\t{}\n'.format(date,entry[0],entry[1]))
 			new_view = sublime.active_window().open_file(report_file)
 
 # ------------------------------------------------------------------
@@ -107,15 +111,25 @@ class gemsShowMessages(sublime_plugin.WindowCommand):
 		webbrowser.open(info['Server'] + '/show_student_messages?' + u)
 
 # ------------------------------------------------------------------
-def gems_get_pid_attempts(fname):
+def gems_problem_info(fname):
 	basename = os.path.basename(fname)
-	if not basename.startswith('gemp'):
-		return 0, 0
-	name = basename.rsplit('.', 1)[0]
-	items = name.rsplit('_', 2)
-	if len(items)!=3 or  not items[1].isdecimal() or not items[2].isdecimal():
-		return 0, 0
-	return int(items[1]), int(items[2])
+	if '.' in fname:
+		prefix, ext = fname.rsplit('.',1)
+	else:
+		prefix, ext = fname, ''
+	if prefix.count('_') < 2:
+		return basename, 0
+	prefix, pid, a = prefix.rsplit('_', 2)
+	try:
+		pid = int(pid)
+		a = int(a)
+	except:
+		return basename, 0
+	if ext == '':
+		orginal_fname = prefix
+	else:
+		orginal_fname = prefix + '.' + ext
+	return orginal_fname, pid
 
 # ------------------------------------------------------------------
 def gems_share(self, edit, priority):
@@ -125,13 +139,9 @@ def gems_share(self, edit, priority):
 	if fname is None:
 		sublime.message_dialog('Cannot share unsaved content.')
 		return
-	ext = fname.rsplit('.',1)[-1]
-	pid, attempts = gems_get_pid_attempts(fname)
-
-	# Lower priority if it's not a problem.
+	original_fname, pid = gems_problem_info(fname)
 	if pid == 0:
 		priority = 1
-
 	if pid > 0 or sublime.ok_cancel_dialog('This file is not a graded problem. Do you want to send it?'):
 		expired = False
 		if pid in gemsAttempts:
@@ -148,7 +158,13 @@ def gems_share(self, edit, priority):
 			answer = items[1].strip()
 		else:
 			answer = ''
-		data = dict(content=content, answer=answer, pid=pid, ext=ext, priority=priority)
+		data = dict(
+			content=content,
+			answer=answer,
+			pid=pid,
+			filename=original_fname,
+			priority=priority,
+		)
 		response = gemsRequest('student_shares', data)
 		if response == 'OK':
 			if pid in gemsAttempts and gemsAttempts[pid]<=3:
@@ -194,22 +210,24 @@ class gemsGetBoardContent(sublime_plugin.WindowCommand):
 		for board in json_obj:
 			content = board['Content']
 			attempts = board['Attempts']
-			ext = board['Ext']
+			filename = board['Filename']
 			pid = board['Pid']
 			today = datetime.datetime.today()
 			if pid > 0:
-				if attempts > 0:
+				if pid not in gemsAttempts and attempts > 0:
 					gemsAttempts[pid] = attempts
-				prefix = 'gemp{}_{}'.format(today.strftime('%m%d'), pid)
+
+			if '.' in filename:
+				fname, ext = filename.rsplit('.',1)
 			else:
-				rpid = gems_rand_chars(2)
-				prefix = 'gem{}_{}'.format(today.strftime('%m%d'), rpid)
+				fname, ext = filename, ''
+			prefix = '{}_{}'.format(fname, pid)
 			tmp = [os.path.basename(f) for f in os.listdir(gemsFOLDER)]
 			count = len([f for f in tmp if f.startswith(prefix)])
-			fname = os.path.join(gemsFOLDER, '{}_{}.{}'.format(prefix,count+1,ext))
-			with open(fname, 'w', encoding='utf-8') as f:
+			new_fname = os.path.join(gemsFOLDER, '{}_{}.{}'.format(prefix,count+1,ext))
+			with open(new_fname, 'w', encoding='utf-8') as f:
 				f.write(content)
-			sublime.active_window().open_file(fname)
+			sublime.active_window().open_file(new_fname)
 
 # ------------------------------------------------------------------
 class gemsRegister(sublime_plugin.WindowCommand):

@@ -21,8 +21,8 @@ func testHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 		fmt.Printf("Uid: %d has %d pages.\n", uid, len(board_pages))
 		for i := 0; i < len(board_pages); i++ {
 			b := board_pages[i]
-			fmt.Printf("Attempts: %d, Ext: %s, Pid: %d, Answer: %s, len of content: %d\n",
-				b.Attempts, b.Ext, b.Pid, b.Answer, len(b.Content))
+			fmt.Printf("Attempts: %d, Filename: %s, Pid: %d, Answer: %s, len of content: %d\n",
+				b.Attempts, b.Filename, b.Pid, b.Answer, len(b.Content))
 		}
 	}
 

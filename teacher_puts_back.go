@@ -12,7 +12,6 @@ import (
 
 //-----------------------------------------------------------------------------------
 func teacher_puts_backHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	content, ext := r.FormValue("content"), r.FormValue("ext")
 	priority, _ := strconv.Atoi(r.FormValue("priority"))
 	pid, _ := strconv.Atoi(r.FormValue("pid"))
 	sid, _ := strconv.Atoi(r.FormValue("sid"))
@@ -20,17 +19,20 @@ func teacher_puts_backHandler(w http.ResponseWriter, r *http.Request, who string
 
 	SubSem.Lock()
 	defer SubSem.Unlock()
-	sub := &Submission{
-		Sid:      sid,
-		Uid:      stid,
-		Pid:      pid,
-		Content:  content,
-		Ext:      ext,
-		Priority: priority,
-		At:       time.Now(),
+	if prob, ok := ActiveProblems[pid]; ok {
+		sub := &Submission{
+			Sid:      sid,
+			Uid:      stid,
+			Pid:      pid,
+			Content:  prob.Description,
+			Filename: prob.Filename,
+			Priority: priority,
+			At:       time.Now(),
+		}
+		WorkingSubs = append(WorkingSubs, sub)
+		fmt.Fprintf(w, "OK")
 	}
-	WorkingSubs = append(WorkingSubs, sub)
-	fmt.Fprintf(w, "OK")
+	fmt.Fprintf(w, "This problem is not active.  Cannot put back.")
 }
 
-//-----------------------------------------------------------------------------------
+// //-----------------------------------------------------------------------------------

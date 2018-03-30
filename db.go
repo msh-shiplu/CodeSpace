@@ -20,7 +20,7 @@ func create_tables() {
 	}
 	execSQL("create table if not exists student (id integer primary key, name text unique, password text)")
 	execSQL("create table if not exists teacher (id integer primary key, name text unique, password text)")
-	execSQL("create table if not exists problem (id integer primary key, tid integer, content blob, answer text, ext text, merit integer, effort integer, attempts integer, at timestamp)")
+	execSQL("create table if not exists problem (id integer primary key, tid integer, content blob, answer text, filename text, merit integer, effort integer, attempts integer, at timestamp)")
 	execSQL("create table if not exists submission (id integer primary key, pid integer, sid integer, content blob, priority integer, at timestamp, completed timestamp)")
 	execSQL("create table if not exists score (id integer primary key, pid integer, stid integer, tid integer, points integer, attempts integer, at timestamp, unique(pid,stid))")
 	execSQL("create table if not exists feedback (id integer primary key, tid integer, stid integer, content text, date timestamp)")
@@ -47,7 +47,7 @@ func init_database(db_name string) {
 	create_tables()
 	AddStudentSQL = prepare("insert into student (name, password) values (?, ?)")
 	AddTeacherSQL = prepare("insert into teacher (name, password) values (?, ?)")
-	AddProblemSQL = prepare("insert into problem (tid, content, answer, ext, merit, effort, attempts, at) values (?, ?, ?, ?, ?, ?, ?, ?)")
+	AddProblemSQL = prepare("insert into problem (tid, content, answer, filename, merit, effort, attempts, at) values (?, ?, ?, ?, ?, ?, ?, ?)")
 	AddSubmissionSQL = prepare("insert into submission (pid, sid, content, priority, at) values (?, ?, ?, ?, ?)")
 	AddScoreSQL = prepare("insert into score (pid, stid, tid, points, attempts, at) values (?, ?, ?, ?, ?, ?)")
 	AddFeedbackSQL = prepare("insert into feedback (tid, stid, content, date) values (?, ?, ?, ?)")
@@ -63,10 +63,10 @@ func init_database(db_name string) {
 func add_next_problem_to_board(pid, stid int) string {
 	next_pid, ok := NextProblem[int64(pid)]
 	if ok {
-		new_content, new_answer, new_ext, new_merit, new_effort, new_attempts := "", "", "", 0, 0, 0
-		rows, _ := Database.Query("select content, answer, ext, merit, effort, attempts from problem where id=?", next_pid)
+		new_content, new_answer, new_fn, new_merit, new_effort, new_attempts := "", "", "", 0, 0, 0
+		rows, _ := Database.Query("select content, answer, filename, merit, effort, attempts from problem where id=?", next_pid)
 		for rows.Next() {
-			rows.Scan(&new_content, &new_answer, &new_ext, &new_merit, &new_effort, &new_attempts)
+			rows.Scan(&new_content, &new_answer, &new_fn, &new_merit, &new_effort, &new_attempts)
 			break
 		}
 		rows.Close()
@@ -74,7 +74,7 @@ func add_next_problem_to_board(pid, stid int) string {
 			Content:      new_content,
 			Answer:       new_answer,
 			Attempts:     new_attempts,
-			Ext:          new_ext,
+			Filename:     new_fn,
 			Pid:          int(next_pid),
 			StartingTime: time.Now(),
 		}
@@ -157,7 +157,7 @@ func init_student(stid int, password string) {
 			Content:      Boards[-1][i].Content,
 			Answer:       Boards[-1][i].Answer,
 			Attempts:     Boards[-1][i].Attempts,
-			Ext:          Boards[-1][i].Ext,
+			Filename:     Boards[-1][i].Filename,
 			Pid:          Boards[-1][i].Pid,
 			StartingTime: time.Now(),
 		}

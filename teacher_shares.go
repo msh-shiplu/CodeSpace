@@ -11,13 +11,13 @@ import (
 
 //-----------------------------------------------------------------------------------
 func teacher_sharesHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	content, ext := r.FormValue("content"), r.FormValue("ext")
+	content, filename := r.FormValue("content"), r.FormValue("filename")
 	for stid, _ := range Boards {
 		b := &Board{
 			Content:      content,
 			Answer:       "",
 			Attempts:     -1,
-			Ext:          ext,
+			Filename:     filename,
 			Pid:          0,
 			StartingTime: time.Now(),
 		}

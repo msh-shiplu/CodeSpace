@@ -12,7 +12,7 @@ import (
 
 //-----------------------------------------------------------------------------------
 func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	content, ext := r.FormValue("content"), r.FormValue("ext")
+	content, filename := r.FormValue("content"), r.FormValue("filename")
 	answer := r.FormValue("answer")
 	priority, _ := strconv.Atoi(r.FormValue("priority"))
 	pid, _ := strconv.Atoi(r.FormValue("pid"))
@@ -31,7 +31,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 		correct_answer = ActiveProblems[pid].Answer
 	}
 	if pid > 0 && answer != "" && correct_answer == answer {
-		// tid is 0 because submission is automatically graded.
+		// Auto-grading: set tid to 0
 		scoring_mesg := add_or_update_score("correct", pid, uid, 0)
 		fmt.Fprintf(w, scoring_mesg)
 	} else {
@@ -42,7 +42,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			Uid:      uid,
 			Pid:      pid,
 			Content:  content,
-			Ext:      ext,
+			Filename: filename,
 			Priority: priority,
 			At:       time.Now(),
 		}

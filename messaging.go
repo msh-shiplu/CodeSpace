@@ -114,63 +114,6 @@ func view_bulletin_boardHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //-----------------------------------------------------------------------------------
-// func view_bulletin_boardHandler(w http.ResponseWriter, r *http.Request) {
-// 	i, err := strconv.Atoi(r.FormValue("i"))
-// 	passcode := r.FormValue("pc")
-// 	if err != nil {
-// 		i = 0
-// 	}
-// 	if i >= len(BulletinBoard) {
-// 		i = 0
-// 	}
-// 	funcMap := template.FuncMap{
-// 		"inc": func(i int) int {
-// 			return i + 1
-// 		},
-// 	}
-// 	temp := template.New("")
-// 	t, err2 := temp.Funcs(funcMap).Parse(TEACHER_MESSAGING_TEMPLATE)
-// 	if err2 != nil {
-// 		panic(err2)
-// 	}
-
-// 	// Get code and build page links
-// 	idx := make([]string, 0)
-// 	code := ""
-// 	if i >= 0 && i < len(BulletinBoard) {
-// 		for j := 0; j < len(BulletinBoard); j++ {
-// 			if i == j {
-// 				idx = append(idx, "active")
-// 			} else {
-// 				idx = append(idx, "")
-// 			}
-// 		}
-// 		code = BulletinBoard[i]
-// 	}
-
-// 	// Get priority counts
-// 	priority := []int{0, 0, 0}
-// 	for j := 0; j < len(WorkingSubs); j++ {
-// 		priority[WorkingSubs[j].Priority]++
-// 	}
-
-// 	data := &BulletinBoardMessage{
-// 		Code:           code,
-// 		Idx:            idx,
-// 		Tbr:            i,
-// 		PC:             passcode,
-// 		P1:             priority[1],
-// 		P2:             priority[2],
-// 		ActiveProblems: len(ActiveProblems),
-// 		BulletinItems:  len(BulletinBoard),
-// 		Attendance:     len(Student),
-// 		Authenticated:  passcode == Passcode,
-// 	}
-// 	w.Header().Set("Content-Type", "text/html")
-// 	t.Execute(w, &data)
-// }
-
-//-----------------------------------------------------------------------------------
 func student_messagesHandler(w http.ResponseWriter, r *http.Request) {
 	stid, err := strconv.Atoi(r.FormValue("stid"))
 	if err != nil {

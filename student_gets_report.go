@@ -11,26 +11,30 @@ import (
 )
 
 type StudentReport struct {
-	Points int
-	Date   int64
+	Points   int
+	Filename string
+	Date     int64
 }
 
 //-----------------------------------------------------------------------------------
 func student_gets_reportHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	rows, _ := Database.Query("select points, at from score where stid=?", uid)
+	rows, err := Database.Query("select score.points, score.at, problem.filename from score join problem on problem.id == score.pid where stid=?", uid)
 	defer rows.Close()
+	if err != nil {
+		panic(err)
+	}
 	report := make([]*StudentReport, 0)
 	var points int
 	var t time.Time
+	var filename string
 	for rows.Next() {
-		rows.Scan(&points, &t)
-		report = append(report, &StudentReport{Points: points, Date: t.Unix()})
+		// fmt.Println(rows)
+		rows.Scan(&points, &t, &filename)
+		report = append(report, &StudentReport{Points: points, Filename: filename, Date: t.Unix()})
 	}
-	js, err := json.Marshal(report)
-	if err == nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
-	}
+	js, _ := json.Marshal(report)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
 
 //-----------------------------------------------------------------------------------

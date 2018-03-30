@@ -91,29 +91,29 @@ class gemaPutBack(sublime_plugin.TextCommand):
 	def run(self, edit):
 		fname = self.view.file_name()
 		basename = os.path.basename(fname)
-		if not basename.startswith('gema') or basename.count('_')!=2:
+		if not basename.startswith('gema') or basename.count('_') < 2:
 			sublime.message_dialog('This is not a student submission.')
 			return
-		prefix, ext = basename.rsplit('.', 1)
+		if '.' in basename:
+			prefix, ext = basename.rsplit('.', 1)
+		else:
+			prefix = basename
 		prefix = prefix[4:]
 		stid, pid, sid = prefix.split('_')
 		try:
 			stid = int(stid)
+			pid = int(pid)
 			sid = int(sid)
 		except:
 			sublime.message_dialog('This is not a student submission.')
 			return
-		try:
-			pid = int(pid)
-		except:
-			pid = 0
+
 		content = self.view.substr(sublime.Region(0, self.view.size())).strip()
 		data = dict(
 			sid = sid,
 			stid = stid,
 			pid = pid,
 			content = content,
-			ext = ext,
 			priority = gemaHighestPriority,
 		)
 		response = gemaRequest('teacher_puts_back', data)
@@ -124,21 +124,23 @@ class gemaPutBack(sublime_plugin.TextCommand):
 def gema_grade(self, edit, decision):
 	fname = self.view.file_name()
 	basename = os.path.basename(fname)
-	if not basename.startswith('gema') or basename.count('_')!=2:
+	if not basename.startswith('gemt') or basename.count('_') < 2:
 		sublime.message_dialog('This is not a student submission.')
 		return
-	prefix, ext = basename.rsplit('.', 1)
+	if '.' in basename:
+		prefix, ext = basename.rsplit('.', 1)
+	else:
+		prefix = basename
 	prefix = prefix[4:]
 	stid, pid, sid = prefix.split('_')
 	try:
 		stid = int(stid)
+		pid = int(pid)
 		sid = int(sid)
 	except:
 		sublime.message_dialog('This is not a student submission.')
 		return
-	try:
-		pid = int(pid)
-	except:
+	if pid == 0:
 		sublime.message_dialog('This is not a graded problem.')
 		return
 	changed = False
@@ -152,7 +154,6 @@ def gema_grade(self, edit, decision):
 		stid = stid,
 		pid = pid,
 		content = content,
-		ext = ext,
 		decision = decision,
 		changed = changed,
 	)
@@ -186,21 +187,24 @@ def gema_gets(self, index, priority):
 	if response is not None:
 		sub = json.loads(response)
 		if sub['Content'] != '':
-			ext = sub['Ext'] or 'txt'
+			filename = sub['Filename']
+			if '.' in filename:
+				ext = filename.rsplit('.',1)[1]
+			else:
+				ext = 'txt'
 			pid, sid, uid = sub['Pid'], sub['Sid'], sub['Uid']
-			if pid == 0:
-				pid = gema_rand_chars(4)
-			fname = 'gema{}_{}_{}.{}'.format(uid,pid,sid,ext)
+			fname = 'gemt{}_{}_{}.{}'.format(uid,pid,sid,ext)
 			fname = os.path.join(gemaFOLDER, fname)
 			with open(fname, 'w', encoding='utf-8') as fp:
 				fp.write(sub['Content'])
 			gemaStudentSubmissions[pid] = sub['Content']
 			sublime.active_window().open_file(fname)
-		else:
-			if priority > 0:
-				sublime.message_dialog('There are no submission with priority {}.'.format(priority))
-			elif index >= 0:
-				sublime.message_dialog('There are no submission with index.'.format(index))
+		elif priority == 0:
+			sublime.message_dialog('There are no submissions.')
+		elif priority > 0:
+			sublime.message_dialog('There are no submissions with priority {}.'.format(priority))
+		elif index >= 0:
+			sublime.message_dialog('There are no submission with index {}.'.format(index))
 
 # ------------------------------------------------------------------
 # Priorities: 1 (I got it), 2 (I need help),

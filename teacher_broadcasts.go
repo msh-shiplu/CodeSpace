@@ -13,14 +13,14 @@ import (
 )
 
 //-----------------------------------------------------------------------------------
-func extract_problems(content, answers, merits, efforts, attempts, exts, divider_tag string) []*ProblemFormat {
+func extract_problems(content, answers, merits, efforts, attempts, filenames, divider_tag string) []*ProblemFormat {
 	if divider_tag == "" {
 		merit, _ := strconv.Atoi(merits)
 		effort, _ := strconv.Atoi(efforts)
 		attempt, _ := strconv.Atoi(attempts)
 		return []*ProblemFormat{&ProblemFormat{
 			Description: content,
-			Ext:         exts,
+			Filename:    filenames,
 			Answer:      answers,
 			Merit:       merit,
 			Effort:      effort,
@@ -32,7 +32,7 @@ func extract_problems(content, answers, merits, efforts, attempts, exts, divider
 	m := strings.Split(merits, "\n")
 	ef := strings.Split(efforts, "\n")
 	at := strings.Split(attempts, "\n")
-	ex := strings.Split(exts, "\n")
+	fn := strings.Split(attempts, "\n")
 
 	problems := make([]*ProblemFormat, 0)
 	for i := 0; i < len(c); i++ {
@@ -41,7 +41,7 @@ func extract_problems(content, answers, merits, efforts, attempts, exts, divider
 		attempt, _ := strconv.Atoi(at[i])
 		p := &ProblemFormat{
 			Description: c[i],
-			Ext:         ex[i],
+			Filename:    fn[i],
 			Answer:      an[i],
 			Merit:       merit,
 			Effort:      effort,
@@ -60,13 +60,13 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 	merits := r.FormValue("merits")
 	efforts := r.FormValue("efforts")
 	attempts := r.FormValue("attempts")
-	exts := r.FormValue("exts")
+	filenames := r.FormValue("filenames")
 	divider_tag := r.FormValue("divider_tag")
 	mode := r.FormValue("mode")
 	problems := make([]*ProblemFormat, 0)
 
 	// Extract info
-	problems = extract_problems(content, answers, merits, efforts, attempts, exts, divider_tag)
+	problems = extract_problems(content, answers, merits, efforts, attempts, filenames, divider_tag)
 
 	// Create new problems
 	for i := 0; i < len(problems); i++ {
@@ -77,7 +77,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				uid,
 				problems[i].Description,
 				problems[i].Answer,
-				problems[i].Ext,
+				problems[i].Filename,
 				problems[i].Merit,
 				problems[i].Effort,
 				problems[i].Attempts,
@@ -100,7 +100,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				Content:      problems[0].Description,
 				Answer:       problems[0].Answer,
 				Attempts:     problems[0].Attempts,
-				Ext:          problems[0].Ext,
+				Filename:     problems[0].Filename,
 				Pid:          int(problems[0].Pid),
 				StartingTime: time.Now(),
 			}
@@ -133,7 +133,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				Content:      problems[rand_idx[i]].Description,
 				Answer:       problems[rand_idx[i]].Answer,
 				Attempts:     problems[rand_idx[i]].Attempts,
-				Ext:          problems[rand_idx[i]].Ext,
+				Filename:     problems[rand_idx[i]].Filename,
 				Pid:          int(problems[rand_idx[i]].Pid),
 				StartingTime: time.Now(),
 			}

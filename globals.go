@@ -48,7 +48,7 @@ type Board struct {
 	Content      string
 	Answer       string
 	Attempts     int
-	Ext          string
+	Filename     string
 	Pid          int // problem id
 	StartingTime time.Time
 }
@@ -64,14 +64,14 @@ type Submission struct {
 	Uid      int // student id
 	Pid      int // problem id
 	Content  string
-	Ext      string
+	Filename string
 	Priority int
 	At       time.Time
 }
 
 type ProblemFormat struct {
 	Description string
-	Ext         string
+	Filename    string
 	Answer      string
 	Merit       int
 	Effort      int
