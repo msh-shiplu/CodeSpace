@@ -351,7 +351,7 @@ class gemtDeactivateProblems(sublime_plugin.WindowCommand):
 			active_pids = json.loads(json_response)
 			mesg = "Problems closed."
 			if len(active_pids) > 0:
-				mesg += " Answered to be summarized."
+				mesg += " Answers to be summarized."
 			sublime.message_dialog(mesg)
 			for pid in active_pids:
 				p = urllib.parse.urlencode({'pc' : passcode, 'pid':pid})
