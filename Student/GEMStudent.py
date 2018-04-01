@@ -225,8 +225,7 @@ class gemsGetBoardContent(sublime_plugin.WindowCommand):
 			# count = len([f for f in tmp if f.startswith(prefix)])
 			# new_fname = os.path.join(gemsFOLDER, '{}_{}.{}'.format(prefix,count+1,ext))
 			new_fname = os.path.join(gemsFOLDER, '{}_{}.{}'.format(fname,pid,ext))
-			count = len([f for f in os.listdir(gemsFOLDER) if f==os.path.basename(new_fname)])
-			if count > 0:
+			if pid>0 and os.path.exists(new_fname):
 				new_fname = os.path.join(gemsFOLDER, 'FEEDBACK.' + ext)
 			with open(new_fname, 'w', encoding='utf-8') as f:
 				f.write(content)
