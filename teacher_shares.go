@@ -12,7 +12,7 @@ import (
 //-----------------------------------------------------------------------------------
 func teacher_sharesHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	content, filename := r.FormValue("content"), r.FormValue("filename")
-	for stid, _ := range Boards {
+	for stid := range Students {
 		b := &Board{
 			Content:      content,
 			Answer:       "",
@@ -21,8 +21,8 @@ func teacher_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			Pid:          0,
 			StartingTime: time.Now(),
 		}
-		Boards[stid] = append(Boards[stid], b)
-		MessageBoards[stid] = "Teacher shared some material with you."
+		Students[stid].Boards = append(Students[stid].Boards, b)
+		Students[stid].Status = "Teacher shared some material with you."
 	}
 	fmt.Fprintf(w, "Content shared to all students.")
 

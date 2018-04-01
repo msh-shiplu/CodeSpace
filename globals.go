@@ -29,7 +29,7 @@ var UpdateScoreSQL *sql.Stmt
 // Authentication
 //---------------------------------------------------------
 
-var Student = make(map[int]string)
+// var Student = make(map[int]string)
 var Teacher = make(map[int]string)
 var Passcode string
 
@@ -44,6 +44,7 @@ var BulletinSem sync.Mutex
 //---------------------------------------------------------
 // Virtual boards for students and student submissions
 //---------------------------------------------------------
+
 type Board struct {
 	Content      string
 	Answer       string
@@ -53,12 +54,22 @@ type Board struct {
 	StartingTime time.Time
 }
 
-var Boards = make(map[int][]*Board)
+type StudenInfo struct {
+	Password string
+	Boards   []*Board
+	Status   string
+}
 
-var MessageBoards = make(map[int]string)
+var Students = make(map[int]*StudenInfo)
+
+// var Boards = make(map[int][]*Board)
+// var MessageBoards = make(map[int]string)
+
+//---------------------------------------------------------
 
 var BulletinBoard = make([]string, 0)
 
+//---------------------------------------------------------
 type Submission struct {
 	Sid      int // submission id
 	Uid      int // student id
@@ -71,6 +82,7 @@ type Submission struct {
 
 var WorkingSubs = make([]*Submission, 0)
 
+//---------------------------------------------------------
 type ProblemInfo struct {
 	Description string
 	Filename    string

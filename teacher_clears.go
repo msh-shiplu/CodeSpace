@@ -33,11 +33,9 @@ func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request,
 //-----------------------------------------------------------------------------------
 func teacher_clearsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	WorkingSubs = make([]*Submission, 0)
-	for stid, _ := range Boards {
-		Boards[stid] = make([]*Board, 0)
-	}
-	for stid, _ := range MessageBoards {
-		MessageBoards[stid] = "White board is empty."
+	for stid, _ := range Students {
+		Students[stid].Boards = make([]*Board, 0)
+		Students[stid].Status = ""
 	}
 	fmt.Fprintf(w, "Done.")
 }

@@ -101,7 +101,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 	BoardsSem.Lock()
 	defer BoardsSem.Unlock()
 	if mode == "unicast" || mode == "multicast_seq" {
-		for stid, _ := range Boards {
+		for stid, _ := range Students {
 			b := &Board{
 				Content:      problems[0].Description,
 				Answer:       problems[0].Answer,
@@ -110,8 +110,8 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				Pid:          problems[0].Pid,
 				StartingTime: time.Now(),
 			}
-			Boards[stid] = append(Boards[stid], b)
-			MessageBoards[stid] = "You have a new problem on board."
+			Students[stid].Boards = append(Students[stid].Boards, b)
+			Students[stid].Status = "You have a new problem on board."
 		}
 		if mode == "unicast" {
 			fmt.Fprintf(w, "Content copied to white boards.")
@@ -123,9 +123,9 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 		}
 	} else if mode == "multicast_or" {
 		// Initialize random indices
-		rand_idx := make([]int, len(Boards))
+		rand_idx := make([]int, len(Students))
 		j := 0
-		for i := 0; i < len(Boards); i++ {
+		for i := 0; i < len(Students); i++ {
 			rand_idx[i] = j
 			j = (j + 1) % len(problems)
 		}
@@ -134,7 +134,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 		})
 		// Insert into boards
 		i := 0
-		for stid, _ := range Boards {
+		for stid, _ := range Students {
 			b := &Board{
 				Content:      problems[rand_idx[i]].Description,
 				Answer:       problems[rand_idx[i]].Answer,
@@ -143,8 +143,8 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				Pid:          int(problems[rand_idx[i]].Pid),
 				StartingTime: time.Now(),
 			}
-			Boards[stid] = append(Boards[stid], b)
-			MessageBoards[stid] = "You have a new problem on board."
+			Students[stid].Boards = append(Students[stid].Boards, b)
+			Students[stid].Status = "You have a new problem on board."
 			i++
 		}
 		fmt.Fprintf(w, "Files saved randomly to white boards.")

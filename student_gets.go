@@ -17,10 +17,12 @@ func student_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 	BoardsSem.Lock()
 	defer BoardsSem.Unlock()
 
-	if board, ok := Boards[uid]; ok {
-		js, err = json.Marshal(board)
-		Boards[uid] = []*Board{}
-		MessageBoards[uid] = ""
+	if _, ok := Students[uid]; ok {
+		js, err = json.Marshal(Students[uid].Boards)
+		Students[uid].Boards = []*Board{}
+
+		// TODO: send boards, status and feedback to student at the same time.
+		Students[uid].Status = ""
 		if err == nil {
 			// fmt.Println(string(js))
 			w.Header().Set("Content-Type", "application/json")

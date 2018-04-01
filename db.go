@@ -56,7 +56,9 @@ func init_database(db_name string) {
 
 	// Initialize passcode for current session and default board
 	Passcode = RandStringRunes(12)
-	Boards[-1] = make([]*Board, 0) // content for a newly logged in student
+	Students[0] = &StudenInfo{
+		Boards: make([]*Board, 0),
+	}
 }
 
 //-----------------------------------------------------------------
@@ -78,7 +80,8 @@ func add_next_problem_to_board(pid, stid int) string {
 			Pid:          int(prob.Next),
 			StartingTime: time.Now(),
 		}
-		Boards[stid] = append(Boards[stid], b)
+		Students[stid].Boards = append(Students[stid].Boards, b)
+		Students[stid].Status = "New problem added to white board."
 		return "\nNew problem added to white board."
 	}
 	return ""
@@ -150,19 +153,27 @@ func init_student(stid int, password string) {
 
 	BoardsSem.Lock()
 	defer BoardsSem.Unlock()
-	Student[stid] = password
-	MessageBoards[stid] = ""
-	Boards[stid] = make([]*Board, 0)
-	for i := 0; i < len(Boards[-1]); i++ {
+
+	Students[stid] = &StudenInfo{
+		Password: password,
+		Boards:   make([]*Board, 0),
+		Status:   "",
+	}
+
+	// Student[stid] = password
+	// MessageBoards[stid] = ""
+	// Boards[stid] = make([]*Board, 0)
+
+	for i := 0; i < len(Students[0].Boards); i++ {
 		b := &Board{
-			Content:      Boards[-1][i].Content,
-			Answer:       Boards[-1][i].Answer,
-			Attempts:     Boards[-1][i].Attempts,
-			Filename:     Boards[-1][i].Filename,
-			Pid:          Boards[-1][i].Pid,
+			Content:      Students[0].Boards[i].Content,
+			Answer:       Students[0].Boards[i].Answer,
+			Attempts:     Students[0].Boards[i].Attempts,
+			Filename:     Students[0].Boards[i].Filename,
+			Pid:          Students[0].Boards[i].Pid,
 			StartingTime: time.Now(),
 		}
-		Boards[stid] = append(Boards[stid], b)
+		Students[stid].Boards = append(Students[stid].Boards, b)
 	}
 }
 

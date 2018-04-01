@@ -32,7 +32,7 @@ func teacher_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 			if WorkingSubs[i].Priority == priority {
 				selected = WorkingSubs[i]
 				WorkingSubs = append(WorkingSubs[:i], WorkingSubs[i+1:]...)
-				MessageBoards[selected.Uid] = "Your submission is being looked at."
+				Students[selected.Uid].Status = "Your submission is being looked at."
 				break
 			}
 		}
@@ -50,7 +50,7 @@ func teacher_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 				j := first_sub_w_priority[i]
 				selected = WorkingSubs[j]
 				WorkingSubs = append(WorkingSubs[:j], WorkingSubs[j+1:]...)
-				MessageBoards[selected.Uid] = "Your submission is being looked at."
+				Students[selected.Uid].Status = "Your submission is being looked at."
 				break
 			}
 		}

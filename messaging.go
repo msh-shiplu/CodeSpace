@@ -112,7 +112,7 @@ func get_bulletin_board_data(i int, passcode string) *BulletinBoardMessage {
 		P2:             priority[2],
 		ActiveProblems: len(ActiveProblems),
 		BulletinItems:  len(BulletinBoard),
-		Attendance:     len(Student),
+		Attendance:     len(Students),
 		Address:        ADDRESS,
 		Authenticated:  passcode == Passcode,
 	}
@@ -152,12 +152,12 @@ func student_messagesHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprintf(w, "Error")
 	}
-	mesg, ok := MessageBoards[stid]
+	_, ok := Students[stid]
 	if ok {
 		t := template.New("")
 		t, err := t.Parse(STUDENT_MESSAGING_TEMPLATE)
 		if err == nil {
-			data := struct{ Message string }{mesg}
+			data := struct{ Message string }{Students[stid].Status}
 			w.Header().Set("Content-Type", "text/html")
 			t.Execute(w, data)
 		} else {

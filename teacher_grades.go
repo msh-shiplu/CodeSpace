@@ -19,7 +19,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	stid, _ := strconv.Atoi(r.FormValue("stid"))
 	mesg, student_mesg := "", ""
 	if decision == "dismissed" {
-		MessageBoards[stid] = "Teacher looked at but did not grade your submission."
+		Students[stid].Status = "Teacher looked at but did not grade your submission."
 		fmt.Fprintf(w, "Submission dismissed.")
 		return
 	}
@@ -38,13 +38,13 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 				Pid:          pid,
 				StartingTime: time.Now(),
 			}
-			Boards[stid] = append(Boards[stid], b)
+			Students[stid].Boards = append(Students[stid].Boards, b)
 		}
 	}
 	scoring_mesg := add_or_update_score(decision, pid, stid, uid)
 	mesg = scoring_mesg + "\n" + mesg
 	student_mesg += scoring_mesg
-	MessageBoards[stid] = student_mesg
+	Students[stid].Status = student_mesg
 	fmt.Fprintf(w, mesg)
 }
 
