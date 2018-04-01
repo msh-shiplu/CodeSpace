@@ -26,11 +26,6 @@ func testHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 		}
 	}
 
-	fmt.Println("NextProblem")
-	for pid, p := range NextProblem {
-		fmt.Println(pid, p)
-	}
-
 	fmt.Printf("WorkingSubs: %d entries", len(WorkingSubs))
 	for i := 0; i < len(WorkingSubs); i++ {
 		fmt.Println(WorkingSubs[i].Sid, WorkingSubs[i].Uid, WorkingSubs[i].Pid, WorkingSubs[i].Priority)
@@ -43,9 +38,10 @@ func testHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	}
 
 	fmt.Println("ActiveProblems:", ActiveProblems)
+	for pid, v := range ActiveProblems {
+		fmt.Println(pid, v.Active, "Answers:", v.Answers, "Next:", v.Next, "Attempts:", v.Attempts)
+	}
 	fmt.Fprintf(w, Passcode)
-
-	fmt.Println("Answers:", Answers)
 }
 
 //-----------------------------------------------------------------------------------

@@ -13,12 +13,12 @@ import (
 )
 
 //-----------------------------------------------------------------------------------
-func extract_problems(content, answers, merits, efforts, attempts, filenames, divider_tag string) []*ProblemFormat {
+func extract_problems(content, answers, merits, efforts, attempts, filenames, divider_tag string) []*ProblemInfo {
 	if divider_tag == "" {
 		merit, _ := strconv.Atoi(merits)
 		effort, _ := strconv.Atoi(efforts)
 		attempt, _ := strconv.Atoi(attempts)
-		return []*ProblemFormat{&ProblemFormat{
+		return []*ProblemInfo{&ProblemInfo{
 			Description: content,
 			Filename:    filenames,
 			Answer:      answers,
@@ -34,12 +34,12 @@ func extract_problems(content, answers, merits, efforts, attempts, filenames, di
 	at := strings.Split(attempts, "\n")
 	fn := strings.Split(filenames, "\n")
 
-	problems := make([]*ProblemFormat, 0)
+	problems := make([]*ProblemInfo, 0)
 	for i := 0; i < len(c); i++ {
 		merit, _ := strconv.Atoi(m[i])
 		effort, _ := strconv.Atoi(ef[i])
 		attempt, _ := strconv.Atoi(at[i])
-		p := &ProblemFormat{
+		p := &ProblemInfo{
 			Description: c[i],
 			Filename:    fn[i],
 			Answer:      an[i],
@@ -63,7 +63,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 	filenames := r.FormValue("filenames")
 	divider_tag := r.FormValue("divider_tag")
 	mode := r.FormValue("mode")
-	problems := make([]*ProblemFormat, 0)
+	problems := make([]*ProblemInfo, 0)
 
 	// Extract info
 	problems = extract_problems(content, answers, merits, efforts, attempts, filenames, divider_tag)
@@ -87,9 +87,14 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				panic(err)
 			}
 			pid, _ = result.LastInsertId()
-			problems[i].Pid = pid
-			ActiveProblems[int(pid)] = problems[i]
-			Answers[int(pid)] = make([]string, 0)
+			problems[i].Pid = int(pid)
+			ActiveProblems[int(pid)] = &ActiveProblem{
+				Info:     problems[i],
+				Answers:  make([]string, 0),
+				Next:     0,
+				Active:   true,
+				Attempts: make(map[int]int),
+			}
 		}
 	}
 
@@ -102,7 +107,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				Answer:       problems[0].Answer,
 				Attempts:     problems[0].Attempts,
 				Filename:     problems[0].Filename,
-				Pid:          int(problems[0].Pid),
+				Pid:          problems[0].Pid,
 				StartingTime: time.Now(),
 			}
 			Boards[stid] = append(Boards[stid], b)
@@ -112,7 +117,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 			fmt.Fprintf(w, "Content copied to white boards.")
 		} else if mode == "multicast_seq" {
 			for i := 0; i < len(problems)-1; i++ {
-				NextProblem[problems[i].Pid] = problems[i+1].Pid
+				ActiveProblems[problems[i].Pid].Next = problems[i+1].Pid
 			}
 			fmt.Fprintf(w, "First file copied to white boards.")
 		}

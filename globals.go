@@ -69,23 +69,27 @@ type Submission struct {
 	At       time.Time
 }
 
-type ProblemFormat struct {
+var WorkingSubs = make([]*Submission, 0)
+
+type ProblemInfo struct {
 	Description string
 	Filename    string
 	Answer      string
 	Merit       int
 	Effort      int
 	Attempts    int
-	Pid         int64
+	Pid         int
 }
 
-var WorkingSubs = make([]*Submission, 0)
+type ActiveProblem struct {
+	Info     *ProblemInfo
+	Answers  []string
+	Next     int
+	Active   bool
+	Attempts map[int]int
+}
 
-var NextProblem = make(map[int64]int64)
-
-var ActiveProblems = make(map[int]*ProblemFormat)
-
-var Answers = make(map[int][]string)
+var ActiveProblems = make(map[int]*ActiveProblem)
 
 //---------------------------------------------------------
 // Utilities

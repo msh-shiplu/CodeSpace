@@ -35,11 +35,11 @@ type AnswersBoardMessage struct {
 func view_answersHandler(w http.ResponseWriter, r *http.Request) {
 	pid, err := strconv.Atoi(r.FormValue("pid"))
 	passcode := r.FormValue("pc")
-	if _, ok := Answers[pid]; err == nil && ok && passcode == Passcode {
+	if _, ok := ActiveProblems[pid]; err == nil && ok && passcode == Passcode {
 		t := template.New("")
 		t, err := t.Parse(VIEW_ANSWERS_TEMPLATE)
 		if err == nil {
-			answers := Answers[pid]
+			answers := ActiveProblems[pid].Answers
 			counts := make(map[string]int)
 			for i := 0; i < len(answers); i++ {
 				counts[answers[i]]++

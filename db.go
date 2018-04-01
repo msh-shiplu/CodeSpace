@@ -61,10 +61,10 @@ func init_database(db_name string) {
 
 //-----------------------------------------------------------------
 func add_next_problem_to_board(pid, stid int) string {
-	next_pid, ok := NextProblem[int64(pid)]
-	if ok {
+	prob, ok := ActiveProblems[pid]
+	if ok && prob.Next > 0 {
 		new_content, new_answer, new_fn, new_merit, new_effort, new_attempts := "", "", "", 0, 0, 0
-		rows, _ := Database.Query("select content, answer, filename, merit, effort, attempts from problem where id=?", next_pid)
+		rows, _ := Database.Query("select content, answer, filename, merit, effort, attempts from problem where id=?", prob.Next)
 		for rows.Next() {
 			rows.Scan(&new_content, &new_answer, &new_fn, &new_merit, &new_effort, &new_attempts)
 			break
@@ -75,11 +75,11 @@ func add_next_problem_to_board(pid, stid int) string {
 			Answer:       new_answer,
 			Attempts:     new_attempts,
 			Filename:     new_fn,
-			Pid:          int(next_pid),
+			Pid:          int(prob.Next),
 			StartingTime: time.Now(),
 		}
 		Boards[stid] = append(Boards[stid], b)
-		return "New problem added to white board."
+		return "\nNew problem added to white board."
 	}
 	return ""
 }
@@ -113,8 +113,9 @@ func add_or_update_score(decision string, pid, stid, tid int) string {
 	points, teacher := 0, tid
 	if decision == "correct" {
 		points = merit
+		mesg = "Answer is correct."
 		m := add_next_problem_to_board(pid, stid)
-		mesg = "Answer is correct. " + m
+		mesg = mesg + m
 	} else {
 		points = effort
 		// If the problem was previously graded correct, this submission

@@ -24,8 +24,8 @@ func teacher_puts_backHandler(w http.ResponseWriter, r *http.Request, who string
 			Sid:      sid,
 			Uid:      stid,
 			Pid:      pid,
-			Content:  prob.Description,
-			Filename: prob.Filename,
+			Content:  prob.Info.Description,
+			Filename: prob.Info.Filename,
 			Priority: priority,
 			At:       time.Now(),
 		}

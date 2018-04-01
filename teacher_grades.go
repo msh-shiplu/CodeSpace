@@ -32,9 +32,9 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			defer BoardsSem.Unlock()
 			b := &Board{
 				Content:      content,
-				Answer:       prob.Answer,
+				Answer:       prob.Info.Answer,
 				Attempts:     0, // This tells the client this is an existing problem
-				Filename:     prob.Filename,
+				Filename:     prob.Info.Filename,
 				Pid:          pid,
 				StartingTime: time.Now(),
 			}

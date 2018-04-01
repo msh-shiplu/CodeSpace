@@ -15,7 +15,6 @@ gemsFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemsFOLDER = ''
 # gemsUID = 0
 gemsTIMEOUT = 7
-gemsAttempts = {}
 gemsAnswerTag = 'ANSWER:'
 
 # ------------------------------------------------------------------------------
@@ -132,8 +131,6 @@ def gems_problem_info(fname):
 
 # ------------------------------------------------------------------
 def gems_share(self, edit, priority):
-	global gemsAttempts
-
 	fname = self.view.file_name()
 	if fname is None:
 		sublime.message_dialog('Cannot share unsaved content.')
@@ -142,15 +139,6 @@ def gems_share(self, edit, priority):
 	if pid == 0:
 		priority = 1
 	if pid > 0 or sublime.ok_cancel_dialog('This file is not a graded problem. Do you want to send it?'):
-		expired = False
-		if pid in gemsAttempts:
-			if gemsAttempts[pid] == 0:
-				expired = True
-			else:
-				gemsAttempts[pid] -= 1
-		if expired:
-			sublime.message_dialog('This problem has expired and is not submitted.')
-			return
 		content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
 		items = content.rsplit(gemsAnswerTag, 1)
 		if len(items)==2:
@@ -165,13 +153,7 @@ def gems_share(self, edit, priority):
 			priority=priority,
 		)
 		response = gemsRequest('student_shares', data)
-		if response == 'OK':
-			if pid in gemsAttempts and gemsAttempts[pid]<=3:
-				sublime.message_dialog('There are {} attempts left.'.format(gemsAttempts[pid]))
-			else:
-				sublime.message_dialog('Content submitted.')
-		else:
-			sublime.message_dialog(response)
+		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
 class gemsCheckin(sublime_plugin.WindowCommand):
@@ -197,8 +179,6 @@ def gems_rand_chars(n):
 # ------------------------------------------------------------------
 class gemsGetBoardContent(sublime_plugin.WindowCommand):
 	def run(self):
-		global gemsAttempts
-
 		response = gemsRequest('student_gets', {})
 		if response is None:
 			return
@@ -212,21 +192,13 @@ class gemsGetBoardContent(sublime_plugin.WindowCommand):
 			filename = board['Filename']
 			pid = board['Pid']
 			today = datetime.datetime.today()
-			if pid > 0:
-				if pid not in gemsAttempts and attempts > 0:
-					gemsAttempts[pid] = attempts
-
 			if '.' in filename:
 				fname, ext = filename.rsplit('.',1)
 			else:
 				fname, ext = filename, ''
-			# prefix = '{}_{}'.format(fname, pid)
-			# tmp = [os.path.basename(f) for f in os.listdir(gemsFOLDER)]
-			# count = len([f for f in tmp if f.startswith(prefix)])
-			# new_fname = os.path.join(gemsFOLDER, '{}_{}.{}'.format(prefix,count+1,ext))
 			new_fname = os.path.join(gemsFOLDER, '{}_{}.{}'.format(fname,pid,ext))
 			if pid>0 and os.path.exists(new_fname):
-				new_fname = os.path.join(gemsFOLDER, 'FEEDBACK.' + ext)
+				new_fname = os.path.join(gemsFOLDER, 'FEEDBACK.txt')
 			with open(new_fname, 'w', encoding='utf-8') as f:
 				f.write(content)
 			sublime.active_window().open_file(new_fname)
