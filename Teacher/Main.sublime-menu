@@ -4,17 +4,22 @@
         "id": "GEMTeacher",
         "children": [
             {
-                "caption": "Start problem",
+                "caption": "Start a problem",
                 "id": "gemtUnicast",
                 "command": "gemt_unicast",
             },
             {
-                "caption": "Start list of problems",
+                "caption": "Start problems (Concurrent)",
+                "id": "gemtMulticastAnd",
+                "command": "gemt_multicast_and",
+            },
+            {
+                "caption": "Start problems (Sequential)",
                 "id": "gemtMulticastSeq",
                 "command": "gemt_multicast_seq",
             },
             {
-                "caption": "Start randomized problem",
+                "caption": "Start problems (Randomized)",
                 "id": "gemtMulticastOr",
                 "command": "gemt_multicast_or",
             },

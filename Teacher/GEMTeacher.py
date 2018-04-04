@@ -14,6 +14,7 @@ import random
 gemtFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemtFOLDER = ''
 gemtOrTag = '<GEM_OR>'
+gemtAndTag = '<GEM_AND>'
 gemtSeqTag = '<GEM_NEXT>'
 gemtAnswerTag = 'ANSWER:'
 gemtTIMEOUT = 7
@@ -229,7 +230,7 @@ def gemt_broadcast(content, answers, merits, efforts, attempts, filenames, exts,
 		'efforts':			efforts,
 		'attempts':			attempts,
 		'divider_tag':	 	tag,
-		'mode':				mode
+		'mode':				mode,
 	}
 	response = gemtRequest('teacher_broadcasts', data)
 	if response is not None:
@@ -287,9 +288,6 @@ def gemt_multicast(self, edit, tag, mode, mesg):
 	if len(fnames)>0 and sublime.ok_cancel_dialog(mesg):
 		content, answers, merits, efforts, attempts, fns, exts = [],[],[],[],[],[],[]
 		for fname in fnames:
-			# ext = fname.rsplit('.',1)[-1]
-			# with open(fname, 'r', encoding='utf-8') as fp:
-			# 	contents.append(fp.read())
 			c, an, m, e, at, fn, ex = gemt_get_problem_info(fname)
 			content.append(c)
 			answers.append(an)
@@ -327,6 +325,17 @@ class gemtMulticastOr(sublime_plugin.TextCommand):
 			gemtOrTag,
 			'multicast_or',
 			'Send problems *randomly* to students, where problems are defined in all non-empty tabs in this window?',
+		)
+
+# ------------------------------------------------------------------
+class gemtMulticastAnd(sublime_plugin.TextCommand):
+	def run(self, edit):
+		gemt_multicast(
+			self,
+			edit,
+			gemtAndTag,
+			'multicast_and',
+			'Send problems *simultaneously* to students, where problems are defined in all non-empty tabs in this window?',
 		)
 
 # ------------------------------------------------------------------

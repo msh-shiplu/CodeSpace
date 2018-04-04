@@ -145,12 +145,22 @@ def gems_periodic_update():
 	submission_stat, board_stat = response.split(';')
 	submission_stat = int(submission_stat)
 	board_stat = int(board_stat)
+
+	# Display messages if necessary
+	mesg = ""
 	if submission_stat > 0 and submission_stat in gemsUpdateMessage:
-		sublime.message_dialog(gemsUpdateMessage[submission_stat])
+		mesg = gemsUpdateMessage[submission_stat]
 	if board_stat == 1:
-		print('Get board')
+		mesg += "\nTeacher put something on your board."
+	mesg = mesg.strip()
+	if mesg != "":
+		sublime.message_dialog(mesg)
+
+	# Open board pages and feedback automatically
+	if board_stat == 1:
 		sublime.active_window().run_command('gems_get_board_content')
 
+	# Keep checking periodically
 	update_timeout = 10000
 	if submission_stat == 1:
 		update_timeout = 5000

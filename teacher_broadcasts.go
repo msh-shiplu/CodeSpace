@@ -100,26 +100,30 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 
 	BoardsSem.Lock()
 	defer BoardsSem.Unlock()
-	if mode == "unicast" || mode == "multicast_seq" {
-		for stid, _ := range Students {
-			b := &Board{
-				Content:      problems[0].Description,
-				Answer:       problems[0].Answer,
-				Attempts:     problems[0].Attempts,
-				Filename:     problems[0].Filename,
-				Pid:          problems[0].Pid,
-				StartingTime: time.Now(),
-			}
-			Students[stid].Boards = append(Students[stid].Boards, b)
+	if mode == "unicast" || mode == "multicast_seq" || mode == "multicast_and" {
+		end := 1
+		if mode == "multicast_and" {
+			end = len(problems)
 		}
-		if mode == "unicast" {
-			fmt.Fprintf(w, "Content copied to white boards.")
-		} else if mode == "multicast_seq" {
+		if mode == "multicast_seq" {
 			for i := 0; i < len(problems)-1; i++ {
 				ActiveProblems[problems[i].Pid].Next = problems[i+1].Pid
 			}
-			fmt.Fprintf(w, "First file copied to white boards.")
 		}
+		for stid, _ := range Students {
+			for i := 0; i < end; i++ {
+				b := &Board{
+					Content:      problems[i].Description,
+					Answer:       problems[i].Answer,
+					Attempts:     problems[i].Attempts,
+					Filename:     problems[i].Filename,
+					Pid:          problems[i].Pid,
+					StartingTime: time.Now(),
+				}
+				Students[stid].Boards = append(Students[stid].Boards, b)
+			}
+		}
+		fmt.Fprintf(w, "Content copied to white boards.")
 	} else if mode == "multicast_or" {
 		// Initialize random indices
 		rand_idx := make([]int, len(Students))

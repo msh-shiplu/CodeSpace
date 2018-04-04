@@ -31,6 +31,7 @@ func testHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 		fmt.Println(WorkingSubs[i].Sid, WorkingSubs[i].Uid, WorkingSubs[i].Pid, WorkingSubs[i].Priority)
 		fmt.Println(WorkingSubs[i].Content)
 	}
+	fmt.Println()
 
 	fmt.Println("ActiveProblems:", ActiveProblems)
 	for pid, v := range ActiveProblems {
