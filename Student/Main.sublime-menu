@@ -25,11 +25,11 @@
                 "id": "gemsCheckin",
                 "command": "gems_checkin",
             },
-            {
-                "caption": "Messages",
-                "id": "gemsShowMessages",
-                "command": "gems_show_messages",
-            },
+            // {
+            //     "caption": "Messages",
+            //     "id": "gemsShowMessages",
+            //     "command": "gems_show_messages",
+            // },
             {
                 "caption": "Points",
                 "id": "gemsGetReport",

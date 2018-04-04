@@ -18,10 +18,10 @@ gemsTIMEOUT = 7
 gemsAnswerTag = 'ANSWER:'
 gemsTracking = False
 gemsUpdateMessage = {
-	1 : "Your submission being looked at."
-	2 : "Teacher did not grade your submission.  Try again."
-	3 : "Teacher did not think your submission was correct. Try again."
-	4 : "Your submission was correct."
+	1 : "Your submission being looked at.",
+	2 : "Teacher did not grade your submission.  Try again.",
+	3 : "Teacher did not think your submission was correct. Try again.",
+	4 : "Your submission was correct.",
 }
 # ------------------------------------------------------------------------------
 def gemsRequest(path, data, authenticated=True, method='POST', verbal=True):
@@ -100,24 +100,24 @@ class gemsGetReport(sublime_plugin.WindowCommand):
 			new_view = sublime.active_window().open_file(report_file)
 
 # ------------------------------------------------------------------
-class gemsShowMessages(sublime_plugin.WindowCommand):
-	def run(self):
-		try:
-			with open(gemsFILE, 'r') as f:
-				info = json.loads(f.read())
-		except:
-			info = dict()
+# class gemsShowMessages(sublime_plugin.WindowCommand):
+# 	def run(self):
+# 		try:
+# 			with open(gemsFILE, 'r') as f:
+# 				info = json.loads(f.read())
+# 		except:
+# 			info = dict()
 
-		if 'Server' not in info:
-			sublime.message_dialog("Please set server address.")
-			return None
+# 		if 'Server' not in info:
+# 			sublime.message_dialog("Please set server address.")
+# 			return None
 
-		if 'Uid' not in info:
-			sublime.message_dialog("Please register.")
-			return None
+# 		if 'Uid' not in info:
+# 			sublime.message_dialog("Please register.")
+# 			return None
 
-		u = urllib.parse.urlencode({'stid' : info['Uid']})
-		webbrowser.open(info['Server'] + '/show_student_messages?' + u)
+# 		u = urllib.parse.urlencode({'stid' : info['Uid']})
+# 		webbrowser.open(info['Server'] + '/show_student_messages?' + u)
 
 # ------------------------------------------------------------------
 def gems_problem_info(fname):
