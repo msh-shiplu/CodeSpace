@@ -81,7 +81,6 @@ func add_next_problem_to_board(pid, stid int) string {
 			StartingTime: time.Now(),
 		}
 		Students[stid].Boards = append(Students[stid].Boards, b)
-		Students[stid].Status = "New problem added to white board."
 		return "\nNew problem added to white board."
 	}
 	return ""
@@ -155,9 +154,9 @@ func init_student(stid int, password string) {
 	defer BoardsSem.Unlock()
 
 	Students[stid] = &StudenInfo{
-		Password: password,
-		Boards:   make([]*Board, 0),
-		Status:   "",
+		Password:         password,
+		Boards:           make([]*Board, 0),
+		SubmissionStatus: 0,
 	}
 
 	// Student[stid] = password

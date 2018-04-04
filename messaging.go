@@ -147,23 +147,23 @@ func view_bulletin_boardHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //-----------------------------------------------------------------------------------
-func student_messagesHandler(w http.ResponseWriter, r *http.Request) {
-	stid, err := strconv.Atoi(r.FormValue("stid"))
-	if err != nil {
-		fmt.Fprintf(w, "Error")
-	}
-	_, ok := Students[stid]
-	if ok {
-		t := template.New("")
-		t, err := t.Parse(STUDENT_MESSAGING_TEMPLATE)
-		if err == nil {
-			data := struct{ Message string }{Students[stid].Status}
-			w.Header().Set("Content-Type", "text/html")
-			t.Execute(w, data)
-		} else {
-			fmt.Println(err)
-		}
-	} else {
-		fmt.Fprint(w, "Error")
-	}
-}
+// func student_messagesHandler(w http.ResponseWriter, r *http.Request) {
+// 	stid, err := strconv.Atoi(r.FormValue("stid"))
+// 	if err != nil {
+// 		fmt.Fprintf(w, "Error")
+// 	}
+// 	_, ok := Students[stid]
+// 	if ok {
+// 		t := template.New("")
+// 		t, err := t.Parse(STUDENT_MESSAGING_TEMPLATE)
+// 		if err == nil {
+// 			data := struct{ Message string }{Students[stid].Status}
+// 			w.Header().Set("Content-Type", "text/html")
+// 			t.Execute(w, data)
+// 		} else {
+// 			fmt.Println(err)
+// 		}
+// 	} else {
+// 		fmt.Fprint(w, "Error")
+// 	}
+// }

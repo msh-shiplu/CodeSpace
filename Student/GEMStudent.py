@@ -16,9 +16,15 @@ gemsFOLDER = ''
 # gemsUID = 0
 gemsTIMEOUT = 7
 gemsAnswerTag = 'ANSWER:'
-
+gemsTracking = False
+gemsUpdateMessage = {
+	1 : "Your submission being looked at."
+	2 : "Teacher did not grade your submission.  Try again."
+	3 : "Teacher did not think your submission was correct. Try again."
+	4 : "Your submission was correct."
+}
 # ------------------------------------------------------------------------------
-def gemsRequest(path, data, authenticated=True, method='POST'):
+def gemsRequest(path, data, authenticated=True, method='POST', verbal=True):
 	# global gemsUID
 	global gemsFOLDER
 	try:
@@ -28,11 +34,13 @@ def gemsRequest(path, data, authenticated=True, method='POST'):
 		info = dict()
 
 	if 'Server' not in info:
-		sublime.message_dialog("Please set server address.")
+		if verbal:
+			sublime.message_dialog("Please set server address.")
 		return None
 
 	if 'Folder' not in info:
-		sublime.message_dialog("Please set a local folder to store working files.")
+		if verbal:
+			sublime.message_dialog("Please set a local folder to store working files.")
 		return None
 
 	# data['server'] = info['Server']
@@ -53,9 +61,11 @@ def gemsRequest(path, data, authenticated=True, method='POST'):
 		with urllib.request.urlopen(req, None, gemsTIMEOUT) as response:
 			return response.read().decode(encoding="utf-8")
 	except urllib.error.HTTPError as err:
-		sublime.message_dialog("{0}".format(err))
+		if verbal:
+			sublime.message_dialog("{0}".format(err))
 	except urllib.error.URLError as err:
-		sublime.message_dialog("{0}\nCannot connect to server.".format(err))
+		if verbal:
+			sublime.message_dialog("{0}\nCannot connect to server.".format(err))
 	print('Error making request')
 	return None
 
@@ -130,7 +140,26 @@ def gems_problem_info(fname):
 	return orginal_fname, pid
 
 # ------------------------------------------------------------------
+def gems_periodic_update():
+	response = gemsRequest('student_periodic_update', {}, verbal=False)
+	submission_stat, board_stat = response.split(';')
+	submission_stat = int(submission_stat)
+	board_stat = int(board_stat)
+	if submission_stat > 0 and submission_stat in gemsUpdateMessage:
+		sublime.message_dialog(gemsUpdateMessage[submission_stat])
+	if board_stat == 1:
+		print('Get board')
+		sublime.active_window().run_command('gems_get_board_content')
+
+	update_timeout = 10000
+	if submission_stat == 1:
+		update_timeout = 5000
+	print('checking', submission_stat, board_stat, update_timeout)
+	sublime.set_timeout_async(gems_periodic_update, update_timeout)
+
+# ------------------------------------------------------------------
 def gems_share(self, edit, priority):
+	global gemsTracking
 	fname = self.view.file_name()
 	if fname is None:
 		sublime.message_dialog('Cannot share unsaved content.')
@@ -154,6 +183,9 @@ def gems_share(self, edit, priority):
 		)
 		response = gemsRequest('student_shares', data)
 		sublime.message_dialog(response)
+		if pid > 0 and gemsTracking==False:
+			gemsTracking = True
+			sublime.set_timeout_async(gems_periodic_update, 5000)
 
 # ------------------------------------------------------------------
 class gemsCheckin(sublime_plugin.WindowCommand):

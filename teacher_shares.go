@@ -22,7 +22,6 @@ func teacher_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			StartingTime: time.Now(),
 		}
 		Students[stid].Boards = append(Students[stid].Boards, b)
-		Students[stid].Status = "Teacher shared some material with you."
 	}
 	fmt.Fprintf(w, "Content shared to all students.")
 

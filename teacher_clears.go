@@ -35,7 +35,7 @@ func teacher_clearsHandler(w http.ResponseWriter, r *http.Request, who string, u
 	WorkingSubs = make([]*Submission, 0)
 	for stid, _ := range Students {
 		Students[stid].Boards = make([]*Board, 0)
-		Students[stid].Status = ""
+		Students[stid].SubmissionStatus = 0
 	}
 	fmt.Fprintf(w, "Done.")
 }

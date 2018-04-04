@@ -55,9 +55,15 @@ type Board struct {
 }
 
 type StudenInfo struct {
-	Password string
-	Boards   []*Board
-	Status   string
+	Password         string
+	Boards           []*Board
+	SubmissionStatus int
+	/*
+		1 submission being looked at.
+		2 teacher did not grade your submission (dismissed).
+		3 your submission was not correct.
+		4 your submission was correct.
+	*/
 }
 
 var Students = make(map[int]*StudenInfo)

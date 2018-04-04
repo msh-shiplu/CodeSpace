@@ -111,7 +111,6 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				StartingTime: time.Now(),
 			}
 			Students[stid].Boards = append(Students[stid].Boards, b)
-			Students[stid].Status = "You have a new problem on board."
 		}
 		if mode == "unicast" {
 			fmt.Fprintf(w, "Content copied to white boards.")
@@ -144,7 +143,6 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				StartingTime: time.Now(),
 			}
 			Students[stid].Boards = append(Students[stid].Boards, b)
-			Students[stid].Status = "You have a new problem on board."
 			i++
 		}
 		fmt.Fprintf(w, "Files saved randomly to white boards.")

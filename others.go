@@ -18,7 +18,7 @@ func testHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	// Show content of boards
 	fmt.Println("Students:", len(Students))
 	for uid, st := range Students {
-		fmt.Printf("Uid: %d has %d pages. Status: %s\n", uid, len(st.Boards), st.Status)
+		fmt.Printf("Uid: %d has %d pages. Status: %d\n", uid, len(st.Boards), st.SubmissionStatus)
 		for i := 0; i < len(st.Boards); i++ {
 			b := st.Boards[i]
 			fmt.Printf("Attempts: %d, Filename: %s, Pid: %d, Answer: %s, len of content: %d\n",
