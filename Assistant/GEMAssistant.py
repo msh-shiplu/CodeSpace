@@ -18,6 +18,44 @@ gemaHighestPriority = 2
 gemaStudentSubmissions = {}
 
 # ------------------------------------------------------------------
+# These functionalities are unique to the GEMAssistant module
+# ------------------------------------------------------------------
+class gemaPutBack(sublime_plugin.TextCommand):
+	def run(self, edit):
+		fname = self.view.file_name()
+		basename = os.path.basename(fname)
+		if not basename.startswith('gema') or basename.count('_') < 2:
+			sublime.message_dialog('This is not a student submission.')
+			return
+		if '.' in basename:
+			prefix, ext = basename.rsplit('.', 1)
+		else:
+			prefix = basename
+		prefix = prefix[4:]
+		stid, pid, sid = prefix.split('_')
+		try:
+			stid = int(stid)
+			pid = int(pid)
+			sid = int(sid)
+		except:
+			sublime.message_dialog('This is not a student submission.')
+			return
+
+		content = self.view.substr(sublime.Region(0, self.view.size())).strip()
+		data = dict(
+			sid = sid,
+			stid = stid,
+			pid = pid,
+			content = content,
+			priority = gemaHighestPriority,
+		)
+		response = gemaRequest('teacher_puts_back', data)
+		if response:
+			sublime.message_dialog(response)
+# ------------------------------------------------------------------
+
+
+# ------------------------------------------------------------------
 def gemaRequest(path, data, authenticated=True, localhost=False, method='POST'):
 	global gemaFOLDER
 	try:
@@ -86,39 +124,6 @@ class gemaAddBulletin(sublime_plugin.TextCommand):
 		if response:
 			sublime.message_dialog(response)
 
-# ------------------------------------------------------------------
-class gemaPutBack(sublime_plugin.TextCommand):
-	def run(self, edit):
-		fname = self.view.file_name()
-		basename = os.path.basename(fname)
-		if not basename.startswith('gema') or basename.count('_') < 2:
-			sublime.message_dialog('This is not a student submission.')
-			return
-		if '.' in basename:
-			prefix, ext = basename.rsplit('.', 1)
-		else:
-			prefix = basename
-		prefix = prefix[4:]
-		stid, pid, sid = prefix.split('_')
-		try:
-			stid = int(stid)
-			pid = int(pid)
-			sid = int(sid)
-		except:
-			sublime.message_dialog('This is not a student submission.')
-			return
-
-		content = self.view.substr(sublime.Region(0, self.view.size())).strip()
-		data = dict(
-			sid = sid,
-			stid = stid,
-			pid = pid,
-			content = content,
-			priority = gemaHighestPriority,
-		)
-		response = gemaRequest('teacher_puts_back', data)
-		if response:
-			sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
 def gema_grade(self, edit, decision):
@@ -176,11 +181,6 @@ class gemaDismissed(sublime_plugin.TextCommand):
 		gema_grade(self, edit, "dismissed")
 
 # ------------------------------------------------------------------
-def gema_rand_chars(n):
-	letters = 'abcdefghijklmkopqrstuvwxyzABCDEFGHIJKLMLOPQRSTUVWXYZ'
-	return ''.join(random.choice(letters) for i in range(n))
-
-# ------------------------------------------------------------------
 def gema_gets(self, index, priority):
 	global gemaStudentSubmissions
 	response = gemaRequest('teacher_gets', {'index':index, 'priority':priority})
@@ -230,7 +230,7 @@ class gemaSetServerAddress(sublime_plugin.WindowCommand):
 		except:
 			info = dict()
 		if 'Server' not in info:
-			info['Server'] = 'http://x.x.x.x:8080'
+			info['Server'] = ''
 		sublime.active_window().show_input_panel("Set server address.  Press Enter:",
 			info['Server'],
 			self.set,
@@ -261,7 +261,8 @@ class gemaSetLocalFolder(sublime_plugin.WindowCommand):
 				info = json.loads(f.read())
 		except:
 			info = dict()
-
+		if 'Folder' not in info:
+			info['Folder'] = os.path.join(os.path.expanduser('~'), 'GEMA')
 		sublime.active_window().show_input_panel("This folder will be used to store working files.",
 			info['Folder'],
 			self.set,

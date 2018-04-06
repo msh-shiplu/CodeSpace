@@ -70,7 +70,25 @@ def gemsRequest(path, data, authenticated=True, method='POST', verbal=True):
 	return None
 
 # ------------------------------------------------------------------
-class gemsGetReport(sublime_plugin.WindowCommand):
+class gemsAttendanceReport(sublime_plugin.WindowCommand):
+	def run(self):
+		response = gemsRequest('student_checks_in', {})
+		json_obj = json.loads(response)
+		dates = set()
+		for d in json_obj:
+			dates.add(datetime.datetime.fromtimestamp(d).strftime('%Y-%m-%d'))
+
+		with open(gemsFILE, 'r') as f:
+			info = json.loads(f.read())
+		report_file = os.path.join(info['Folder'], 'Attendance.txt')
+		with open(report_file, 'w', encoding='utf-8') as f:
+			f.write('Your attendance was taken on these dates:\n')
+			for d in sorted(dates, reverse=True):
+				f.write('{}\n'.format(d))
+		new_view = sublime.active_window().open_file(report_file)
+
+# ------------------------------------------------------------------
+class gemsPointsReport(sublime_plugin.WindowCommand):
 	def run(self):
 		response = gemsRequest('student_gets_report', {})
 		if response != None:
@@ -90,7 +108,7 @@ class gemsGetReport(sublime_plugin.WindowCommand):
 
 			with open(gemsFILE, 'r') as f:
 				info = json.loads(f.read())
-			report_file = os.path.join(info['Folder'], 'report.txt')
+			report_file = os.path.join(info['Folder'], 'Points.txt')
 			with open(report_file, 'w', encoding='utf-8') as f:
 				f.write('Total points: {}\n'.format(total_points))
 				for d,v in reversed(sorted(report.items())):
@@ -198,12 +216,6 @@ def gems_share(self, edit, priority):
 			sublime.set_timeout_async(gems_periodic_update, 5000)
 
 # ------------------------------------------------------------------
-class gemsCheckin(sublime_plugin.WindowCommand):
-	def run(self):
-		response = gemsRequest('student_checks_in', {})
-		sublime.message_dialog(response)
-
-# ------------------------------------------------------------------
 class gemsNeedHelp(sublime_plugin.TextCommand):
 	def run(self, edit):
 		gems_share(self, edit, priority=2)
@@ -212,11 +224,6 @@ class gemsNeedHelp(sublime_plugin.TextCommand):
 class gemsGotIt(sublime_plugin.TextCommand):
 	def run(self, edit):
 		gems_share(self, edit, priority=1)
-
-# ------------------------------------------------------------------
-def gems_rand_chars(n):
-	letters = 'abcdefghijklmkopqrstuvwxyzABCDEFGHIJKLMLOPQRSTUVWXYZ'
-	return ''.join(random.choice(letters) for i in range(n))
 
 # ------------------------------------------------------------------
 class gemsGetBoardContent(sublime_plugin.WindowCommand):

@@ -41,7 +41,7 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Excerpt to bullentin board",
+                "caption": "Add to bullentin board",
                 "id": "gemaAddBulletin",
                 "command": "gema_add_bulletin",
             },

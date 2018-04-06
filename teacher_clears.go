@@ -15,8 +15,11 @@ import (
 func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	active_pids := make([]int, 0)
 	for pid, prob := range ActiveProblems {
-		if prob.Active && len(prob.Answers) > 0 {
-			active_pids = append(active_pids, pid)
+		if prob.Active {
+			prob.Active = false
+			if len(prob.Answers) > 0 {
+				active_pids = append(active_pids, pid)
+			}
 		}
 	}
 	js, err := json.Marshal(active_pids)

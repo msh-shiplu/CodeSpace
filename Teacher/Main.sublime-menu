@@ -4,6 +4,12 @@
         "id": "GEMTeacher",
         "children": [
             {
+                "caption": "Share current file",
+                "id": "gemtShare",
+                "command": "gemt_share",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
                 "caption": "Start a problem",
                 "id": "gemtUnicast",
                 "command": "gemt_unicast",
@@ -57,18 +63,18 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Done with all problems",
+                "caption": "Time's up!",
                 "id": "gemtDeactivateProblem",
                 "command": "gemt_deactivate_problems",
             },
             {
-                "caption": "Clear boards and submissions",
+                "caption": "Clear",
                 "id": "gemtClearSubmissions",
                 "command": "gemt_clear_submissions",
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Excerpt to bullentin board",
+                "caption": "Add to bullentin board",
                 "id": "gemtAddBulletin",
                 "command": "gemt_add_bulletin",
             },
@@ -76,12 +82,6 @@
                 "caption": "View bullentin board",
                 "id": "gemtViewBulletinBoard",
                 "command": "gemt_view_bulletin_board",
-            },
-            {"caption":"-", "id":"side-bar-separator"},
-            {
-                "caption": "Copy tab to white boards",
-                "id": "gemtShare",
-                "command": "gemt_share",
             },
             {"caption":"-", "id":"side-bar-separator"},
             {

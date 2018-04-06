@@ -4,16 +4,31 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
-	// "strconv"
+	"time"
 )
 
 //-----------------------------------------------------------------
 
 func student_checks_inHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	// attendance is taken automatically by authorization
-	fmt.Fprint(w, "Ok")
+	// attendance is taken automatically by authorization when this handler is called.
+	// Next: return student attendance report
+	rows, err := Database.Query("select at from attendance where stid=?", uid)
+	defer rows.Close()
+	if err != nil {
+		panic(err)
+	}
+	dates := make([]int64, 0)
+	var t time.Time
+	for rows.Next() {
+		rows.Scan(&t)
+		dates = append(dates, t.Unix())
+	}
+	js, _ := json.Marshal(dates)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
 
 //-----------------------------------------------------------------
@@ -25,20 +40,4 @@ func student_periodic_updateHandler(w http.ResponseWriter, r *http.Request, who 
 	}
 	Students[uid].SubmissionStatus = 0 // reset status after notifying student
 	fmt.Fprintf(w, "%d;%d", submission_stat, board_stat)
-
-	// pid, _ := strconv.Atoi(r.FormValue("pid"))
-	// if prob, ok := ActiveProblems[pid]; ok {
-	// 	fmt.Println(pid, prob.Active, prob.Attempts[uid])
-	// 	if prob.Active && prob.Attempts[uid] >= 0 {
-	// 		code = 1
-	// 	}
-	// 	if !prob.Active {
-	// 		update_mesg = "Problem inactive"
-	// 		fmt.Println("inactive")
-	// 	}
-	// 	if prob.Attempts[uid] < 0 {
-	// 		update_mesg = "No more attempts"
-	// 		fmt.Println("No more attempts")
-	// 	}
-	// }
 }

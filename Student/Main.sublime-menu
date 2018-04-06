@@ -21,9 +21,9 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Check in",
-                "id": "gemsCheckin",
-                "command": "gems_checkin",
+                "caption": "Attendance",
+                "id": "gemsAttendanceReport",
+                "command": "gems_attendance_report",
             },
             // {
             //     "caption": "Messages",
@@ -32,8 +32,8 @@
             // },
             {
                 "caption": "Points",
-                "id": "gemsGetReport",
-                "command": "gems_get_report",
+                "id": "gemsPointsReport",
+                "command": "gems_points_report",
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
