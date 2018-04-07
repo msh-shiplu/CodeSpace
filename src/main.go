@@ -4,13 +4,15 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"math/rand"
 	"net"
 	"net/http"
-	"path/filepath"
+	"os"
+	// "path/filepath"
 	"time"
 )
 
@@ -39,8 +41,6 @@ func init_handlers() {
 	http.HandleFunc("/teacher_gets", Authorize(teacher_getsHandler))
 	http.HandleFunc("/teacher_broadcasts", Authorize(teacher_broadcastsHandler))
 	http.HandleFunc("/teacher_gets_passcode", Authorize(teacher_gets_passcodeHandler))
-
-	// this should be teacher_registers
 	http.HandleFunc("/teacher_completes_registration", teacher_completes_registrationHandler)
 }
 
@@ -59,22 +59,35 @@ func informIPAddress() string {
 }
 
 //-----------------------------------------------------------------
+func init_config(filename string) *Configuration {
+	file, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	decoder := json.NewDecoder(file)
+	config := &Configuration{}
+	err = decoder.Decode(&config)
+	if err != nil {
+		panic(err)
+	}
+	if config.IP == "" {
+		config.IP = informIPAddress()
+	}
+	config.Address = fmt.Sprintf("%s:%d", config.IP, config.Port)
+	fmt.Println(config)
+	return config
+}
+
+//-----------------------------------------------------------------
 func main() {
-	server := informIPAddress()
-	port := "8080"
-	ADDRESS = server + ":" + port
-	fmt.Println("*********************************************")
-	fmt.Printf("*   GEM (%s)\n", VERSION)
-	fmt.Printf("*   Server address: %s:%s\n", server, port)
-	fmt.Println("*********************************************\n")
 	rand.Seed(time.Now().UnixNano())
-	db_name := filepath.Join(".", "gem.sqlite3")
-	new_teacher, new_ta := "", ""
-	flag.StringVar(&db_name, "db", db_name, "user database (sqlite).")
+	new_teacher, new_ta, config_file := "", "", ""
+	flag.StringVar(&config_file, "config", config_file, "configuration file.")
 	flag.StringVar(&new_teacher, "add_teacher", new_teacher, "add a new teacher.")
 	flag.StringVar(&new_ta, "add_ta", new_ta, "add a new teaching assistant.")
 	flag.Parse()
-	init_database(db_name)
+	Config = init_config(config_file)
+	init_database(Config.Database)
 	if new_teacher != "" {
 		add_teacher(new_teacher)
 	} else if new_ta != "" {
@@ -82,7 +95,11 @@ func main() {
 	} else {
 		init_handlers()
 		load_teachers()
-		err := http.ListenAndServe("0.0.0.0:"+port, nil)
+		fmt.Println("*********************************************")
+		fmt.Printf("*   GEM (%s)\n", VERSION)
+		fmt.Printf("*   Server address: %s\n", Config.Address)
+		fmt.Println("*********************************************\n")
+		err := http.ListenAndServe(Config.Address, nil)
 		if err != nil {
 			panic(err.Error() + "\n")
 		}

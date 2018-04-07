@@ -9,7 +9,15 @@ import (
 
 const VERSION = "0.1"
 
-var ADDRESS string
+//---------------------------------------------------------
+type Configuration struct {
+	IP       string
+	Port     int
+	Database string
+	Address  string
+}
+
+var Config *Configuration
 
 //---------------------------------------------------------
 // Database
@@ -29,7 +37,6 @@ var UpdateScoreSQL *sql.Stmt
 // Authentication
 //---------------------------------------------------------
 
-// var Student = make(map[int]string)
 var Teacher = make(map[int]string)
 var Passcode string
 
@@ -67,9 +74,6 @@ type StudenInfo struct {
 }
 
 var Students = make(map[int]*StudenInfo)
-
-// var Boards = make(map[int][]*Board)
-// var MessageBoards = make(map[int]string)
 
 //---------------------------------------------------------
 

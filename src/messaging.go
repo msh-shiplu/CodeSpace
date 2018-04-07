@@ -113,7 +113,7 @@ func get_bulletin_board_data(i int, passcode string) *BulletinBoardMessage {
 		ActiveProblems: len(ActiveProblems),
 		BulletinItems:  len(BulletinBoard),
 		Attendance:     len(Students),
-		Address:        ADDRESS,
+		Address:        Config.Address,
 		Authenticated:  passcode == Passcode,
 	}
 	return data
