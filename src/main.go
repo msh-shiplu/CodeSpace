@@ -25,12 +25,11 @@ func init_handlers() {
 	http.HandleFunc("/student_checks_in", Authorize(student_checks_inHandler))
 	http.HandleFunc("/student_shares", Authorize(student_sharesHandler))
 	http.HandleFunc("/student_gets", Authorize(student_getsHandler))
-	http.HandleFunc("/student_registers", student_registersHandler)
-	// http.HandleFunc("/show_student_messages", student_messagesHandler)
 	http.HandleFunc("/view_bulletin_board", view_bulletin_boardHandler)
 	http.HandleFunc("/remove_bulletin_page", remove_bulletin_pageHandler)
 	http.HandleFunc("/bulletin_board_data", bulletin_board_dataHandler)
 	http.HandleFunc("/view_answers", view_answersHandler)
+	http.HandleFunc("/complete_registration", complete_registrationHandler)
 
 	http.HandleFunc("/teacher_adds_bulletin_page", Authorize(teacher_adds_bulletin_pageHandler))
 	http.HandleFunc("/teacher_clears", Authorize(teacher_clearsHandler))
@@ -41,7 +40,6 @@ func init_handlers() {
 	http.HandleFunc("/teacher_gets", Authorize(teacher_getsHandler))
 	http.HandleFunc("/teacher_broadcasts", Authorize(teacher_broadcastsHandler))
 	http.HandleFunc("/teacher_gets_passcode", Authorize(teacher_gets_passcodeHandler))
-	http.HandleFunc("/teacher_completes_registration", teacher_completes_registrationHandler)
 }
 
 //-----------------------------------------------------------------
@@ -74,24 +72,23 @@ func init_config(filename string) *Configuration {
 		config.IP = informIPAddress()
 	}
 	config.Address = fmt.Sprintf("%s:%d", config.IP, config.Port)
-	fmt.Println(config)
 	return config
 }
 
 //-----------------------------------------------------------------
 func main() {
 	rand.Seed(time.Now().UnixNano())
-	new_teacher, new_ta, config_file := "", "", ""
+	teacher_file, student_file, config_file := "", "", ""
 	flag.StringVar(&config_file, "config", config_file, "configuration file.")
-	flag.StringVar(&new_teacher, "add_teacher", new_teacher, "add a new teacher.")
-	flag.StringVar(&new_ta, "add_ta", new_ta, "add a new teaching assistant.")
+	flag.StringVar(&teacher_file, "add_teacher", teacher_file, "teacher file.")
+	flag.StringVar(&student_file, "add_student", student_file, "student file.")
 	flag.Parse()
 	Config = init_config(config_file)
 	init_database(Config.Database)
-	if new_teacher != "" {
-		add_teacher(new_teacher)
-	} else if new_ta != "" {
-		add_teacher(new_ta)
+	if teacher_file != "" {
+		add_multiple(teacher_file, "teacher")
+	} else if student_file != "" {
+		add_multiple(student_file, "student")
 	} else {
 		init_handlers()
 		load_teachers()

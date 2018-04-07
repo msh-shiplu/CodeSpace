@@ -47,9 +47,9 @@
                 "command": "gems_set_local_folder",
             },
             {
-                "caption": "Register",
-                "id": "gemsRegister",
-                "command": "gems_register",
+                "caption": "Complete registration",
+                "id": "gemsCompleteRegistration",
+                "command": "gems_complete_registration",
             },
             {"caption":"-", "id":"side-bar-separator"},
             {

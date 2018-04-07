@@ -466,14 +466,14 @@ class gemtCompleteRegistration(sublime_plugin.WindowCommand):
 			sublime.message_dialog("Please set server address.")
 			return None
 
-		mesg = 'Enter a new name'
+		mesg = 'Enter your assigned name'
 		if 'Name' in info:
 			mesg = '{} is already registered. Enter a new name or Esc:'.format(info['Name'])
 
 		if 'Name' not in info:
 			info['Name'] = ''
 
-		if sublime.ok_cancel_dialog("Register a username that has been added by the teacher."):
+		if sublime.ok_cancel_dialog("Register an assigned username."):
 			sublime.active_window().show_input_panel(
 				mesg,
 				info['Name'],
@@ -484,9 +484,13 @@ class gemtCompleteRegistration(sublime_plugin.WindowCommand):
 
 	def process(self, name):
 		name = name.strip()
-		response = gemtRequest('teacher_completes_registration', {'name':name}, authenticated=False)
+		response = gemtRequest(
+			'complete_registration',
+			{'name':name, 'role':'teacher'},
+			authenticated=False,
+		)
 		if response == 'Failed':
-			sublime.message_dialog('This name is not registered. Ask the teacher to add it.')
+			sublime.message_dialog('Failed to complete registration.')
 		else:
 			uid, password = response.split(',')
 			try:

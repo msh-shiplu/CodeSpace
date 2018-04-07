@@ -32,13 +32,16 @@ func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request,
 }
 
 //-----------------------------------------------------------------------------------
-// All submissions are cleared.  All boards are cleared.
+// Clear submissions, boards, statuses, and set all problems inactive.
 //-----------------------------------------------------------------------------------
 func teacher_clearsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	WorkingSubs = make([]*Submission, 0)
 	for stid, _ := range Students {
 		Students[stid].Boards = make([]*Board, 0)
 		Students[stid].SubmissionStatus = 0
+	}
+	for _, prob := range ActiveProblems {
+		prob.Active = false
 	}
 	fmt.Fprintf(w, "Done.")
 }

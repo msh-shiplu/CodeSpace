@@ -145,6 +145,11 @@ func add_or_update_score(decision string, pid, stid, tid int) string {
 }
 
 //-----------------------------------------------------------------
+func init_teacher(id int, password string) {
+	Teacher[id] = password
+}
+
+//-----------------------------------------------------------------
 // initialize once per session
 //-----------------------------------------------------------------
 func init_student(stid int, password string) {

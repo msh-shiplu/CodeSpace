@@ -253,43 +253,47 @@ class gemsGetBoardContent(sublime_plugin.WindowCommand):
 			sublime.active_window().open_file(new_fname)
 
 # ------------------------------------------------------------------
-class gemsRegister(sublime_plugin.WindowCommand):
+class gemsCompleteRegistration(sublime_plugin.WindowCommand):
 	def run(self):
 		try:
 			with open(gemsFILE, 'r') as f:
 				info = json.loads(f.read())
 		except:
 			info = dict()
+		if 'Folder' not in info:
+			sublime.message_dialog("Please set a local folder for keeping working files.")
+			return None
 
 		if 'Server' not in info:
 			sublime.message_dialog("Please set server address.")
 			return None
 
-		if 'Folder' not in info:
-			sublime.message_dialog("Please set a local folder to store working files.")
-			return None
-
-		mesg = 'Enter a new name'
+		mesg = 'Enter your assigned name'
 		if 'Name' in info:
 			mesg = '{} is already registered. Enter a new name or Esc:'.format(info['Name'])
 
 		if 'Name' not in info:
 			info['Name'] = ''
 
-		sublime.active_window().show_input_panel(
-			mesg,
-			info['Name'],
-			self.process,
-			None,
-			None,
-		)
+		if sublime.ok_cancel_dialog("Register an assigned username."):
+			sublime.active_window().show_input_panel(
+				mesg,
+				info['Name'],
+				self.process,
+				None,
+				None,
+			)
 
 	def process(self, name):
 		name = name.strip()
-		response = gemsRequest('student_registers', {'name':name}, authenticated=False)
-		if response == 'exist':
-			sublime.message_dialog('{} exists. Choose a different name.'.format(name))
-		else:
+		response = gemsRequest(
+			'complete_registration',
+			{'name':name, 'role':'student'},
+			authenticated=False,
+		)
+		if response == 'Failed':
+			sublime.message_dialog('Failed to complete registration.')
+		elif response!=None:
 			uid, password = response.split(',')
 			try:
 				with open(gemsFILE, 'r') as f:
@@ -302,6 +306,57 @@ class gemsRegister(sublime_plugin.WindowCommand):
 			with open(gemsFILE, 'w') as f:
 				f.write(json.dumps(info, indent=4))
 			sublime.message_dialog('{} registered'.format(name))
+
+
+# class gemsRegister(sublime_plugin.WindowCommand):
+# 	def run(self):
+# 		try:
+# 			with open(gemsFILE, 'r') as f:
+# 				info = json.loads(f.read())
+# 		except:
+# 			info = dict()
+
+# 		if 'Server' not in info:
+# 			sublime.message_dialog("Please set server address.")
+# 			return None
+
+# 		if 'Folder' not in info:
+# 			sublime.message_dialog("Please set a local folder to store working files.")
+# 			return None
+
+# 		mesg = 'Enter a new name'
+# 		if 'Name' in info:
+# 			mesg = '{} is already registered. Enter a new name or Esc:'.format(info['Name'])
+
+# 		if 'Name' not in info:
+# 			info['Name'] = ''
+
+# 		sublime.active_window().show_input_panel(
+# 			mesg,
+# 			info['Name'],
+# 			self.process,
+# 			None,
+# 			None,
+# 		)
+
+# 	def process(self, name):
+# 		name = name.strip()
+# 		response = gemsRequest('student_registers', {'name':name}, authenticated=False)
+# 		if response == 'exist':
+# 			sublime.message_dialog('{} exists. Choose a different name.'.format(name))
+# 		else:
+# 			uid, password = response.split(',')
+# 			try:
+# 				with open(gemsFILE, 'r') as f:
+# 					info = json.loads(f.read())
+# 			except:
+# 				info = dict()
+# 			info['Uid'] = int(uid)
+# 			info['Password'] = password
+# 			info['Name'] = name
+# 			with open(gemsFILE, 'w') as f:
+# 				f.write(json.dumps(info, indent=4))
+# 			sublime.message_dialog('{} registered'.format(name))
 
 # ------------------------------------------------------------------
 class gemsSetLocalFolder(sublime_plugin.WindowCommand):
