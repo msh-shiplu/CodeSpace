@@ -1,0 +1,110 @@
+[
+    {
+        "caption": "GEM",
+        "id": "GEMTeacher",
+        "children": [
+            {
+                "caption": "Share current file",
+                "id": "gemtShare",
+                "command": "gemt_share",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Start a problem",
+                "id": "gemtUnicast",
+                "command": "gemt_unicast",
+            },
+            {
+                "caption": "Start problems (Concurrent)",
+                "id": "gemtMulticastAnd",
+                "command": "gemt_multicast_and",
+            },
+            {
+                "caption": "Start problems (Sequential)",
+                "id": "gemtMulticastSeq",
+                "command": "gemt_multicast_seq",
+            },
+            {
+                "caption": "Start problems (Randomized)",
+                "id": "gemtMulticastOr",
+                "command": "gemt_multicast_or",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Get submission",
+                "id": "gemtGetPrioritized",
+                "command": "gemt_get_prioritized",
+            },
+            {
+                "caption": "Get 😎 submission",
+                "id": "gemtGetFromOk",
+                "command": "gemt_get_from_ok",
+            },
+            {
+                "caption": "Get 😥 submission",
+                "id": "gemtGetFromNeedHelp",
+                "command": "gemt_get_from_need_help",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "✔  Mark correct",
+                "id": "gemtGradeCorrect",
+                "command": "gemt_grade_correct",
+            },
+            {
+                "caption": "✘  Mark incorrect",
+                "id": "gemtGradeIncorrect",
+                "command": "gemt_grade_incorrect",
+            },
+            {
+                "caption": "✂ Mark dismissed",
+                "id": "gemtDismissed",
+                "command": "gemt_dismissed",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Time's up!",
+                "id": "gemtDeactivateProblem",
+                "command": "gemt_deactivate_problems",
+            },
+            {
+                "caption": "Clear",
+                "id": "gemtClearSubmissions",
+                "command": "gemt_clear_submissions",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Add to bullentin board",
+                "id": "gemtAddBulletin",
+                "command": "gemt_add_bulletin",
+            },
+            {
+                "caption": "View bullentin board",
+                "id": "gemtViewBulletinBoard",
+                "command": "gemt_view_bulletin_board",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Set server address",
+                "id": "gemtSetServerAddress",
+                "command": "gemt_set_server_address",
+            },
+            {
+                "caption": "Set working folder",
+                "id": "gemtSetLocalFolder",
+                "command": "gemt_set_local_folder",
+            },
+            {
+                "caption": "Complete registration",
+                "id": "gemtCompleteRegistration",
+                "command": "gemt_complete_registration",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Test",
+                "id": "gemtTest",
+                "command": "gemt_test",
+            },
+        ]
+    }
+]

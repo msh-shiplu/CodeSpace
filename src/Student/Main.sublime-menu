@@ -1,0 +1,62 @@
+[
+    {
+        "caption": "Gem",
+        "id": "GEMStudent",
+        "children": [
+            {
+                "caption": "White board",
+                "id": "gemsGetBoardContent",
+                "command": "gems_get_board_content",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Help me! 😥",
+                "id": "gemsNeedHelp",
+                "command": "gems_need_help",
+            },
+            {
+                "caption": "I got this 😎",
+                "id": "gemsGotIt",
+                "command": "gems_got_it",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Attendance",
+                "id": "gemsAttendanceReport",
+                "command": "gems_attendance_report",
+            },
+            // {
+            //     "caption": "Messages",
+            //     "id": "gemsShowMessages",
+            //     "command": "gems_show_messages",
+            // },
+            {
+                "caption": "Points",
+                "id": "gemsPointsReport",
+                "command": "gems_points_report",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Set server address",
+                "id": "gemsSetServerAddress",
+                "command": "gems_set_server_address",
+            },
+            {
+                "caption": "Set working folder",
+                "id": "gemsSetLocalFolder",
+                "command": "gems_set_local_folder",
+            },
+            {
+                "caption": "Register",
+                "id": "gemsRegister",
+                "command": "gems_register",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Update GEM",
+                "id": "gemsUpdate",
+                "command": "gems_update",
+            },
+        ]
+    }
+]
