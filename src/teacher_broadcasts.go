@@ -33,14 +33,13 @@ func extract_problems(content, answers, merits, efforts, attempts, filenames, di
 	ef := strings.Split(efforts, "\n")
 	at := strings.Split(attempts, "\n")
 	fn := strings.Split(filenames, "\n")
-
 	problems := make([]*ProblemInfo, 0)
 	for i := 0; i < len(c); i++ {
 		merit, _ := strconv.Atoi(m[i])
 		effort, _ := strconv.Atoi(ef[i])
 		attempt, _ := strconv.Atoi(at[i])
 		p := &ProblemInfo{
-			Description:     c[i],
+			Description:     strings.TrimLeft(c[i], " \n"),
 			Filename:        fn[i],
 			Answer:          an[i],
 			Merit:           merit,

@@ -129,9 +129,9 @@ def gemt_get_next_problems(fns, mode):
 		# determine next if incorrect or fns[i]
 		for i in range(len(names)-1):
 			nii[i] = i+1
-		print(names)
-		print(nic)
-		print(nii)
+		# print(names)
+		# print(nic)
+		# print(nii)
 		return [n[1] for n in names], nic, nii
 	except:
 		return None, None, None

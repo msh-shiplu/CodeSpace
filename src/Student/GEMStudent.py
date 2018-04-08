@@ -11,6 +11,7 @@ import random
 import datetime
 import webbrowser
 
+gemsUpdateTimeout = 10000
 gemsFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemsFOLDER = ''
 # gemsUID = 0
@@ -159,34 +160,39 @@ def gems_problem_info(fname):
 
 # ------------------------------------------------------------------
 def gems_periodic_update():
+	global gemsTracking
 	response = gemsRequest('student_periodic_update', {}, verbal=False)
 	if response is None:
 		print('Response is None. Stop tracking.')
+		gemsTracking = False
 		return
-	submission_stat, board_stat = response.split(';')
-	submission_stat = int(submission_stat)
-	board_stat = int(board_stat)
+	try:
+		submission_stat, board_stat = response.split(';')
+		submission_stat = int(submission_stat)
+		board_stat = int(board_stat)
 
-	# Display messages if necessary
-	mesg = ""
-	if submission_stat > 0 and submission_stat in gemsUpdateMessage:
-		mesg = gemsUpdateMessage[submission_stat]
-	if board_stat == 1:
-		mesg += "\nTeacher put something on your board."
-	mesg = mesg.strip()
-	if mesg != "":
-		sublime.message_dialog(mesg)
+		# Display messages if necessary
+		mesg = ""
+		if submission_stat > 0 and submission_stat in gemsUpdateMessage:
+			mesg = gemsUpdateMessage[submission_stat]
+		if board_stat == 1:
+			mesg += "\nTeacher put something on your board."
+		mesg = mesg.strip()
+		if mesg != "":
+			sublime.message_dialog(mesg)
 
-	# Open board pages and feedback automatically
-	if board_stat == 1:
-		sublime.active_window().run_command('gems_get_board_content')
+		# Open board pages and feedback automatically
+		if board_stat == 1:
+			sublime.active_window().run_command('gems_get_board_content')
 
-	# Keep checking periodically
-	update_timeout = 10000
-	if submission_stat == 1:
-		update_timeout = 5000
-	print('checking', submission_stat, board_stat, update_timeout)
-	sublime.set_timeout_async(gems_periodic_update, update_timeout)
+		# Keep checking periodically
+		update_timeout = gemsUpdateTimeout
+		if submission_stat == 1:
+			update_timeout = gemsUpdateTimeout // 2
+		print('checking', submission_stat, board_stat, update_timeout)
+		sublime.set_timeout_async(gems_periodic_update, update_timeout)
+	except:
+		gemsTracking = False
 
 # ------------------------------------------------------------------
 def gems_share(self, edit, priority):
