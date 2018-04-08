@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -139,7 +140,7 @@ func view_bulletin_boardHandler(w http.ResponseWriter, r *http.Request) {
 	temp := template.New("")
 	t, err2 := temp.Parse(TEACHER_MESSAGING_TEMPLATE)
 	if err2 != nil {
-		panic(err2)
+		log.Fatal(err2)
 	}
 	data := get_bulletin_board_data(i, passcode)
 	w.Header().Set("Content-Type", "text/html")

@@ -5,8 +5,8 @@ package main
 
 import (
 	"database/sql"
-	// "fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
 	"time"
 )
 
@@ -14,7 +14,7 @@ func create_tables() {
 	execSQL := func(s string) {
 		sql_stmt, err := Database.Prepare(s)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		sql_stmt.Exec()
 	}
@@ -35,14 +35,14 @@ func init_database(db_name string) {
 	prepare := func(s string) *sql.Stmt {
 		stmt, err := Database.Prepare(s)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		return stmt
 	}
 
 	Database, err = sql.Open("sqlite3", db_name)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	create_tables()
 	AddStudentSQL = prepare("insert into student (name, password) values (?, ?)")
@@ -144,12 +144,12 @@ func add_or_update_score(decision string, pid, stid, tid int) string {
 	if score_id == 0 {
 		_, err := AddScoreSQL.Exec(pid, stid, tid, points, current_attempts+1, time.Now())
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 	} else {
 		_, err := UpdateScoreSQL.Exec(teacher, points, current_attempts+1, score_id)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 	}
 	return mesg

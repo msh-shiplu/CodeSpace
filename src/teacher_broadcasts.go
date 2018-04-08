@@ -5,6 +5,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -62,14 +63,14 @@ func assign_next_problem_pid(problems []*ProblemInfo, next_if_correct, next_if_i
 		if nic[i] != "-1" {
 			idx, err := strconv.Atoi(nic[i])
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 			problems[i].NextIfCorrect = problems[idx].Pid
 		}
 		if nii[i] != "-1" {
 			idx, err := strconv.Atoi(nii[i])
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 			problems[i].NextIfIncorrect = problems[idx].Pid
 		}
@@ -120,7 +121,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				time.Now(),
 			)
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 			pid, _ = result.LastInsertId()
 			problems[i].Pid = int(pid)

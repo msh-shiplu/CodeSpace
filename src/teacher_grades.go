@@ -53,6 +53,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	student_mesg += scoring_mesg
 	if decision == "correct" {
 		Students[stid].SubmissionStatus = 4
+		ActiveProblems[pid].Attempts[stid] = 0 // This prevents further submission.
 	} else {
 		Students[stid].SubmissionStatus = 3
 	}

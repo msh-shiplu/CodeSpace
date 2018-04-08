@@ -6,6 +6,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -18,7 +19,7 @@ func student_checks_inHandler(w http.ResponseWriter, r *http.Request, who string
 	rows, err := Database.Query("select at from attendance where stid=?", uid)
 	defer rows.Close()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	dates := make([]int64, 0)
 	var t time.Time

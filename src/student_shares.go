@@ -5,6 +5,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -20,49 +21,38 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	correct_answer := ""
 	msg := "Your submission will be looked at soon."
 	if pid > 0 { // only keep in database submissions related to problems
-		active_problem, ok := ActiveProblems[pid]
-		if !ok {
-			fmt.Fprintf(w, "This is not a known problem.")
-			return
-		}
-		if !active_problem.Active {
+		if prob, ok := ActiveProblems[pid]; !ok || !prob.Active {
 			fmt.Fprintf(w, "This problem is no longer active.")
 			return
 		}
 		if _, ok := ActiveProblems[pid].Attempts[uid]; !ok {
 			ActiveProblems[pid].Attempts[uid] = ActiveProblems[pid].Info.Attempts
 		}
-		ActiveProblems[pid].Attempts[uid] -= 1
-		if ActiveProblems[pid].Attempts[uid] < 0 {
-			fmt.Fprintf(w, "Submission limit reached. Not submitted.")
+		if ActiveProblems[pid].Attempts[uid] == 0 {
+			fmt.Fprintf(w, "This is not submitted because either you have reached the submission limit or your solution was previously graded correctly.")
 			return
 		}
 
-		// Reject submission if already graded correctly.
-		rows, _ := Database.Query("select points from score where pid=? and stid=?", pid, uid)
-		current_points := 0
-		for rows.Next() {
-			rows.Scan(&current_points)
-			break
-		}
-		rows.Close()
-		if current_points == ActiveProblems[pid].Info.Merit {
-			fmt.Fprintf(w, "Your solution was previously graded correct. No need to resubmit your solution.")
-			return
+		// Decrement attempts
+		ActiveProblems[pid].Attempts[uid] -= 1
+		if ActiveProblems[pid].Attempts[uid] <= 3 {
+			msg += fmt.Sprintf(" You have %d attempt(s) left.", ActiveProblems[pid].Attempts[uid])
 		}
 
 		// Add to submission queue
 		result, err := AddSubmissionSQL.Exec(pid, uid, content, priority, time.Now())
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		sid, _ = result.LastInsertId()
+
+		// Autograding if possible
 		correct_answer = ActiveProblems[pid].Info.Answer
 		if answer != "" {
 			ActiveProblems[pid].Answers = append(ActiveProblems[pid].Answers, answer)
 			if correct_answer == answer {
-				// Auto-grading: set tid to 0
 				scoring_mesg := add_or_update_score("correct", pid, uid, 0)
+				ActiveProblems[pid].Attempts[uid] = 0 // This prevents further submission
 				fmt.Fprintf(w, scoring_mesg)
 				return
 			}

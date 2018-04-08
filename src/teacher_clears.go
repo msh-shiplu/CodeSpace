@@ -6,6 +6,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -31,7 +32,7 @@ func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request,
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(js)
 	} else {
-		panic(err)
+		log.Fatal(err)
 	}
 }
 

@@ -5,7 +5,7 @@ package main
 
 import (
 	"encoding/json"
-	// "fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -21,7 +21,7 @@ func student_gets_reportHandler(w http.ResponseWriter, r *http.Request, who stri
 	rows, err := Database.Query("select score.points, score.at, problem.filename from score join problem on problem.id == score.pid where stid=?", uid)
 	defer rows.Close()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	report := make([]*StudentReport, 0)
 	var points int

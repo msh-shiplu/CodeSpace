@@ -155,7 +155,7 @@ def gemt_broadcast(content, answers, merits, efforts, attempts, filenames, exts,
 	}
 	response = gemtRequest('teacher_broadcasts', data)
 	if response is not None:
-		sublime.message_dialog(response)
+		sublime.status_message(response)
 
 # ------------------------------------------------------------------
 def gemt_multicast(self, edit, tag, mode, mesg):

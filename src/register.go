@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -13,7 +14,7 @@ import (
 func add_multiple(filename, role string) {
 	file, err := os.Open(filename)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -34,12 +35,12 @@ func add_user(name, role string) {
 	if role == "teacher" {
 		rows, err = Database.Query("select name from teacher where name=?", name)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 	} else {
 		rows, err = Database.Query("select name from student where name=?", name)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 	}
 	defer rows.Close()
@@ -54,11 +55,11 @@ func add_user(name, role string) {
 		result, err = AddStudentSQL.Exec(name, password)
 	}
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	id, err = result.LastInsertId()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	if role == "teacher" {
 		init_teacher(int(id), password)
@@ -85,7 +86,7 @@ func complete_registrationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	var password string
 	var id int
@@ -96,63 +97,5 @@ func complete_registrationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprintf(w, "Failed")
 }
-
-//-----------------------------------------------------------------
-// func add_student(name string) {
-// 	var err error
-// 	var rows *sql.Rows
-// 	var result sql.Result
-// 	var id int64
-// 	rows, err = Database.Query("select name from student where name=?", name)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	defer rows.Close()
-// 	for rows.Next() {
-// 		fmt.Printf("%s already exists.\n", name)
-// 		return
-// 	}
-// 	password := RandStringRunes(12)
-// 	result, err = AddStudentSQL.Exec(name, password)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	id, err = result.LastInsertId()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	init_student(int(id), password)
-// 	fmt.Printf("%s is added. Must complete registeration.\n", name)
-// }
-
-//-----------------------------------------------------------------
-// func student_registersHandler(w http.ResponseWriter, r *http.Request) {
-// 	name := r.FormValue("name")
-// 	rows, err := Database.Query("select name from student where name=?", name)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	defer rows.Close()
-// 	i := 0
-// 	for rows.Next() {
-// 		i++
-// 	}
-// 	if i > 0 {
-// 		fmt.Fprintf(w, "exist")
-// 	} else {
-// 		password := RandStringRunes(12)
-// 		result, err2 := AddStudentSQL.Exec(name, password)
-// 		if err2 != nil {
-// 			panic(err2)
-// 		}
-// 		id, err3 := result.LastInsertId()
-// 		if err3 != nil {
-// 			panic(err3)
-// 		}
-// 		init_student(int(id), password)
-// 		// Send password back to student
-// 		fmt.Fprintf(w, fmt.Sprintf("%d,%s", id, password))
-// 	}
-// }
 
 //-----------------------------------------------------------------

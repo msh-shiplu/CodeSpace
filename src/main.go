@@ -8,11 +8,11 @@ import (
 	"flag"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
 	"math/rand"
 	"net"
 	"net/http"
 	"os"
-	// "path/filepath"
 	"time"
 )
 
@@ -46,7 +46,7 @@ func init_handlers() {
 func informIPAddress() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-		panic(err.Error() + "\n")
+		log.Fatal(err)
 	}
 	for _, a := range addrs {
 		if ipnet, ok := a.(*net.IPNet); ok && ipnet.IP.IsGlobalUnicast() {
@@ -60,13 +60,13 @@ func informIPAddress() string {
 func init_config(filename string) *Configuration {
 	file, err := os.Open(filename)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	decoder := json.NewDecoder(file)
 	config := &Configuration{}
 	err = decoder.Decode(&config)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	if config.IP == "" {
 		config.IP = informIPAddress()
@@ -83,6 +83,9 @@ func main() {
 	flag.StringVar(&teacher_file, "add_teacher", teacher_file, "teacher file.")
 	flag.StringVar(&student_file, "add_student", student_file, "student file.")
 	flag.Parse()
+	if config_file == "" {
+		log.Fatal("Must provide json configuration file.")
+	}
 	Config = init_config(config_file)
 	init_database(Config.Database)
 	if teacher_file != "" {
@@ -98,7 +101,7 @@ func main() {
 		fmt.Println("*********************************************\n")
 		err := http.ListenAndServe(Config.Address, nil)
 		if err != nil {
-			panic(err.Error() + "\n")
+			log.Fatal(err)
 		}
 	}
 }
