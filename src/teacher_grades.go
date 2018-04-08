@@ -18,6 +18,8 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	pid, _ := strconv.Atoi(r.FormValue("pid"))
 	stid, _ := strconv.Atoi(r.FormValue("stid"))
 	mesg, student_mesg := "", ""
+
+	// If the original file is changed, there's feedback.  Copy it to whiteboard.
 	if changed == "True" {
 		if prob, ok := ActiveProblems[pid]; ok {
 			AddFeedbackSQL.Exec(uid, stid, content, time.Now())
@@ -36,12 +38,16 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			Students[stid].Boards = append(Students[stid].Boards, b)
 		}
 	}
+
+	// If submission is dismissed, do not take that attempt away from the student.
 	if decision == "dismissed" {
 		Students[stid].SubmissionStatus = 2
 		ActiveProblems[pid].Attempts[stid] += 1
 		fmt.Fprintf(w, "Submission dismissed.")
 		return
 	}
+
+	// Update score based on the grading decision
 	scoring_mesg := add_or_update_score(decision, pid, stid, uid)
 	mesg = scoring_mesg + "\n" + mesg
 	student_mesg += scoring_mesg

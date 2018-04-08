@@ -68,7 +68,7 @@
                 "command": "gemt_deactivate_problems",
             },
             {
-                "caption": "Clear",
+                "caption": "Empty submission queue",
                 "id": "gemtClearSubmissions",
                 "command": "gemt_clear_submissions",
             },
@@ -85,21 +85,26 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Set server address",
-                "id": "gemtSetServerAddress",
-                "command": "gemt_set_server_address",
+                "caption": "Configure",
+                "id": "GEMTConfigure",
+                "children": [
+                    {
+                        "caption": "Set server address",
+                        "id": "gemtSetServerAddress",
+                        "command": "gemt_set_server_address",
+                    },
+                    {
+                        "caption": "Set working folder",
+                        "id": "gemtSetLocalFolder",
+                        "command": "gemt_set_local_folder",
+                    },
+                    {
+                        "caption": "Complete registration",
+                        "id": "gemtCompleteRegistration",
+                        "command": "gemt_complete_registration",
+                    },
+                ]
             },
-            {
-                "caption": "Set working folder",
-                "id": "gemtSetLocalFolder",
-                "command": "gemt_set_local_folder",
-            },
-            {
-                "caption": "Complete registration",
-                "id": "gemtCompleteRegistration",
-                "command": "gemt_complete_registration",
-            },
-            {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Test",
                 "id": "gemtTest",

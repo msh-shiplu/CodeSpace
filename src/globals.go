@@ -94,19 +94,20 @@ var WorkingSubs = make([]*Submission, 0)
 
 //---------------------------------------------------------
 type ProblemInfo struct {
-	Description string
-	Filename    string
-	Answer      string
-	Merit       int
-	Effort      int
-	Attempts    int
-	Pid         int
+	Description     string
+	Filename        string
+	Answer          string
+	Merit           int
+	Effort          int
+	Attempts        int
+	Pid             int
+	NextIfCorrect   int
+	NextIfIncorrect int
 }
 
 type ActiveProblem struct {
 	Info     *ProblemInfo
 	Answers  []string
-	Next     int
 	Active   bool
 	Attempts map[int]int
 }

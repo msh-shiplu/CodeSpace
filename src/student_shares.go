@@ -38,6 +38,20 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			return
 		}
 
+		// Reject submission if already graded correctly.
+		rows, _ := Database.Query("select points from score where pid=? and stid=?", pid, uid)
+		current_points := 0
+		for rows.Next() {
+			rows.Scan(&current_points)
+			break
+		}
+		rows.Close()
+		if current_points == ActiveProblems[pid].Info.Merit {
+			fmt.Fprintf(w, "Your solution was previously graded correct. No need to resubmit your solution.")
+			return
+		}
+
+		// Add to submission queue
 		result, err := AddSubmissionSQL.Exec(pid, uid, content, priority, time.Now())
 		if err != nil {
 			panic(err)
@@ -52,9 +66,6 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 				fmt.Fprintf(w, scoring_mesg)
 				return
 			}
-		}
-		if ActiveProblems[pid].Attempts[uid] == 0 {
-			msg += add_next_problem_to_board(pid, uid)
 		}
 	}
 	SubSem.Lock()

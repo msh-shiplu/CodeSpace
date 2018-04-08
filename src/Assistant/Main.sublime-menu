@@ -52,19 +52,25 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Set server address",
-                "id": "gemaSetServerAddress",
-                "command": "gema_set_server_address",
-            },
-            {
-                "caption": "Set working folder",
-                "id": "gemaSetLocalFolder",
-                "command": "gema_set_local_folder",
-            },
-            {
-                "caption": "Complete registration",
-                "id": "gemaCompleteRegistration",
-                "command": "gema_complete_registration",
+                "caption": "Configure",
+                "id": "GemTASetup",
+                "children": [
+                    {
+                        "caption": "Set server address",
+                        "id": "gemaSetServerAddress",
+                        "command": "gema_set_server_address",
+                    },
+                    {
+                        "caption": "Set working folder",
+                        "id": "gemaSetLocalFolder",
+                        "command": "gema_set_local_folder",
+                    },
+                    {
+                        "caption": "Complete registration",
+                        "id": "gemaCompleteRegistration",
+                        "command": "gema_complete_registration",
+                    },
+                ]
             },
         ]
     }

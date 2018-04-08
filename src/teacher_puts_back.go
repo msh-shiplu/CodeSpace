@@ -19,7 +19,7 @@ func teacher_puts_backHandler(w http.ResponseWriter, r *http.Request, who string
 
 	SubSem.Lock()
 	defer SubSem.Unlock()
-	if prob, ok := ActiveProblems[pid]; ok {
+	if prob, ok := ActiveProblems[pid]; ok && prob.Active {
 		sub := &Submission{
 			Sid:      sid,
 			Uid:      stid,
@@ -31,8 +31,9 @@ func teacher_puts_backHandler(w http.ResponseWriter, r *http.Request, who string
 		}
 		WorkingSubs = append(WorkingSubs, sub)
 		fmt.Fprintf(w, "OK")
+	} else {
+		fmt.Fprintf(w, "This problem is not active.  Cannot put back.")
 	}
-	fmt.Fprintf(w, "This problem is not active.  Cannot put back.")
 }
 
 // //-----------------------------------------------------------------------------------

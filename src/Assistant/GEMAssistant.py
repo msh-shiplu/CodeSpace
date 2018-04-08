@@ -24,7 +24,7 @@ class gemaPutBack(sublime_plugin.TextCommand):
 	def run(self, edit):
 		fname = self.view.file_name()
 		basename = os.path.basename(fname)
-		if not basename.startswith('gema') or basename.count('_') < 2:
+		if not basename.startswith('gemt') or basename.count('_') < 2:
 			sublime.message_dialog('This is not a student submission.')
 			return
 		if '.' in basename:
@@ -40,7 +40,6 @@ class gemaPutBack(sublime_plugin.TextCommand):
 		except:
 			sublime.message_dialog('This is not a student submission.')
 			return
-
 		content = self.view.substr(sublime.Region(0, self.view.size())).strip()
 		data = dict(
 			sid = sid,
@@ -52,6 +51,8 @@ class gemaPutBack(sublime_plugin.TextCommand):
 		response = gemaRequest('teacher_puts_back', data)
 		if response:
 			sublime.message_dialog(response)
+		self.view.window().run_command('close')
+
 # ------------------------------------------------------------------
 
 

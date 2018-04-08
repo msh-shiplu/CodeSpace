@@ -18,10 +18,10 @@ gemsTIMEOUT = 7
 gemsAnswerTag = 'ANSWER:'
 gemsTracking = False
 gemsUpdateMessage = {
-	1 : "Your submission being looked at.",
-	2 : "Teacher did not grade your submission.  Try again.",
-	3 : "Teacher did not think your submission was correct. Try again.",
-	4 : "Your submission was correct.",
+	1 : "Your submission is being looked at.",
+	2 : "Teacher did not grade your submission.",
+	3 : "Good effort!!!  However, the teacher did not think your solution was correct. Try again.",
+	4 : "Your solution was correct.",
 }
 # ------------------------------------------------------------------------------
 def gemsRequest(path, data, authenticated=True, method='POST', verbal=True):
@@ -160,6 +160,9 @@ def gems_problem_info(fname):
 # ------------------------------------------------------------------
 def gems_periodic_update():
 	response = gemsRequest('student_periodic_update', {}, verbal=False)
+	if response is None:
+		print('Response is None. Stop tracking.')
+		return
 	submission_stat, board_stat = response.split(';')
 	submission_stat = int(submission_stat)
 	board_stat = int(board_stat)

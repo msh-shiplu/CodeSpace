@@ -40,12 +40,14 @@ func extract_problems(content, answers, merits, efforts, attempts, filenames, di
 		effort, _ := strconv.Atoi(ef[i])
 		attempt, _ := strconv.Atoi(at[i])
 		p := &ProblemInfo{
-			Description: c[i],
-			Filename:    fn[i],
-			Answer:      an[i],
-			Merit:       merit,
-			Effort:      effort,
-			Attempts:    attempt,
+			Description:     c[i],
+			Filename:        fn[i],
+			Answer:          an[i],
+			Merit:           merit,
+			Effort:          effort,
+			Attempts:        attempt,
+			NextIfCorrect:   0,
+			NextIfIncorrect: 0,
 		}
 		problems = append(problems, p)
 		// fmt.Println(p)
@@ -53,6 +55,30 @@ func extract_problems(content, answers, merits, efforts, attempts, filenames, di
 	return problems
 }
 
+//-----------------------------------------------------------------------------------
+func assign_next_problem_pid(problems []*ProblemInfo, next_if_correct, next_if_incorrect string) {
+	nic := strings.Split(next_if_correct, "\n")
+	nii := strings.Split(next_if_incorrect, "\n")
+	for i := 0; i < len(problems)-1; i++ {
+		if nic[i] != "-1" {
+			idx, err := strconv.Atoi(nic[i])
+			if err != nil {
+				panic(err)
+			}
+			problems[i].NextIfCorrect = problems[idx].Pid
+		}
+		if nii[i] != "-1" {
+			idx, err := strconv.Atoi(nii[i])
+			if err != nil {
+				panic(err)
+			}
+			problems[i].NextIfIncorrect = problems[idx].Pid
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------------
+// Teacher starts one or more problems.
 //-----------------------------------------------------------------------------------
 func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	content := r.FormValue("content")
@@ -63,7 +89,18 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 	filenames := r.FormValue("filenames")
 	divider_tag := r.FormValue("divider_tag")
 	mode := r.FormValue("mode")
+	nic, nii := r.FormValue("nic"), r.FormValue("nii")
+
 	problems := make([]*ProblemInfo, 0)
+
+	// Deactivate active problems and clear student boards
+	for _, prob := range ActiveProblems {
+		prob.Active = false
+	}
+	for stid, _ := range Students {
+		Students[stid].Boards = make([]*Board, 0)
+		Students[stid].SubmissionStatus = 0
+	}
 
 	// Extract info
 	problems = extract_problems(content, answers, merits, efforts, attempts, filenames, divider_tag)
@@ -91,11 +128,14 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 			ActiveProblems[int(pid)] = &ActiveProblem{
 				Info:     problems[i],
 				Answers:  make([]string, 0),
-				Next:     0,
 				Active:   true,
 				Attempts: make(map[int]int),
 			}
 		}
+	}
+
+	if mode == "multicast_seq" {
+		assign_next_problem_pid(problems, nic, nii)
 	}
 
 	BoardsSem.Lock()
@@ -104,11 +144,6 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 		end := 1
 		if mode == "multicast_and" {
 			end = len(problems)
-		}
-		if mode == "multicast_seq" {
-			for i := 0; i < len(problems)-1; i++ {
-				ActiveProblems[problems[i].Pid].Next = problems[i+1].Pid
-			}
 		}
 		for stid, _ := range Students {
 			for i := 0; i < end; i++ {

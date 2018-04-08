@@ -54,25 +54,6 @@ class gemtShare(sublime_plugin.TextCommand):
 			sublime.status_message(response)
 
 # ------------------------------------------------------------------
-# used by gemt_multicast and gemtUnicast to start a new problem
-# ------------------------------------------------------------------
-def gemt_broadcast(content, answers, merits, efforts, attempts, filenames, exts, tag, mode):
-	data = {
-		'content': 			content,
-		'answers':			answers,
-		'filenames':		filenames,
-		'exts': 			exts,
-		'merits':			merits,
-		'efforts':			efforts,
-		'attempts':			attempts,
-		'divider_tag':	 	tag,
-		'mode':				mode,
-	}
-	response = gemtRequest('teacher_broadcasts', data)
-	if response is not None:
-		sublime.message_dialog(response)
-
-# ------------------------------------------------------------------
 def gemt_get_problem_info(fname):
 	merit, effort, attempts = 0, 0, -1
 	ext = fname.rsplit('.', 1)[-1]
@@ -118,11 +99,71 @@ def gemt_get_problem_info(fname):
 
 
 # ------------------------------------------------------------------
+# Input: file names
+# Output:
+# - files sorted by difficulty level
+# - list of index of the next problem if solution is correct
+# - list of index of the next problem if solution is incorrect
+# ------------------------------------------------------------------
+def gemt_get_next_problems(fns, mode):
+	nic = [-1] * len(fns)
+	nii = [-1] * len(fns)
+	if mode != 'multicast_seq':
+		return fns, nic, nii
+	# Remove .py or .java
+	names = [ f.rsplit('.', 1)[0] for f in fns ]
+	for n in names:
+		# Properly named files must have at least one "_"
+		if n.count('_') < 1:
+			return None, None, None
+	try:
+		nums = [ int(n.rsplit('_', 1)[1]) for n in names ]
+		names = [ (nums[i],fns[i]) for i in range(len(fns)) ]
+		names = sorted(names)
+		# determine next if correct or fns[i]
+		for i in range(len(names)):
+			for j in range(i+1,len(names)):
+				if names[j][0] > names[i][0]:
+					nic[i] = j
+					break
+		# determine next if incorrect or fns[i]
+		for i in range(len(names)-1):
+			nii[i] = i+1
+		print(names)
+		print(nic)
+		print(nii)
+		return [n[1] for n in names], nic, nii
+	except:
+		return None, None, None
+
+# ------------------------------------------------------------------
+# used by gemt_multicast and gemtUnicast to start a new problem
+# ------------------------------------------------------------------
+def gemt_broadcast(content, answers, merits, efforts, attempts, filenames, exts, tag, mode, nic='', nii=''):
+	data = {
+		'content': 			content,
+		'answers':			answers,
+		'filenames':		filenames,
+		'exts': 			exts,
+		'merits':			merits,
+		'efforts':			efforts,
+		'attempts':			attempts,
+		'divider_tag':	 	tag,
+		'mode':				mode,
+		'nic': 				nic,
+		'nii':				nii,
+	}
+	response = gemtRequest('teacher_broadcasts', data)
+	if response is not None:
+		sublime.message_dialog(response)
+
+# ------------------------------------------------------------------
 def gemt_multicast(self, edit, tag, mode, mesg):
 	fnames = [ v.file_name() for v in sublime.active_window().views() ]
 	fnames = [ fname for fname in fnames if fname is not None ]
 	if len(fnames)>0 and sublime.ok_cancel_dialog(mesg):
 		content, answers, merits, efforts, attempts, fns, exts = [],[],[],[],[],[],[]
+		nic, nii = [], []
 		for fname in fnames:
 			c, an, m, e, at, fn, ex = gemt_get_problem_info(fname)
 			content.append(c)
@@ -133,6 +174,11 @@ def gemt_multicast(self, edit, tag, mode, mesg):
 			fns.append(fn)
 			exts.append(ex)
 
+		fns, nic, nii = gemt_get_next_problems(fns, mode)
+		if fns == None:
+			sublime.message_dialog('Could not detect difficulty level in file names.  Example of a correctly named file at level 1: abc_1.py')
+			return
+
 		content = '\n{}\n'.format(tag).join(content)
 		answers = '\n'.join(answers)
 		merits = '\n'.join(merits)
@@ -140,50 +186,69 @@ def gemt_multicast(self, edit, tag, mode, mesg):
 		attempts = '\n'.join(attempts)
 		fns = '\n'.join(fns)
 		exts = '\n'.join(exts)
-		gemt_broadcast(content, answers, merits, efforts, attempts, fns, exts, tag, mode)
+		nic = '\n'.join([str(i) for i in nic])
+		nii = '\n'.join([str(i) for i in nii])
+
+		gemt_broadcast(
+			content,
+			answers,
+			merits,
+			efforts,
+			attempts,
+			fns,
+			exts,
+			tag,
+			mode,
+			nic,
+			nii,
+		)
 
 # ------------------------------------------------------------------
 class gemtUnicast(sublime_plugin.TextCommand):
 	def run(self, edit):
-		fname = self.view.file_name()
-		if fname is None:
-			sublime.message_dialog('Content must be saved first.')
-			return
-		content, answers, merits, efforts, attempts, fns, exts = gemt_get_problem_info(fname)
-		gemt_broadcast(content, answers, merits, efforts, attempts, fns, exts, tag='', mode='unicast')
+		if sublime.ok_cancel_dialog('Starting a new problem will close up active problems.  Do you want to proceed?'):
+			fname = self.view.file_name()
+			if fname is None:
+				sublime.message_dialog('Content must be saved first.')
+				return
+			content, answers, merits, efforts, attempts, fns, exts = gemt_get_problem_info(fname)
+			gemt_broadcast(content, answers, merits, efforts, attempts, fns, exts, tag='', mode='unicast')
 
 # ------------------------------------------------------------------
 class gemtMulticastOr(sublime_plugin.TextCommand):
 	def run(self, edit):
-		gemt_multicast(
-			self,
-			edit,
-			gemtOrTag,
-			'multicast_or',
-			'Send problems *randomly* to students, where problems are defined in all non-empty tabs in this window?',
-		)
+		if sublime.ok_cancel_dialog('Starting new problems will close up active problems.  Do you want to proceed?'):
+			gemt_multicast(
+				self,
+				edit,
+				gemtOrTag,
+				'multicast_or',
+				'Send problems *randomly* to students, where problems are defined in all non-empty tabs in this window?',
+			)
 
 # ------------------------------------------------------------------
 class gemtMulticastAnd(sublime_plugin.TextCommand):
 	def run(self, edit):
-		gemt_multicast(
-			self,
-			edit,
-			gemtAndTag,
-			'multicast_and',
-			'Send problems *simultaneously* to students, where problems are defined in all non-empty tabs in this window?',
-		)
+		if sublime.ok_cancel_dialog('Starting problems will close up active problems.  Do you want to proceed?'):
+			gemt_multicast(
+				self,
+				edit,
+				gemtAndTag,
+				'multicast_and',
+				'Send problems *simultaneously* to students, where problems are defined in all non-empty tabs in this window?',
+			)
 
 # ------------------------------------------------------------------
 class gemtMulticastSeq(sublime_plugin.TextCommand):
 	def run(self, edit):
-		gemt_multicast(
-			self,
-			edit,
-			gemtSeqTag,
-			'multicast_seq',
-			'Send problems *sequentially* to students, where problems are defined in all non-empty tabs in this window?',
-		)
+		if sublime.ok_cancel_dialog('Starting problems will close up active problems.  Do you want to proceed?'):
+			gemt_multicast(
+				self,
+				edit,
+				gemtSeqTag,
+				'multicast_seq',
+				'Send problems *sequentially* to students, where problems are defined in all non-empty tabs in this window?',
+			)
 
 # ------------------------------------------------------------------
 class gemtDeactivateProblems(sublime_plugin.WindowCommand):
@@ -206,7 +271,7 @@ class gemtDeactivateProblems(sublime_plugin.WindowCommand):
 class gemtClearSubmissions(sublime_plugin.WindowCommand):
 	def run(self):
 		if sublime.ok_cancel_dialog('Do you want to clear all submissions and white boards?'):
-			response = gemtRequest('teacher_clears', {})
+			response = gemtRequest('teacher_clears_submissions', {})
 			sublime.message_dialog(response)
 
 

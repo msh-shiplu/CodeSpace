@@ -10,7 +10,7 @@ import (
 )
 
 //-----------------------------------------------------------------------------------
-// When problems are deactivated, no new submissions are possibile.
+// When problems are deactivated, boards cleared, no new submissions are possibile.
 //-----------------------------------------------------------------------------------
 func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	active_pids := make([]int, 0)
@@ -21,6 +21,10 @@ func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request,
 				active_pids = append(active_pids, pid)
 			}
 		}
+	}
+	for stid, _ := range Students {
+		Students[stid].Boards = make([]*Board, 0)
+		Students[stid].SubmissionStatus = 0
 	}
 	js, err := json.Marshal(active_pids)
 	if err == nil {
@@ -34,14 +38,7 @@ func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request,
 //-----------------------------------------------------------------------------------
 // Clear submissions, boards, statuses, and set all problems inactive.
 //-----------------------------------------------------------------------------------
-func teacher_clearsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+func teacher_clears_submissionsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	WorkingSubs = make([]*Submission, 0)
-	for stid, _ := range Students {
-		Students[stid].Boards = make([]*Board, 0)
-		Students[stid].SubmissionStatus = 0
-	}
-	for _, prob := range ActiveProblems {
-		prob.Active = false
-	}
 	fmt.Fprintf(w, "Done.")
 }

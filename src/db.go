@@ -62,11 +62,23 @@ func init_database(db_name string) {
 }
 
 //-----------------------------------------------------------------
-func add_next_problem_to_board(pid, stid int) string {
+func add_next_problem_to_board(pid, stid int, decision string) string {
 	prob, ok := ActiveProblems[pid]
-	if ok && prob.Next > 0 {
+	msg := ""
+	if ok {
+		next_pid := 0
+		if decision == "correct" {
+			next_pid = prob.Info.NextIfCorrect
+			msg = "\nNew problem added to white board."
+		} else if decision == "incorrect" && prob.Attempts[stid] <= 0 {
+			next_pid = prob.Info.NextIfIncorrect
+			msg = "\nNew problem added to white board."
+		}
+		if next_pid == 0 {
+			return ""
+		}
 		new_content, new_answer, new_fn, new_merit, new_effort, new_attempts := "", "", "", 0, 0, 0
-		rows, _ := Database.Query("select content, answer, filename, merit, effort, attempts from problem where id=?", prob.Next)
+		rows, _ := Database.Query("select content, answer, filename, merit, effort, attempts from problem where id=?", next_pid)
 		for rows.Next() {
 			rows.Scan(&new_content, &new_answer, &new_fn, &new_merit, &new_effort, &new_attempts)
 			break
@@ -77,13 +89,12 @@ func add_next_problem_to_board(pid, stid int) string {
 			Answer:       new_answer,
 			Attempts:     new_attempts,
 			Filename:     new_fn,
-			Pid:          int(prob.Next),
+			Pid:          next_pid,
 			StartingTime: time.Now(),
 		}
 		Students[stid].Boards = append(Students[stid].Boards, b)
-		return "\nNew problem added to white board."
 	}
-	return ""
+	return msg
 }
 
 //-----------------------------------------------------------------
@@ -116,8 +127,6 @@ func add_or_update_score(decision string, pid, stid, tid int) string {
 	if decision == "correct" {
 		points = merit
 		mesg = "Answer is correct."
-		m := add_next_problem_to_board(pid, stid)
-		mesg = mesg + m
 	} else {
 		points = effort
 		// If the problem was previously graded correct, this submission
@@ -128,6 +137,8 @@ func add_or_update_score(decision string, pid, stid, tid int) string {
 		}
 		mesg = "Answer is incorrect."
 	}
+	m := add_next_problem_to_board(pid, stid, decision)
+	mesg = mesg + m
 
 	// Add a new score or update a current score for this student & problem
 	if score_id == 0 {
