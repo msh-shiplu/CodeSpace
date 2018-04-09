@@ -21,7 +21,7 @@ gemsTracking = False
 gemsUpdateMessage = {
 	1 : "Your submission is being looked at.",
 	2 : "Teacher did not grade your submission.",
-	3 : "Good effort!!!  However, the teacher did not think your solution was correct. Try again.",
+	3 : "Good effort!!!  However, the teacher did not think your solution was correct.",
 	4 : "Your solution was correct.",
 }
 # ------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ def gemsRequest(path, data, authenticated=True, method='POST', verbal=True):
 	return None
 
 # ------------------------------------------------------------------
-class gemsAttendanceReport(sublime_plugin.WindowCommand):
+class gemsAttendanceReport(sublime_plugin.ApplicationCommand):
 	def run(self):
 		response = gemsRequest('student_checks_in', {})
 		json_obj = json.loads(response)
@@ -86,10 +86,11 @@ class gemsAttendanceReport(sublime_plugin.WindowCommand):
 			f.write('Your attendance was taken on these dates:\n')
 			for d in sorted(dates, reverse=True):
 				f.write('{}\n'.format(d))
-		new_view = sublime.active_window().open_file(report_file)
+		sublime.run_command('new_window')
+		sublime.active_window().open_file(report_file)
 
 # ------------------------------------------------------------------
-class gemsPointsReport(sublime_plugin.WindowCommand):
+class gemsPointsReport(sublime_plugin.ApplicationCommand):
 	def run(self):
 		response = gemsRequest('student_gets_report', {})
 		if response != None:
@@ -116,7 +117,9 @@ class gemsPointsReport(sublime_plugin.WindowCommand):
 					date = datetime.datetime.fromtimestamp(d).strftime('%Y-%m-%d')
 					for entry in v:
 						f.write('{}\t{}\t{}\n'.format(date,entry[0],entry[1]))
-			new_view = sublime.active_window().open_file(report_file)
+
+			sublime.run_command('new_window')
+			sublime.active_window().open_file(report_file)
 
 # ------------------------------------------------------------------
 # class gemsShowMessages(sublime_plugin.WindowCommand):
@@ -176,13 +179,15 @@ def gems_periodic_update():
 		if submission_stat > 0 and submission_stat in gemsUpdateMessage:
 			mesg = gemsUpdateMessage[submission_stat]
 		if board_stat == 1:
-			mesg += "\nTeacher put something on your board."
+			mesg += "\nTeacher placed new material on your board."
 		mesg = mesg.strip()
 		if mesg != "":
 			sublime.message_dialog(mesg)
 
 		# Open board pages and feedback automatically
 		if board_stat == 1:
+			if sublime.active_window().id() == 0:
+				sublime.run_command('new_window')
 			sublime.active_window().run_command('gems_get_board_content')
 
 		# Keep checking periodically
@@ -235,7 +240,7 @@ class gemsGotIt(sublime_plugin.TextCommand):
 		gems_share(self, edit, priority=1)
 
 # ------------------------------------------------------------------
-class gemsGetBoardContent(sublime_plugin.WindowCommand):
+class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
 	def run(self):
 		response = gemsRequest('student_gets', {})
 		if response is None:
@@ -259,10 +264,12 @@ class gemsGetBoardContent(sublime_plugin.WindowCommand):
 				new_fname = os.path.join(gemsFOLDER, 'FEEDBACK.txt')
 			with open(new_fname, 'w', encoding='utf-8') as f:
 				f.write(content)
+			if sublime.active_window().id() == 0:
+				sublime.run_command('new_window')
 			sublime.active_window().open_file(new_fname)
 
 # ------------------------------------------------------------------
-class gemsCompleteRegistration(sublime_plugin.WindowCommand):
+class gemsCompleteRegistration(sublime_plugin.ApplicationCommand):
 	def run(self):
 		try:
 			with open(gemsFILE, 'r') as f:
@@ -285,6 +292,8 @@ class gemsCompleteRegistration(sublime_plugin.WindowCommand):
 			info['Name'] = ''
 
 		if sublime.ok_cancel_dialog("Register an assigned username."):
+			if sublime.active_window().id() == 0:
+				sublime.run_command('new_window')
 			sublime.active_window().show_input_panel(
 				mesg,
 				info['Name'],
@@ -316,59 +325,8 @@ class gemsCompleteRegistration(sublime_plugin.WindowCommand):
 				f.write(json.dumps(info, indent=4))
 			sublime.message_dialog('{} registered'.format(name))
 
-
-# class gemsRegister(sublime_plugin.WindowCommand):
-# 	def run(self):
-# 		try:
-# 			with open(gemsFILE, 'r') as f:
-# 				info = json.loads(f.read())
-# 		except:
-# 			info = dict()
-
-# 		if 'Server' not in info:
-# 			sublime.message_dialog("Please set server address.")
-# 			return None
-
-# 		if 'Folder' not in info:
-# 			sublime.message_dialog("Please set a local folder to store working files.")
-# 			return None
-
-# 		mesg = 'Enter a new name'
-# 		if 'Name' in info:
-# 			mesg = '{} is already registered. Enter a new name or Esc:'.format(info['Name'])
-
-# 		if 'Name' not in info:
-# 			info['Name'] = ''
-
-# 		sublime.active_window().show_input_panel(
-# 			mesg,
-# 			info['Name'],
-# 			self.process,
-# 			None,
-# 			None,
-# 		)
-
-# 	def process(self, name):
-# 		name = name.strip()
-# 		response = gemsRequest('student_registers', {'name':name}, authenticated=False)
-# 		if response == 'exist':
-# 			sublime.message_dialog('{} exists. Choose a different name.'.format(name))
-# 		else:
-# 			uid, password = response.split(',')
-# 			try:
-# 				with open(gemsFILE, 'r') as f:
-# 					info = json.loads(f.read())
-# 			except:
-# 				info = dict()
-# 			info['Uid'] = int(uid)
-# 			info['Password'] = password
-# 			info['Name'] = name
-# 			with open(gemsFILE, 'w') as f:
-# 				f.write(json.dumps(info, indent=4))
-# 			sublime.message_dialog('{} registered'.format(name))
-
 # ------------------------------------------------------------------
-class gemsSetLocalFolder(sublime_plugin.WindowCommand):
+class gemsSetLocalFolder(sublime_plugin.ApplicationCommand):
 	def run(self):
 		try:
 			with open(gemsFILE, 'r') as f:
@@ -377,6 +335,8 @@ class gemsSetLocalFolder(sublime_plugin.WindowCommand):
 			info = dict()
 		if 'Folder' not in info:
 			info['Folder'] = os.path.join(os.path.expanduser('~'), 'GEM')
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
 		sublime.active_window().show_input_panel("This folder will be used to store working files.",
 			info['Folder'],
 			self.set,
@@ -407,7 +367,7 @@ class gemsSetLocalFolder(sublime_plugin.WindowCommand):
 			sublime.message_dialog("Folder name cannot be empty.")
 
 # ------------------------------------------------------------------
-class gemsSetServerAddress(sublime_plugin.WindowCommand):
+class gemsSetServerAddress(sublime_plugin.ApplicationCommand):
 	def run(self):
 		try:
 			with open(gemsFILE, 'r') as f:
@@ -416,6 +376,8 @@ class gemsSetServerAddress(sublime_plugin.WindowCommand):
 			info = dict()
 		if 'Server' not in info:
 			info['Server'] = 'http://x.x.x.x:8080'
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
 		sublime.active_window().show_input_panel("Set server address.  Press Enter:",
 			info['Server'],
 			self.set,

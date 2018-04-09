@@ -251,7 +251,7 @@ class gemtMulticastSeq(sublime_plugin.TextCommand):
 			)
 
 # ------------------------------------------------------------------
-class gemtDeactivateProblems(sublime_plugin.WindowCommand):
+class gemtDeactivateProblems(sublime_plugin.ApplicationCommand):
 	def run(self):
 		if sublime.ok_cancel_dialog('Do you want to close active problems?  No more submissions are possible until a new problem is started.'):
 			passcode = gemtRequest('teacher_gets_passcode', {})
@@ -268,7 +268,7 @@ class gemtDeactivateProblems(sublime_plugin.WindowCommand):
 				webbrowser.open(info['Server'] + '/view_answers?' + p)
 
 # ------------------------------------------------------------------
-class gemtClearSubmissions(sublime_plugin.WindowCommand):
+class gemtClearSubmissions(sublime_plugin.ApplicationCommand):
 	def run(self):
 		if sublime.ok_cancel_dialog('Do you want to clear all submissions and white boards?'):
 			response = gemtRequest('teacher_clears_submissions', {})
@@ -321,7 +321,7 @@ def gemtRequest(path, data, authenticated=True, method='POST'):
 	return None
 
 # ------------------------------------------------------------------
-class gemtViewBulletinBoard(sublime_plugin.WindowCommand):
+class gemtViewBulletinBoard(sublime_plugin.ApplicationCommand):
 	def run(self):
 		response = gemtRequest('teacher_gets_passcode', {})
 		if response.startswith('Unauthorized'):
@@ -422,6 +422,8 @@ def gemt_gets(self, index, priority):
 			with open(fname, 'w', encoding='utf-8') as fp:
 				fp.write(sub['Content'])
 			gemtStudentSubmissions[pid] = sub['Content']
+			if sublime.active_window().id() == 0:
+				sublime.run_command('new_window')
 			sublime.active_window().open_file(fname)
 		elif priority == 0:
 			sublime.message_dialog('There are no submissions.')
@@ -433,20 +435,20 @@ def gemt_gets(self, index, priority):
 # ------------------------------------------------------------------
 # Priorities: 1 (I got it), 2 (I need help),
 # ------------------------------------------------------------------
-class gemtGetPrioritized(sublime_plugin.WindowCommand):
+class gemtGetPrioritized(sublime_plugin.ApplicationCommand):
 	def run(self):
 		gemt_gets(self, -1, 0)
 
-class gemtGetFromNeedHelp(sublime_plugin.WindowCommand):
+class gemtGetFromNeedHelp(sublime_plugin.ApplicationCommand):
 	def run(self):
 		gemt_gets(self, -1, 2)
 
-class gemtGetFromOk(sublime_plugin.WindowCommand):
+class gemtGetFromOk(sublime_plugin.ApplicationCommand):
 	def run(self):
 		gemt_gets(self, -1, 1)
 
 # ------------------------------------------------------------------
-class gemtSetServerAddress(sublime_plugin.WindowCommand):
+class gemtSetServerAddress(sublime_plugin.ApplicationCommand):
 	def run(self):
 		try:
 			with open(gemtFILE, 'r') as f:
@@ -455,6 +457,8 @@ class gemtSetServerAddress(sublime_plugin.WindowCommand):
 			info = dict()
 		if 'Server' not in info:
 			info['Server'] = ''
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
 		sublime.active_window().show_input_panel("Set server address.  Press Enter:",
 			info['Server'],
 			self.set,
@@ -478,7 +482,7 @@ class gemtSetServerAddress(sublime_plugin.WindowCommand):
 			sublime.message_dialog("Server address cannot be empty.")
 
 # ------------------------------------------------------------------
-class gemtSetLocalFolder(sublime_plugin.WindowCommand):
+class gemtSetLocalFolder(sublime_plugin.ApplicationCommand):
 	def run(self):
 		try:
 			with open(gemtFILE, 'r') as f:
@@ -487,6 +491,8 @@ class gemtSetLocalFolder(sublime_plugin.WindowCommand):
 			info = dict()
 		if 'Folder' not in info:
 			info['Folder'] = os.path.join(os.path.expanduser('~'), 'GEMT')
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
 		sublime.active_window().show_input_panel("This folder will be used to store working files.",
 			info['Folder'],
 			self.set,
@@ -517,7 +523,7 @@ class gemtSetLocalFolder(sublime_plugin.WindowCommand):
 			sublime.message_dialog("Folder name cannot be empty.")
 
 # ------------------------------------------------------------------
-class gemtCompleteRegistration(sublime_plugin.WindowCommand):
+class gemtCompleteRegistration(sublime_plugin.ApplicationCommand):
 	def run(self):
 		try:
 			with open(gemtFILE, 'r') as f:
@@ -540,6 +546,8 @@ class gemtCompleteRegistration(sublime_plugin.WindowCommand):
 			info['Name'] = ''
 
 		if sublime.ok_cancel_dialog("Register an assigned username."):
+			if sublime.active_window().id() == 0:
+				sublime.run_command('new_window')
 			sublime.active_window().show_input_panel(
 				mesg,
 				info['Name'],

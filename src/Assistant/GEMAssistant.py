@@ -98,7 +98,7 @@ def gemaRequest(path, data, authenticated=True, localhost=False, method='POST'):
 
 
 # ------------------------------------------------------------------
-class gemaViewBulletinBoard(sublime_plugin.WindowCommand):
+class gemaViewBulletinBoard(sublime_plugin.ApplicationCommand):
 	def run(self):
 		response = gemaRequest('teacher_gets_passcode', {})
 		if response.startswith('Unauthorized'):
@@ -200,6 +200,8 @@ def gema_gets(self, index, priority):
 			with open(fname, 'w', encoding='utf-8') as fp:
 				fp.write(sub['Content'])
 			gemaStudentSubmissions[pid] = sub['Content']
+			if sublime.active_window().id() == 0:
+				sublime.run_command('new_window')
 			sublime.active_window().open_file(fname)
 		elif priority == 0:
 			sublime.message_dialog('There are no submissions.')
@@ -211,20 +213,20 @@ def gema_gets(self, index, priority):
 # ------------------------------------------------------------------
 # Priorities: 1 (I got it), 2 (I need help),
 # ------------------------------------------------------------------
-class gemaGetPrioritized(sublime_plugin.WindowCommand):
+class gemaGetPrioritized(sublime_plugin.ApplicationCommand):
 	def run(self):
 		gema_gets(self, -1, 0)
 
-class gemaGetFromNeedHelp(sublime_plugin.WindowCommand):
+class gemaGetFromNeedHelp(sublime_plugin.ApplicationCommand):
 	def run(self):
 		gema_gets(self, -1, 2)
 
-class gemaGetFromOk(sublime_plugin.WindowCommand):
+class gemaGetFromOk(sublime_plugin.ApplicationCommand):
 	def run(self):
 		gema_gets(self, -1, 1)
 
 # ------------------------------------------------------------------
-class gemaSetServerAddress(sublime_plugin.WindowCommand):
+class gemaSetServerAddress(sublime_plugin.ApplicationCommand):
 	def run(self):
 		try:
 			with open(gemaFILE, 'r') as f:
@@ -233,6 +235,8 @@ class gemaSetServerAddress(sublime_plugin.WindowCommand):
 			info = dict()
 		if 'Server' not in info:
 			info['Server'] = ''
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
 		sublime.active_window().show_input_panel("Set server address.  Press Enter:",
 			info['Server'],
 			self.set,
@@ -256,7 +260,7 @@ class gemaSetServerAddress(sublime_plugin.WindowCommand):
 			sublime.message_dialog("Server address cannot be empty.")
 
 # ------------------------------------------------------------------
-class gemaSetLocalFolder(sublime_plugin.WindowCommand):
+class gemaSetLocalFolder(sublime_plugin.ApplicationCommand):
 	def run(self):
 		try:
 			with open(gemaFILE, 'r') as f:
@@ -265,6 +269,8 @@ class gemaSetLocalFolder(sublime_plugin.WindowCommand):
 			info = dict()
 		if 'Folder' not in info:
 			info['Folder'] = os.path.join(os.path.expanduser('~'), 'GEMA')
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
 		sublime.active_window().show_input_panel("This folder will be used to store working files.",
 			info['Folder'],
 			self.set,
@@ -295,7 +301,7 @@ class gemaSetLocalFolder(sublime_plugin.WindowCommand):
 			sublime.message_dialog("Folder name cannot be empty.")
 
 # ------------------------------------------------------------------
-class gemaCompleteRegistration(sublime_plugin.WindowCommand):
+class gemaCompleteRegistration(sublime_plugin.ApplicationCommand):
 	def run(self):
 		try:
 			with open(gemaFILE, 'r') as f:
@@ -318,6 +324,8 @@ class gemaCompleteRegistration(sublime_plugin.WindowCommand):
 			info['Name'] = ''
 
 		if sublime.ok_cancel_dialog("Register an assigned username."):
+			if sublime.active_window().id() == 0:
+				sublime.run_command('new_window')
 			sublime.active_window().show_input_panel(
 				mesg,
 				info['Name'],
