@@ -122,26 +122,6 @@ class gemsPointsReport(sublime_plugin.ApplicationCommand):
 			sublime.active_window().open_file(report_file)
 
 # ------------------------------------------------------------------
-# class gemsShowMessages(sublime_plugin.WindowCommand):
-# 	def run(self):
-# 		try:
-# 			with open(gemsFILE, 'r') as f:
-# 				info = json.loads(f.read())
-# 		except:
-# 			info = dict()
-
-# 		if 'Server' not in info:
-# 			sublime.message_dialog("Please set server address.")
-# 			return None
-
-# 		if 'Uid' not in info:
-# 			sublime.message_dialog("Please register.")
-# 			return None
-
-# 		u = urllib.parse.urlencode({'stid' : info['Uid']})
-# 		webbrowser.open(info['Server'] + '/show_student_messages?' + u)
-
-# ------------------------------------------------------------------
 def gems_problem_info(fname):
 	basename = os.path.basename(fname)
 	if '.' in fname:
