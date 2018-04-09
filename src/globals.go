@@ -1,3 +1,6 @@
+//
+// Author: Vinhthuy Phan, 2018
+//
 package main
 
 import (
@@ -29,6 +32,8 @@ var AddTeacherSQL *sql.Stmt
 var AddAttendanceSQL *sql.Stmt
 var AddProblemSQL *sql.Stmt
 var AddSubmissionSQL *sql.Stmt
+var AddSubmissionCompleteSQL *sql.Stmt
+var CompleteSubmissionSQL *sql.Stmt
 var AddFeedbackSQL *sql.Stmt
 var AddScoreSQL *sql.Stmt
 var UpdateScoreSQL *sql.Stmt

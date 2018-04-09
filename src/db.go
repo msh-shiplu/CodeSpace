@@ -49,6 +49,8 @@ func init_database(db_name string) {
 	AddTeacherSQL = prepare("insert into teacher (name, password) values (?, ?)")
 	AddProblemSQL = prepare("insert into problem (tid, content, answer, filename, merit, effort, attempts, at) values (?, ?, ?, ?, ?, ?, ?, ?)")
 	AddSubmissionSQL = prepare("insert into submission (pid, sid, content, priority, at) values (?, ?, ?, ?, ?)")
+	AddSubmissionCompleteSQL = prepare("insert into submission (pid, sid, content, priority, at, completed) values (?, ?, ?, ?, ?, ?)")
+	CompleteSubmissionSQL = prepare("update submission set completed=? where id=?")
 	AddScoreSQL = prepare("insert into score (pid, stid, tid, points, attempts, at) values (?, ?, ?, ?, ?, ?)")
 	AddFeedbackSQL = prepare("insert into feedback (tid, stid, content, date) values (?, ?, ?, ?)")
 	UpdateScoreSQL = prepare("update score set tid=?, points=?, attempts=? where id=?")

@@ -5,9 +5,9 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
-	// "strings"
 	"time"
 )
 
@@ -17,6 +17,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	changed := r.FormValue("changed")
 	pid, _ := strconv.Atoi(r.FormValue("pid"))
 	stid, _ := strconv.Atoi(r.FormValue("stid"))
+	sid, _ := strconv.Atoi(r.FormValue("sid"))
 	mesg, student_mesg := "", ""
 
 	// If the original file is changed, there's feedback.  Copy it to whiteboard.
@@ -44,20 +45,25 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 		Students[stid].SubmissionStatus = 2
 		ActiveProblems[pid].Attempts[stid] += 1
 		fmt.Fprintf(w, "Submission dismissed.")
-		return
-	}
-
-	// Update score based on the grading decision
-	scoring_mesg := add_or_update_score(decision, pid, stid, uid)
-	mesg = scoring_mesg + "\n" + mesg
-	student_mesg += scoring_mesg
-	if decision == "correct" {
-		Students[stid].SubmissionStatus = 4
-		ActiveProblems[pid].Attempts[stid] = 0 // This prevents further submission.
 	} else {
-		Students[stid].SubmissionStatus = 3
+		// Update score based on the grading decision
+		scoring_mesg := add_or_update_score(decision, pid, stid, uid)
+		mesg = scoring_mesg + "\n" + mesg
+		student_mesg += scoring_mesg
+		if decision == "correct" {
+			Students[stid].SubmissionStatus = 4
+			ActiveProblems[pid].Attempts[stid] = 0 // This prevents further submission.
+		} else {
+			Students[stid].SubmissionStatus = 3
+		}
+
+		// Update submission complete time
+		_, err := CompleteSubmissionSQL.Exec(time.Now(), sid)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Fprintf(w, mesg)
 	}
-	fmt.Fprintf(w, mesg)
 }
 
 //-----------------------------------------------------------------------------------

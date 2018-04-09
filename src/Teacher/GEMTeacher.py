@@ -381,6 +381,7 @@ def gemt_grade(self, edit, decision):
 	data = dict(
 		stid = stid,
 		pid = pid,
+		sid = sid,
 		content = content,
 		decision = decision,
 		changed = changed,
