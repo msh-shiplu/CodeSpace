@@ -4,7 +4,7 @@
         "id": "GEMTeacher",
         "children": [
             {
-                "caption": "Connect",
+                "caption": "Connect to server",
                 "id": "gemtConnect",
                 "command": "gemt_connect",
             },

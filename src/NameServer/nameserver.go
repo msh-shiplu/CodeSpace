@@ -101,7 +101,15 @@ func askHandler(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		fmt.Fprintf(w, "unknown")
 	} else {
-		fmt.Fprintf(w, rec.Address)
+		server := fmt.Sprintf("http://%s/ping", rec.Address)
+		response, err := http.Get(server)
+		if err != nil {
+			fmt.Fprintf(w, "inactive")
+		} else if response.Status == "200 OK" {
+			fmt.Fprintf(w, "http://"+rec.Address)
+		} else {
+			fmt.Fprintf(w, "broken")
+		}
 	}
 }
 

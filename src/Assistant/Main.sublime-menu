@@ -4,7 +4,7 @@
         "id": "GemTA",
         "children": [
             {
-                "caption": "Connect",
+                "caption": "Connect to server",
                 "id": "gemaConnect",
                 "command": "gema_connect",
             },

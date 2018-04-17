@@ -474,11 +474,12 @@ class gemtConnect(sublime_plugin.ApplicationCommand):
 				except:
 					info = dict()
 				if not server.startswith('http://'):
-					server = 'http://' + server
+					sublime.message_dialog(server)
+					return
 				info['Server'] = server
 				with open(gemtFILE, 'w') as f:
 					f.write(json.dumps(info, indent=4))
-				sublime.message_dialog('Connected to gem server at {}'.format(server))
+				sublime.message_dialog('Connected to server at {}'.format(server))
 		except urllib.error.HTTPError as err:
 			sublime.message_dialog("{0}".format(err))
 		except urllib.error.URLError as err:
