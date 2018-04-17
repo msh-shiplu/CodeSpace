@@ -4,6 +4,12 @@
         "id": "GemTA",
         "children": [
             {
+                "caption": "Connect",
+                "id": "gemaConnect",
+                "command": "gema_connect",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
                 "caption": "Get a submission",
                 "id": "gemaGetPrioritized",
                 "command": "gema_get_prioritized",
@@ -56,14 +62,19 @@
                 "id": "GemTASetup",
                 "children": [
                     {
-                        "caption": "Set server address",
-                        "id": "gemaSetServerAddress",
-                        "command": "gema_set_server_address",
+                        "caption": "Set course id",
+                        "id": "gemaSetCourseId",
+                        "command": "gema_set_course_id",
                     },
                     {
                         "caption": "Set working folder",
                         "id": "gemaSetLocalFolder",
                         "command": "gema_set_local_folder",
+                    },
+                    {
+                        "caption": "Set name server",
+                        "id": "gemaSetNameServer",
+                        "command": "gema_set_name_server",
                     },
                     {
                         "caption": "Complete registration",
