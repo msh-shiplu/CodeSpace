@@ -54,10 +54,9 @@ class gemaPutBack(sublime_plugin.TextCommand):
 		self.view.window().run_command('close')
 
 # ------------------------------------------------------------------
-
-
+# These functionalities should be identical to the GEMTeacher module
 # ------------------------------------------------------------------
-def gemaRequest(path, data, authenticated=True, localhost=False, method='POST'):
+def gemaRequest(path, data, authenticated=True, localhost=False, method='POST', address=None):
 	global gemaFOLDER
 	try:
 		with open(gemaFILE, 'r') as f:
@@ -69,8 +68,8 @@ def gemaRequest(path, data, authenticated=True, localhost=False, method='POST'):
 		sublime.message_dialog("Please set a local folder for keeping working files.")
 		return None
 
-	if 'Server' not in info:
-		sublime.message_dialog("Please set server address.")
+	if address is None and 'Server' not in info:
+		sublime.message_dialog("Please connect to the server first.")
 		return None
 
 	if authenticated:
@@ -83,7 +82,11 @@ def gemaRequest(path, data, authenticated=True, localhost=False, method='POST'):
 		data['role'] = 'teacher'
 		gemaFOLDER = info['Folder']
 
-	url = urllib.parse.urljoin(info['Server'], path)
+	if address is None:
+		address = info['Server']
+	elif not address.startswith('http://'):
+		address = 'http://' + address
+	url = urllib.parse.urljoin(address, path)
 	load = urllib.parse.urlencode(data).encode('utf-8')
 	req = urllib.request.Request(url, load, method=method)
 	try:
@@ -260,106 +263,6 @@ class gemaConnect(sublime_plugin.ApplicationCommand):
 			sublime.message_dialog("{0}\nCannot connect to name server.".format(err))
 
 # ------------------------------------------------------------------
-class gemaSetCourseId(sublime_plugin.ApplicationCommand):
-	def run(self):
-		try:
-			with open(gemaFILE, 'r') as f:
-				info = json.loads(f.read())
-		except:
-			info = dict()
-		if 'CourseId' not in info:
-			info['CourseId'] = ''
-		if sublime.active_window().id() == 0:
-			sublime.run_command('new_window')
-		sublime.active_window().show_input_panel("Set course id then press Enter:",
-			info['CourseId'],
-			self.set,
-			None,
-			None)
-
-	def set(self, cid):
-		cid = cid.strip()
-		if len(cid) > 0:
-			try:
-				with open(gemaFILE, 'r') as f:
-					info = json.loads(f.read())
-			except:
-				info = dict()
-			info['CourseId'] = cid
-			with open(gemaFILE, 'w') as f:
-				f.write(json.dumps(info, indent=4))
-		else:
-			sublime.message_dialog('Course id appears to be invalid.')
-
-# ------------------------------------------------------------------
-class gemaSetNameServer(sublime_plugin.ApplicationCommand):
-	def run(self):
-		try:
-			with open(gemaFILE, 'r') as f:
-				info = json.loads(f.read())
-		except:
-			info = dict()
-		if 'NameServer' not in info:
-			info['NameServer'] = ''
-		if sublime.active_window().id() == 0:
-			sublime.run_command('new_window')
-		sublime.active_window().show_input_panel("Set server address and press Enter:",
-			info['NameServer'],
-			self.set,
-			None,
-			None)
-
-	def set(self, addr):
-		addr = addr.strip()
-		if len(addr) > 0:
-			try:
-				with open(gemaFILE, 'r') as f:
-					info = json.loads(f.read())
-			except:
-				info = dict()
-			if not addr.startswith('http://'):
-				addr = 'http://' + addr
-			info['NameServer'] = addr
-			with open(gemaFILE, 'w') as f:
-				f.write(json.dumps(info, indent=4))
-		else:
-			sublime.message_dialog('Name server appears to be invalid.')
-
-# # ------------------------------------------------------------------
-# class gemaSetServerAddress(sublime_plugin.ApplicationCommand):
-# 	def run(self):
-# 		try:
-# 			with open(gemaFILE, 'r') as f:
-# 				info = json.loads(f.read())
-# 		except:
-# 			info = dict()
-# 		if 'Server' not in info:
-# 			info['Server'] = ''
-# 		if sublime.active_window().id() == 0:
-# 			sublime.run_command('new_window')
-# 		sublime.active_window().show_input_panel("Set server address.  Press Enter:",
-# 			info['Server'],
-# 			self.set,
-# 			None,
-# 			None)
-
-# 	def set(self, addr):
-# 		addr = addr.strip()
-# 		if len(addr) > 0:
-# 			try:
-# 				with open(gemaFILE, 'r') as f:
-# 					info = json.loads(f.read())
-# 			except:
-# 				info = dict()
-# 			if not addr.startswith('http://'):
-# 				addr = 'http://' + addr
-# 			info['Server'] = addr
-# 			with open(gemaFILE, 'w') as f:
-# 				f.write(json.dumps(info, indent=4))
-# 		else:
-# 			sublime.message_dialog("Server address cannot be empty.")
-
-# ------------------------------------------------------------------
 class gemaSetLocalFolder(sublime_plugin.ApplicationCommand):
 	def run(self):
 		try:
@@ -400,6 +303,7 @@ class gemaSetLocalFolder(sublime_plugin.ApplicationCommand):
 		else:
 			sublime.message_dialog("Folder name cannot be empty.")
 
+
 # ------------------------------------------------------------------
 class gemaCompleteRegistration(sublime_plugin.ApplicationCommand):
 	def run(self):
@@ -412,47 +316,50 @@ class gemaCompleteRegistration(sublime_plugin.ApplicationCommand):
 			sublime.message_dialog("Please set a local folder for keeping working files.")
 			return None
 
-		if 'Server' not in info:
-			sublime.message_dialog("Please set server address.")
-			return None
-
-		mesg = 'Enter your assigned name'
+		mesg = 'Enter assigned_id,server_address'
 		if 'Name' in info:
-			mesg = '{} is already registered. Enter a new name or Esc:'.format(info['Name'])
+			mesg = '{} is already registered. Enter assigned_id,server_address:'.format(info['Name'])
 
 		if 'Name' not in info:
-			info['Name'] = ''
+			info['Name'] = '<assigned_id>'
 
-		if sublime.ok_cancel_dialog("Register an assigned username."):
-			if sublime.active_window().id() == 0:
-				sublime.run_command('new_window')
-			sublime.active_window().show_input_panel(
-				mesg,
-				info['Name'],
-				self.process,
-				None,
-				None,
-			)
+		placeholder = info['Name'] + ',server_address'
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
+		sublime.active_window().show_input_panel(
+			mesg,
+			placeholder,
+			self.process,
+			None,
+			None,
+		)
 
-	def process(self, name):
-		name = name.strip()
+	# ------------------------------------------------------------------
+	def process(self, data):
+		name, address = data.split(',')
 		response = gemaRequest(
 			'complete_registration',
-			{'name':name, 'role':'teacher'},
+			{'name':name.strip(), 'role':'teacher'},
 			authenticated=False,
+			address=address.strip(),
 		)
 		if response == 'Failed':
 			sublime.message_dialog('Failed to complete registration.')
-		elif response!=None:
-			uid, password = response.split(',')
+		else:
+			uid, password, course_id, name_server = response.split(',')
 			try:
 				with open(gemaFILE, 'r') as f:
 					info = json.loads(f.read())
 			except:
 				info = dict()
+			if not name_server.strip().startswith('http://'):
+				name_server = 'http://' + name_server.strip()
 			info['Uid'] = int(uid)
-			info['Password'] = password
-			info['Name'] = name
+			info['Password'] = password.strip()
+			info['Name'] = name.strip()
+			info['CourseId'] = course_id.strip()
+			info['NameServer'] = name_server
 			with open(gemaFILE, 'w') as f:
 				f.write(json.dumps(info, indent=4))
-			sublime.message_dialog('{} registered'.format(name))
+			sublime.message_dialog('{} registered for {}'.format(name, course_id))
+

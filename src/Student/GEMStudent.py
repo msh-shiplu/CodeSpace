@@ -25,8 +25,7 @@ gemsUpdateMessage = {
 	4 : "Your solution was correct.",
 }
 # ------------------------------------------------------------------------------
-def gemsRequest(path, data, authenticated=True, method='POST', verbal=True):
-	# global gemsUID
+def gemsRequest(path, data, authenticated=True, method='POST', verbal=True, address=None):
 	global gemsFOLDER
 	try:
 		with open(gemsFILE, 'r') as f:
@@ -34,17 +33,16 @@ def gemsRequest(path, data, authenticated=True, method='POST', verbal=True):
 	except:
 		info = dict()
 
-	if 'Server' not in info:
-		if verbal:
-			sublime.message_dialog("Please set server address.")
-		return None
-
 	if 'Folder' not in info:
 		if verbal:
 			sublime.message_dialog("Please set a local folder to store working files.")
 		return None
 
-	# data['server'] = info['Server']
+	if address is None and 'Server' not in info:
+		if verbal:
+			sublime.message_dialog("Please connect to the server first.")
+		return None
+
 	if authenticated:
 		if 'Uid' not in info:
 			sublime.message_dialog("Please register.")
@@ -55,7 +53,12 @@ def gemsRequest(path, data, authenticated=True, method='POST', verbal=True):
 		gemsFOLDER = info['Folder']
 		# gemsUID = info['Uid']
 
-	url = urllib.parse.urljoin(info['Server'], path)
+	if address is None:
+		address = info['Server']
+	elif not address.startswith('http://'):
+		address = 'http://' + address
+
+	url = urllib.parse.urljoin(address, path)
 	load = urllib.parse.urlencode(data).encode('utf-8')
 	req = urllib.request.Request(url, load, method=method)
 	try:
@@ -249,6 +252,39 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
 			sublime.active_window().open_file(new_fname)
 
 # ------------------------------------------------------------------
+class gemsConnect(sublime_plugin.ApplicationCommand):
+	def run(self):
+		try:
+			with open(gemsFILE, 'r') as f:
+				info = json.loads(f.read())
+		except:
+			info = dict()
+		if 'NameServer' not in info:
+			sublime.message_dialog('Must set name server first.')
+			return
+		url = urllib.parse.urljoin(info['NameServer'], 'ask')
+		load = urllib.parse.urlencode({'who':info['CourseId']}).encode('utf-8')
+		req = urllib.request.Request(url, load)
+		try:
+			with urllib.request.urlopen(req, None, gemsTIMEOUT) as response:
+				server = response.read().decode(encoding="utf-8")
+				try:
+					with open(gemsFILE, 'r') as f:
+						info = json.loads(f.read())
+				except:
+					info = dict()
+				if not server.startswith('http://'):
+					server = 'http://' + server
+				info['Server'] = server
+				with open(gemsFILE, 'w') as f:
+					f.write(json.dumps(info, indent=4))
+				sublime.message_dialog('Connected to gem server at {}'.format(server))
+		except urllib.error.HTTPError as err:
+			sublime.message_dialog("{0}".format(err))
+		except urllib.error.URLError as err:
+			sublime.message_dialog("{0}\nCannot connect to name server.".format(err))
+
+# ------------------------------------------------------------------
 class gemsCompleteRegistration(sublime_plugin.ApplicationCommand):
 	def run(self):
 		try:
@@ -260,50 +296,52 @@ class gemsCompleteRegistration(sublime_plugin.ApplicationCommand):
 			sublime.message_dialog("Please set a local folder for keeping working files.")
 			return None
 
-		if 'Server' not in info:
-			sublime.message_dialog("Please set server address.")
-			return None
-
-		mesg = 'Enter your assigned name'
+		mesg = 'Enter assigned_id,server_address'
 		if 'Name' in info:
-			mesg = '{} is already registered. Enter a new name or Esc:'.format(info['Name'])
+			mesg = '{} is already registered. Enter assigned_id,server_address:'.format(info['Name'])
 
 		if 'Name' not in info:
-			info['Name'] = ''
+			info['Name'] = '<assigned_id>'
 
-		if sublime.ok_cancel_dialog("Register an assigned username."):
-			if sublime.active_window().id() == 0:
-				sublime.run_command('new_window')
-			sublime.active_window().show_input_panel(
-				mesg,
-				info['Name'],
-				self.process,
-				None,
-				None,
-			)
+		placeholder = info['Name'] + ',server_address'
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
+		sublime.active_window().show_input_panel(
+			mesg,
+			placeholder,
+			self.process,
+			None,
+			None,
+		)
 
-	def process(self, name):
-		name = name.strip()
+	# ------------------------------------------------------------------
+	def process(self, data):
+		name, address = data.split(',')
 		response = gemsRequest(
 			'complete_registration',
-			{'name':name, 'role':'student'},
+			{'name':name.strip(), 'role':'student'},
 			authenticated=False,
+			address=address.strip(),
 		)
 		if response == 'Failed':
 			sublime.message_dialog('Failed to complete registration.')
-		elif response!=None:
-			uid, password = response.split(',')
+		else:
+			uid, password, course_id, name_server = response.split(',')
 			try:
 				with open(gemsFILE, 'r') as f:
 					info = json.loads(f.read())
 			except:
 				info = dict()
+			if not name_server.strip().startswith('http://'):
+				name_server = 'http://' + name_server.strip()
 			info['Uid'] = int(uid)
-			info['Password'] = password
-			info['Name'] = name
+			info['Password'] = password.strip()
+			info['Name'] = name.strip()
+			info['CourseId'] = course_id.strip()
+			info['NameServer'] = name_server
 			with open(gemsFILE, 'w') as f:
 				f.write(json.dumps(info, indent=4))
-			sublime.message_dialog('{} registered'.format(name))
+			sublime.message_dialog('{} registered for {}'.format(name, course_id))
 
 # ------------------------------------------------------------------
 class gemsSetLocalFolder(sublime_plugin.ApplicationCommand):
@@ -347,37 +385,37 @@ class gemsSetLocalFolder(sublime_plugin.ApplicationCommand):
 			sublime.message_dialog("Folder name cannot be empty.")
 
 # ------------------------------------------------------------------
-class gemsSetServerAddress(sublime_plugin.ApplicationCommand):
-	def run(self):
-		try:
-			with open(gemsFILE, 'r') as f:
-				info = json.loads(f.read())
-		except:
-			info = dict()
-		if 'Server' not in info:
-			info['Server'] = 'http://x.x.x.x:8080'
-		if sublime.active_window().id() == 0:
-			sublime.run_command('new_window')
-		sublime.active_window().show_input_panel("Set server address.  Press Enter:",
-			info['Server'],
-			self.set,
-			None,
-			None)
+# class gemsSetServerAddress(sublime_plugin.ApplicationCommand):
+# 	def run(self):
+# 		try:
+# 			with open(gemsFILE, 'r') as f:
+# 				info = json.loads(f.read())
+# 		except:
+# 			info = dict()
+# 		if 'Server' not in info:
+# 			info['Server'] = 'http://x.x.x.x:8080'
+# 		if sublime.active_window().id() == 0:
+# 			sublime.run_command('new_window')
+# 		sublime.active_window().show_input_panel("Set server address.  Press Enter:",
+# 			info['Server'],
+# 			self.set,
+# 			None,
+# 			None)
 
-	def set(self, addr):
-		addr = addr.strip()
-		if len(addr) > 0:
-			try:
-				with open(gemsFILE, 'r') as f:
-					info = json.loads(f.read())
-			except:
-				info = dict()
-			if not addr.startswith('http://'):
-				addr = 'http://' + addr
-			info['Server'] = addr
-			with open(gemsFILE, 'w') as f:
-				f.write(json.dumps(info, indent=4))
-		else:
-			sublime.message_dialog("Server address cannot be empty.")
+# 	def set(self, addr):
+# 		addr = addr.strip()
+# 		if len(addr) > 0:
+# 			try:
+# 				with open(gemsFILE, 'r') as f:
+# 					info = json.loads(f.read())
+# 			except:
+# 				info = dict()
+# 			if not addr.startswith('http://'):
+# 				addr = 'http://' + addr
+# 			info['Server'] = addr
+# 			with open(gemsFILE, 'w') as f:
+# 				f.write(json.dumps(info, indent=4))
+# 		else:
+# 			sublime.message_dialog("Server address cannot be empty.")
 
 # ------------------------------------------------------------------------------

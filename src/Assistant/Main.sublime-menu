@@ -58,30 +58,14 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Configure",
-                "id": "GemTASetup",
-                "children": [
-                    {
-                        "caption": "Set course id",
-                        "id": "gemaSetCourseId",
-                        "command": "gema_set_course_id",
-                    },
-                    {
-                        "caption": "Set working folder",
-                        "id": "gemaSetLocalFolder",
-                        "command": "gema_set_local_folder",
-                    },
-                    {
-                        "caption": "Set name server",
-                        "id": "gemaSetNameServer",
-                        "command": "gema_set_name_server",
-                    },
-                    {
-                        "caption": "Complete registration",
-                        "id": "gemaCompleteRegistration",
-                        "command": "gema_complete_registration",
-                    },
-                ]
+                "caption": "Set working folder",
+                "id": "gemaSetLocalFolder",
+                "command": "gema_set_local_folder",
+            },
+            {
+                "caption": "Complete registration",
+                "id": "gemaCompleteRegistration",
+                "command": "gema_complete_registration",
             },
         ]
     }

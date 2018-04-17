@@ -8,6 +8,11 @@
                 "id": "gemtConnect",
                 "command": "gemt_connect",
             },
+            {
+                "caption": "Test",
+                "id": "gemtTest",
+                "command": "gemt_test",
+            },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Share current file",
@@ -91,35 +96,14 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Configure",
-                "id": "GEMTConfigure",
-                "children": [
-                    {
-                        "caption": "Set course id",
-                        "id": "gemtSetCourseId",
-                        "command": "gemt_set_course_id",
-                    },
-                    {
-                        "caption": "Set working folder",
-                        "id": "gemtSetLocalFolder",
-                        "command": "gemt_set_local_folder",
-                    },
-                    {
-                        "caption": "Set name server",
-                        "id": "gemtSetNameServer",
-                        "command": "gemt_set_name_server",
-                    },
-                    {
-                        "caption": "Complete registration",
-                        "id": "gemtCompleteRegistration",
-                        "command": "gemt_complete_registration",
-                    },
-                ]
+                "caption": "Set working folder",
+                "id": "gemtSetLocalFolder",
+                "command": "gemt_set_local_folder",
             },
             {
-                "caption": "Test",
-                "id": "gemtTest",
-                "command": "gemt_test",
+                "caption": "Complete registration",
+                "id": "gemtCompleteRegistration",
+                "command": "gemt_complete_registration",
             },
         ]
     }

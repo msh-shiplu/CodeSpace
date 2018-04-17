@@ -78,7 +78,7 @@ func init_config(filename string) *Configuration {
 
 //-----------------------------------------------------------------
 func inform_name_server() {
-	nameserver := fmt.Sprintf("%s/tell?who=%s&address=%s", Config.NameServer, Config.Id, Config.Address)
+	nameserver := fmt.Sprintf("%s/tell?who=%s&address=%s", Config.NameServer, Config.CourseId, Config.Address)
 	_, err := http.Get(nameserver)
 	if err != nil {
 		log.Fatal("Unable to contact with name server.")

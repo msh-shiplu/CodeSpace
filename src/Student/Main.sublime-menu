@@ -4,6 +4,12 @@
         "id": "GEMStudent",
         "children": [
             {
+                "caption": "Connect",
+                "id": "gemsConnect",
+                "command": "gems_connect",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
                 "caption": "White board",
                 "id": "gemsGetBoardContent",
                 "command": "gems_get_board_content",
@@ -25,11 +31,6 @@
                 "id": "gemsAttendanceReport",
                 "command": "gems_attendance_report",
             },
-            // {
-            //     "caption": "Messages",
-            //     "id": "gemsShowMessages",
-            //     "command": "gems_show_messages",
-            // },
             {
                 "caption": "Points",
                 "id": "gemsPointsReport",
@@ -37,25 +38,14 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Configure",
-                "id": "GemsSetup",
-                "children": [
-                    {
-                        "caption": "Set server address",
-                        "id": "gemsSetServerAddress",
-                        "command": "gems_set_server_address",
-                    },
-                    {
-                        "caption": "Set working folder",
-                        "id": "gemsSetLocalFolder",
-                        "command": "gems_set_local_folder",
-                    },
-                    {
-                        "caption": "Complete registration",
-                        "id": "gemsCompleteRegistration",
-                        "command": "gems_complete_registration",
-                    },
-                ]
+                "caption": "Set working folder",
+                "id": "gemsSetLocalFolder",
+                "command": "gems_set_local_folder",
+            },
+            {
+                "caption": "Complete registration",
+                "id": "gemsCompleteRegistration",
+                "command": "gems_complete_registration",
             },
             {
                 "caption": "Update GEM",

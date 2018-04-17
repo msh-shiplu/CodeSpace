@@ -14,7 +14,7 @@ const VERSION = "0.1"
 
 //---------------------------------------------------------
 type Configuration struct {
-	Id         string
+	CourseId   string
 	NameServer string
 	IP         string
 	Port       int
