@@ -14,10 +14,12 @@ const VERSION = "0.1"
 
 //---------------------------------------------------------
 type Configuration struct {
-	IP       string
-	Port     int
-	Database string
-	Address  string
+	Id         string
+	NameServer string
+	IP         string
+	Port       int
+	Database   string
+	Address    string
 }
 
 var Config *Configuration

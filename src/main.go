@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	// "io/ioutil"
 	"log"
 	"math/rand"
 	"net"
@@ -76,32 +77,45 @@ func init_config(filename string) *Configuration {
 }
 
 //-----------------------------------------------------------------
+func inform_name_server() {
+	nameserver := fmt.Sprintf("%s/tell?who=%s&address=%s", Config.NameServer, Config.Id, Config.Address)
+	_, err := http.Get(nameserver)
+	if err != nil {
+		log.Fatal("Unable to contact with name server.")
+	}
+	// defer resp.Body.Close()
+	// body, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println(">", string(body))
+}
+
+//-----------------------------------------------------------------
 func main() {
+	if len(os.Args) != 2 {
+		fmt.Println("\n\tUsage: ./gem_server config.json\n")
+		return
+	}
 	rand.Seed(time.Now().UnixNano())
-	teacher_file, student_file, config_file := "", "", ""
-	flag.StringVar(&config_file, "config", config_file, "configuration file.")
+	teacher_file, student_file := "", ""
 	flag.StringVar(&teacher_file, "add_teacher", teacher_file, "teacher file.")
 	flag.StringVar(&student_file, "add_student", student_file, "student file.")
 	flag.Parse()
-	if config_file == "" {
-		log.Fatal("Must provide json configuration file.")
-	}
-	Config = init_config(config_file)
+	Config = init_config(os.Args[1])
 	init_database(Config.Database)
 	if teacher_file != "" {
 		add_multiple(teacher_file, "teacher")
 	} else if student_file != "" {
 		add_multiple(student_file, "student")
 	} else {
+		inform_name_server()
 		init_handlers()
 		load_teachers()
 		fmt.Println("*********************************************")
 		fmt.Printf("*   GEM (%s)\n", VERSION)
 		fmt.Printf("*   Server address: %s\n", Config.Address)
 		fmt.Println("*********************************************\n")
-		err := http.ListenAndServe(Config.Address, nil)
-		if err != nil {
-			log.Fatal(err)
-		}
+		http.ListenAndServe(Config.Address, nil)
 	}
 }

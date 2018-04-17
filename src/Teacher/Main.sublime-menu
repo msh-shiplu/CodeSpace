@@ -4,6 +4,12 @@
         "id": "GEMTeacher",
         "children": [
             {
+                "caption": "Connect",
+                "id": "gemtConnect",
+                "command": "gemt_connect",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
                 "caption": "Share current file",
                 "id": "gemtShare",
                 "command": "gemt_share",
@@ -89,14 +95,19 @@
                 "id": "GEMTConfigure",
                 "children": [
                     {
-                        "caption": "Set server address",
-                        "id": "gemtSetServerAddress",
-                        "command": "gemt_set_server_address",
+                        "caption": "Set course id",
+                        "id": "gemtSetCourseId",
+                        "command": "gemt_set_course_id",
                     },
                     {
                         "caption": "Set working folder",
                         "id": "gemtSetLocalFolder",
                         "command": "gemt_set_local_folder",
+                    },
+                    {
+                        "caption": "Set name server",
+                        "id": "gemtSetNameServer",
+                        "command": "gemt_set_name_server",
                     },
                     {
                         "caption": "Complete registration",

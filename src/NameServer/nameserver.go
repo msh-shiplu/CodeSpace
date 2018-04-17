@@ -137,13 +137,14 @@ func tellHandler(w http.ResponseWriter, r *http.Request) {
 //-----------------------------------------------------------------------------
 func main() {
 	if len(os.Args) != 2 {
-		log.Fatal("Must provide json configuration file.")
+		fmt.Println("\n\tUsage: ./address_server config.json\n")
+		return
 	}
 	Config = initConfig(os.Args[1])
-	fmt.Println("Address server is running on", Config.Address)
+	fmt.Printf("Name server is running on http://%s\n", Config.Address)
 	fmt.Println("Log is written to", Config.Log)
 
-	http.HandleFunc("/tells", tellHandler)
+	http.HandleFunc("/tell", tellHandler)
 	http.HandleFunc("/ask", askHandler)
 
 	rand.Seed(time.Now().UnixNano())
