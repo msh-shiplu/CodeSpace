@@ -35,11 +35,11 @@
                 "id": "gemtMulticastSeq",
                 "command": "gemt_multicast_seq",
             },
-            {
-                "caption": "Start problems (Randomized)",
-                "id": "gemtMulticastOr",
-                "command": "gemt_multicast_or",
-            },
+            // {
+            //     "caption": "Start problems (Randomized)",
+            //     "id": "gemtMulticastOr",
+            //     "command": "gemt_multicast_or",
+            // },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Get submission",
