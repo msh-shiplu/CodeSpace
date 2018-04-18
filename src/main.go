@@ -111,7 +111,9 @@ func main() {
 	} else if student_file != "" {
 		add_multiple(student_file, "student")
 	} else {
-		inform_name_server()
+		if Config.NameServer != "" {
+			inform_name_server()
+		}
 		init_handlers()
 		load_teachers()
 		fmt.Println("*********************************************")

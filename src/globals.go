@@ -5,7 +5,9 @@ package main
 
 import (
 	"database/sql"
+	"log"
 	"math/rand"
+	"os"
 	"sync"
 	"time"
 )
@@ -20,6 +22,7 @@ type Configuration struct {
 	Port       int
 	Database   string
 	Address    string
+	LogFile    string
 }
 
 var Config *Configuration
@@ -133,6 +136,17 @@ func RandStringRunes(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+//-----------------------------------------------------------------------------
+func writeLog(filename, message string) {
+	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	log.SetOutput(f)
+	log.Println(time.Now(), " ", message)
 }
 
 //---------------------------------------------------------

@@ -5,6 +5,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"time"
@@ -146,12 +147,16 @@ func add_or_update_score(decision string, pid, stid, tid int) string {
 	if score_id == 0 {
 		_, err := AddScoreSQL.Exec(pid, stid, tid, points, current_attempts+1, time.Now())
 		if err != nil {
-			log.Fatal(err)
+			mesg = fmt.Sprintf("Unable to add score: %d %d %d", pid, stid, tid)
+			writeLog(Config.LogFile, mesg)
+			return mesg
 		}
 	} else {
 		_, err := UpdateScoreSQL.Exec(teacher, points, current_attempts+1, score_id)
 		if err != nil {
-			log.Fatal(err)
+			mesg = fmt.Sprintf("Unable to update score: %d %d", teacher, score_id)
+			writeLog(Config.LogFile, mesg)
+			return mesg
 		}
 	}
 	return mesg

@@ -92,7 +92,13 @@ func complete_registrationHandler(w http.ResponseWriter, r *http.Request) {
 	var id int
 	for rows.Next() {
 		rows.Scan(&id, &password)
-		fmt.Fprintf(w, fmt.Sprintf("%d,%s,%s,%s", id, password, Config.CourseId, Config.NameServer))
+		msg := ""
+		if Config.NameServer != "" {
+			msg = fmt.Sprintf("%d,%s,%s,%s", id, password, Config.CourseId, Config.NameServer)
+		} else {
+			msg = fmt.Sprintf("%d,%s,%s", id, password, Config.CourseId)
+		}
+		fmt.Fprintf(w, msg)
 		return
 	}
 	fmt.Fprintf(w, "Failed")
