@@ -587,13 +587,7 @@ class gemtCompleteRegistration(sublime_plugin.ApplicationCommand):
 		placeholder = info['Name'] + ',server_address'
 		if sublime.active_window().id() == 0:
 			sublime.run_command('new_window')
-		sublime.active_window().show_input_panel(
-			mesg,
-			placeholder,
-			self.process,
-			None,
-			None,
-		)
+		sublime.active_window().show_input_panel(mesg,placeholder,self.process,None,None)
 
 	# ------------------------------------------------------------------
 	def process(self, data):
@@ -606,37 +600,37 @@ class gemtCompleteRegistration(sublime_plugin.ApplicationCommand):
 		)
 		if response == 'Failed':
 			sublime.message_dialog('Failed to complete registration.')
+			return
+
+		name_server = ""
+		if response.count(',') == 3:
+			uid, password, course_id, name_server = response.split(',')
+			if not name_server.strip().startswith('http://'):
+				name_server = 'http://' + name_server.strip()
+		elif response.count(',') == 2:
+			uid, password, course_id = response.split(',')
 		else:
-			name_server = ""
-			if response.count(',') == 3:
-				uid, password, course_id, name_server = response.split(',')
-				if not name_server.strip().startswith('http://'):
-					name_server = 'http://' + name_server.strip()
-			elif response.count(',') == 2:
-				uid, password, course_id = response.split(',')
-			else:
-				sublime.message_dialog('Unable to complete registration.')
-				return
-			try:
-				with open(gemtFILE, 'r') as f:
-					info = json.loads(f.read())
-			except:
-				info = dict()
+			sublime.message_dialog('Unable to complete registration.')
+			return
+		try:
+			with open(gemtFILE, 'r') as f:
+				info = json.loads(f.read())
+		except:
+			info = dict()
 
-			info['Uid'] = int(uid)
-			info['Password'] = password.strip()
-			info['Name'] = name.strip()
-			info['CourseId'] = course_id.strip()
-			if name_server != "":
-				info['NameServer'] = name_server
-			else:
-				if not address.startswith('http://'):
-					address = 'http://' + address
-				info['Server'] = address
+		info['Uid'] = int(uid)
+		info['Password'] = password.strip()
+		info['Name'] = name.strip()
+		info['CourseId'] = course_id.strip()
+		if name_server != "":
+			info['NameServer'] = name_server
+		if not address.startswith('http://'):
+			address = 'http://' + address
+		info['Server'] = address
 
-			with open(gemtFILE, 'w') as f:
-				f.write(json.dumps(info, indent=4))
-			sublime.message_dialog('{} registered for {}'.format(name, course_id))
+		with open(gemtFILE, 'w') as f:
+			f.write(json.dumps(info, indent=4))
+		sublime.message_dialog('{} registered for {}'.format(name, course_id))
 
 
 
