@@ -19,6 +19,7 @@ type Configuration struct {
 	Port    int
 	Address string
 	Log     string
+	Max     int
 }
 
 var Config = &Configuration{}
@@ -29,8 +30,6 @@ type Record struct {
 }
 
 var Records = make(map[string]*Record)
-
-const MaxRecords = 100
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
@@ -72,7 +71,8 @@ func writeLog(filename, message string) {
 	}
 	defer f.Close()
 	log.SetOutput(f)
-	log.Println(time.Now(), " ", message)
+	// log.Println(time.Now().Format("Mon Jan _2 15:04:05 2006"), " ", message)
+	log.Println(message)
 }
 
 //-----------------------------------------------------------------------------
@@ -115,7 +115,7 @@ func askHandler(w http.ResponseWriter, r *http.Request) {
 
 //-----------------------------------------------------------------------------
 func tellHandler(w http.ResponseWriter, r *http.Request) {
-	if len(Records) > MaxRecords {
+	if len(Records) > Config.Max {
 		fmt.Fprintf(w, "max_record_exceeded")
 		return
 	}
