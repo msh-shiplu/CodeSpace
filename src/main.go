@@ -120,6 +120,9 @@ func main() {
 		fmt.Printf("*   GEM (%s)\n", VERSION)
 		fmt.Printf("*   Server address: %s\n", Config.Address)
 		fmt.Println("*********************************************\n")
-		http.ListenAndServe(Config.Address, nil)
+		err := http.ListenAndServe(Config.Address, nil)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
