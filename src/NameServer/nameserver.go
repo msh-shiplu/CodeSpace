@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path"
 	"time"
 )
 
@@ -76,10 +77,20 @@ func writeLog(filename, message string) {
 }
 
 //-----------------------------------------------------------------------------
-func initConfig(filename string) *Configuration {
-	file, err := os.Open(filename)
+// Use config.json which is presumed to exist in the current directory.
+//-----------------------------------------------------------------------------
+func initConfig() *Configuration {
+	var pwd, filename string
+	var err error
+	var file *os.File
+	pwd, err = os.Getwd()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Current directory is inaccessible.")
+	}
+	filename = path.Join(pwd, "config.json")
+	file, err = os.Open(filename)
+	if err != nil {
+		log.Fatal("Could not open " + filename)
 	}
 	decoder := json.NewDecoder(file)
 	config := &Configuration{}
@@ -102,15 +113,6 @@ func askHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "unknown")
 	} else {
 		fmt.Fprintf(w, "http://"+rec.Address)
-		// server := fmt.Sprintf("http://%s/ping", rec.Address)
-		// response, err := http.Get(server)
-		// if err != nil {
-		// 	fmt.Fprintf(w, "inactive")
-		// } else if response.Status == "200 OK" {
-		// 	fmt.Fprintf(w, "http://"+rec.Address)
-		// } else {
-		// 	fmt.Fprintf(w, "broken")
-		// }
 	}
 }
 
@@ -145,11 +147,7 @@ func tellHandler(w http.ResponseWriter, r *http.Request) {
 
 //-----------------------------------------------------------------------------
 func main() {
-	if len(os.Args) != 2 {
-		fmt.Println("\n\tUsage: ./address_server config.json\n")
-		return
-	}
-	Config = initConfig(os.Args[1])
+	Config = initConfig()
 	fmt.Printf("Name server is running on http://%s\n", Config.Address)
 	fmt.Println("Log is written to", Config.Log)
 
