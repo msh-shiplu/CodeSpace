@@ -1,0 +1,8 @@
+GOOD JOB!!!
+Syntax
+Incorrect logic
+Base case
+Will not stop
+Return value
+Incorrect parameters
+Unreachable
