@@ -4,12 +4,6 @@
         "id": "GemTA",
         "children": [
             {
-                "caption": "Connect to server",
-                "id": "gemaConnect",
-                "command": "gema_connect",
-            },
-            {"caption":"-", "id":"side-bar-separator"},
-            {
                 "caption": "Get a submission",
                 "id": "gemaGetPrioritized",
                 "command": "gema_get_prioritized",
@@ -63,7 +57,12 @@
                 "command": "gema_set_local_folder",
             },
             {
-                "caption": "Complete registration",
+                "caption": "Set server address",
+                "id": "gemaSetServerAddress",
+                "command": "gema_set_server_address",
+            },
+            {
+                "caption": "Register",
                 "id": "gemaCompleteRegistration",
                 "command": "gema_complete_registration",
             },

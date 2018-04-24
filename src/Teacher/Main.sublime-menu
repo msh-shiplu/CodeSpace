@@ -4,11 +4,6 @@
         "id": "GEMTeacher",
         "children": [
             {
-                "caption": "Connect to server",
-                "id": "gemtConnect",
-                "command": "gemt_connect",
-            },
-            {
                 "caption": "Test",
                 "id": "gemtTest",
                 "command": "gemt_test",
@@ -101,7 +96,12 @@
                 "command": "gemt_set_local_folder",
             },
             {
-                "caption": "Complete registration",
+                "caption": "Set server address",
+                "id": "gemtSetServerAddress",
+                "command": "gemt_set_server_address",
+            },
+            {
+                "caption": "Register",
                 "id": "gemtCompleteRegistration",
                 "command": "gemt_complete_registration",
             },
