@@ -668,8 +668,11 @@ class gemtSetServerAddress(sublime_plugin.ApplicationCommand):
 class gemtUpdate(sublime_plugin.WindowCommand):
 	def run(self):
 		package_path = os.path.join(sublime.packages_path(), "GEMTeacher");
-		version = open(os.path.join(package_path, "VERSION")).read()
-		if sublime.ok_cancel_dialog("Current version is %s. Click OK to update."):
+		try:
+			version = open(os.path.join(package_path, "VERSION")).read()
+		except:
+			version = 0
+		if sublime.ok_cancel_dialog("Current version is %s. Click OK to update.".format(version)):
 			if not os.path.isdir(package_path):
 				os.mkdir(package_path)
 			module_file = os.path.join(package_path, "GEMTeacher.py")
