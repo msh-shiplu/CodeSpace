@@ -470,7 +470,7 @@ class gemsUpdate(sublime_plugin.WindowCommand):
 			version = open(os.path.join(package_path, "VERSION")).read()
 		except:
 			version = 0
-		if sublime.ok_cancel_dialog("Current version is %s. Click OK to update.".format(version)):
+		if sublime.ok_cancel_dialog("Current version is {}. Click OK to update.".format(version)):
 			if not os.path.isdir(package_path):
 				os.mkdir(package_path)
 			module_file = os.path.join(package_path, "GEMStudent.py")
