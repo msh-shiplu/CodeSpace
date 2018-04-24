@@ -465,8 +465,9 @@ class gemsSetServerAddress(sublime_plugin.ApplicationCommand):
 # ------------------------------------------------------------------
 class gemsUpdate(sublime_plugin.WindowCommand):
 	def run(self):
-		if sublime.ok_cancel_dialog("Are you sure you want to update GEM to the latest version?"):
-			package_path = os.path.join(sublime.packages_path(), "GEMStudent");
+		package_path = os.path.join(sublime.packages_path(), "GEMStudent");
+		version = open(os.path.join(package_path, "VERSION")).read()
+		if sublime.ok_cancel_dialog("Current version is %s. Click OK to update."):
 			if not os.path.isdir(package_path):
 				os.mkdir(package_path)
 			module_file = os.path.join(package_path, "GEMStudent.py")
@@ -477,7 +478,6 @@ class gemsUpdate(sublime_plugin.WindowCommand):
 				urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMStudent/Main.sublime-menu", menu_file)
 				urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/version.go", version_file)
 				lines = open(version_file).readlines()
-				version = 0
 				for line in lines:
 					if line.strip().startswith('const VERSION ='):
 						prefix, version = line.strip().split('const VERSION =')
