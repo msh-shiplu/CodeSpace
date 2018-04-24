@@ -46,6 +46,7 @@
                 "id": "gemsCompleteRegistration",
                 "command": "gems_complete_registration",
             },
+            {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Update GEM",
                 "id": "gemsUpdate",

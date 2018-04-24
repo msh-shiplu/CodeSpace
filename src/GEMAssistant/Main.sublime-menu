@@ -66,6 +66,12 @@
                 "id": "gemaCompleteRegistration",
                 "command": "gema_complete_registration",
             },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Update GEM",
+                "id": "gemtUpdate",
+                "command": "gemt_update",
+            },
         ]
     }
 ]

@@ -441,3 +441,33 @@ class gemaSetServerAddress(sublime_plugin.ApplicationCommand):
 		else:
 			sublime.message_dialog("Server address cannot be empty.")
 
+# ------------------------------------------------------------------
+class gemaUpdate(sublime_plugin.WindowCommand):
+	def run(self):
+		if sublime.ok_cancel_dialog("Are you sure you want to update GEM to the latest version?"):
+			package_path = os.path.join(sublime.packages_path(), "GEMAssistant");
+			if not os.path.isdir(package_path):
+				os.mkdir(package_path)
+			module_file = os.path.join(package_path, "GEMAssistant.py")
+			menu_file = os.path.join(package_path, "Main.sublime-menu")
+			version_file = os.path.join(package_path, "version.go")
+			try:
+				urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMAssistant/GEMAssistant.py", module_file)
+				urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMAssistant/Main.sublime-menu", menu_file)
+				urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/version.go", version_file)
+				lines = open(version_file).readlines()
+				version = 0
+				for line in lines:
+					if line.strip().startswith('const VERSION ='):
+						prefix, version = line.strip().split('const VERSION =')
+						version = float(version)
+						break
+				os.remove(version_file)
+				with open(os.path.join(package_path, "VERSION"), 'w') as f:
+					f.write(version)
+				sublime.message_dialog("GEM has been updated to version %s." % version)
+			except:
+				sublime.message_dialog("A problem occurred during update.")
+
+# ------------------------------------------------------------------
+
