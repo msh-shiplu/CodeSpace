@@ -95,34 +95,34 @@ func inform_name_server() {
 
 //-----------------------------------------------------------------
 func main() {
-	if len(os.Args) != 2 {
-		fmt.Println("\n\tUsage: ./gem_server config.json\n")
-		return
-	}
 	rand.Seed(time.Now().UnixNano())
-	teacher_file, student_file := "", ""
+	config_file, teacher_file, student_file := "", "", ""
+	flag.StringVar(&config_file, "config", config_file, "configuration file.")
 	flag.StringVar(&teacher_file, "add_teacher", teacher_file, "teacher file.")
 	flag.StringVar(&student_file, "add_student", student_file, "student file.")
 	flag.Parse()
-	Config = init_config(os.Args[1])
+	if config_file == "" {
+		log.Fatal("Must provide configuration file.")
+	}
+	Config = init_config(config_file)
+	if Config.NameServer != "" {
+		inform_name_server()
+	}
 	init_database(Config.Database)
 	if teacher_file != "" {
 		add_multiple(teacher_file, "teacher")
-	} else if student_file != "" {
+	}
+	if student_file != "" {
 		add_multiple(student_file, "student")
-	} else {
-		if Config.NameServer != "" {
-			inform_name_server()
-		}
-		init_handlers()
-		load_teachers()
-		fmt.Println("*********************************************")
-		fmt.Printf("*   GEM (%s)\n", VERSION)
-		fmt.Printf("*   Server address: %s\n", Config.Address)
-		fmt.Println("*********************************************\n")
-		err := http.ListenAndServe(Config.Address, nil)
-		if err != nil {
-			log.Fatal("Unable to serve gem server at " + Config.Address)
-		}
+	}
+	init_handlers()
+	load_teachers()
+	fmt.Println("*********************************************")
+	fmt.Printf("*   GEM (%s)\n", VERSION)
+	fmt.Printf("*   Server address: %s\n", Config.Address)
+	fmt.Println("*********************************************\n")
+	err := http.ListenAndServe(Config.Address, nil)
+	if err != nil {
+		log.Fatal("Unable to serve gem server at " + Config.Address)
 	}
 }

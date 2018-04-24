@@ -12,10 +12,22 @@ import os; package_path = os.path.join(sublime.packages_path(), "GEMTeacher"); o
 ```
 + Paste copied code to Console and hit enter.
 
-#### Run the gem server (on the teacher's computer)
+#### Add teachers
 
 ```
-    ./go run *.go
+    ./go run *.go -config config.json -add_teacher teachers.txt
+```
+
+#### Add students
+
+```
+    ./go run *.go -config config.json -add_student students.txt
+```
+
+#### Run the server in class
+
+```
+    ./go run *.go -config config.json
 ```
 
 ### TA's installation
