@@ -69,8 +69,8 @@
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Update GEM",
-                "id": "gemtUpdate",
-                "command": "gemt_update",
+                "id": "gemaUpdate",
+                "command": "gema_update",
             },
         ]
     }
