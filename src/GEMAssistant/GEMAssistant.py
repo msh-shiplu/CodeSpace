@@ -462,7 +462,7 @@ class gemaUpdate(sublime_plugin.WindowCommand):
 			for line in lines:
 				if line.strip().startswith('const VERSION ='):
 					prefix, version = line.strip().split('const VERSION =')
-					version = float(version)
+					version = float(version.strip('"'))
 					break
 			os.remove(version_file)
 			with open(os.path.join(package_path, "VERSION"), 'w') as f:
