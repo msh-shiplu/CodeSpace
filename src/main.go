@@ -122,7 +122,7 @@ func main() {
 		fmt.Println("*********************************************\n")
 		err := http.ListenAndServe(Config.Address, nil)
 		if err != nil {
-			panic(err)
+			log.Fatal("Unable to serve gem server at " + Config.Address)
 		}
 	}
 }

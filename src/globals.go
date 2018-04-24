@@ -12,8 +12,6 @@ import (
 	"time"
 )
 
-const VERSION = "0.1"
-
 //---------------------------------------------------------
 type Configuration struct {
 	CourseId   string
