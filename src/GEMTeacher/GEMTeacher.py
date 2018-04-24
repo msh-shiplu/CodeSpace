@@ -664,5 +664,25 @@ class gemtSetServerAddress(sublime_plugin.ApplicationCommand):
 		else:
 			sublime.message_dialog("Server address cannot be empty.")
 
+# ------------------------------------------------------------------
+class gemtUpdate(sublime_plugin.WindowCommand):
+	def run(self):
+		if sublime.ok_cancel_dialog("Are you sure you want to update GEM to the latest version?"):
+			package_path = os.path.join(sublime.packages_path(), "GEMTeacher");
+			if not os.path.isdir(package_path):
+				os.mkdir(package_path)
+			module_file = os.path.join(package_path, "GEMTeacher.py")
+			menu_file = os.path.join(package_path, "Main.sublime-menu")
+			version_file = os.path.join(package_path, "version.go")
+			try:
+				urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMTeacher/GEMTeacher.py", module_file)
+				urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMTeacher/Main.sublime-menu", menu_file)
+				urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/version.go", version_file)
+				version = open(version_file).read().strip()
+				sublime.message_dialog("GEM has been updated to version %s." % version)
+			except:
+				sublime.message_dialog("A problem occurred during update.")
+
+# ------------------------------------------------------------------
 
 
