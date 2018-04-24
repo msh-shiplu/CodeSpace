@@ -678,22 +678,19 @@ class gemtUpdate(sublime_plugin.WindowCommand):
 			module_file = os.path.join(package_path, "GEMTeacher.py")
 			menu_file = os.path.join(package_path, "Main.sublime-menu")
 			version_file = os.path.join(package_path, "version.go")
-			try:
-				urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMTeacher/GEMTeacher.py", module_file)
-				urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMTeacher/Main.sublime-menu", menu_file)
-				urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/version.go", version_file)
-				lines = open(version_file).readlines()
-				for line in lines:
-					if line.strip().startswith('const VERSION ='):
-						prefix, version = line.strip().split('const VERSION =')
-						version = float(version.strip().strip('"'))
-						break
-				os.remove(version_file)
-				with open(os.path.join(package_path, "VERSION"), 'w') as f:
-					f.write(version)
-				sublime.message_dialog("GEM has been updated to version %s." % version)
-			except:
-				sublime.message_dialog("A problem occurred during update.")
+			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMTeacher/GEMTeacher.py", module_file)
+			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMTeacher/Main.sublime-menu", menu_file)
+			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/version.go", version_file)
+			lines = open(version_file).readlines()
+			for line in lines:
+				if line.strip().startswith('const VERSION ='):
+					prefix, version = line.strip().split('const VERSION =')
+					version = float(version.strip().strip('"'))
+					break
+			os.remove(version_file)
+			with open(os.path.join(package_path, "VERSION"), 'w') as f:
+				f.write(version)
+			sublime.message_dialog("GEM has been updated to version %s." % version)
 
 # ------------------------------------------------------------------
 
