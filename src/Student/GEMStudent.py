@@ -11,7 +11,8 @@ import random
 import datetime
 import webbrowser
 
-gemsUpdateTimeout = 10000
+gemsUpdateIntervalLong  = 20000		# Update interval
+gemsUpdateIntervalShort = 10000		# When submission is being looked at
 gemsFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemsFOLDER = ''
 gemsTIMEOUT = 7
@@ -125,10 +126,10 @@ def gems_periodic_update():
 			sublime.active_window().run_command('gems_get_board_content')
 
 		# Keep checking periodically
-		update_timeout = gemsUpdateTimeout
+		update_timeout = gemsUpdateIntervalLong
 		if submission_stat == 1:
-			update_timeout = gemsUpdateTimeout // 2
-		print('checking', submission_stat, board_stat, update_timeout)
+			update_timeout = gemsUpdateIntervalShort
+		# print('checking', submission_stat, board_stat, update_timeout)
 		sublime.set_timeout_async(gems_periodic_update, update_timeout)
 	except:
 		gemsTracking = False
