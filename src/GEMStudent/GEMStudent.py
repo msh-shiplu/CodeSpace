@@ -479,7 +479,8 @@ class gemsUpdate(sublime_plugin.WindowCommand):
 			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMStudent/GEMStudent.py", module_file)
 			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMStudent/Main.sublime-menu", menu_file)
 			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/version.go", version_file)
-			lines = open(version_file).readlines()
+			with open(version_file) as f:
+				lines = f.readlines()
 			for line in lines:
 				if line.strip().startswith('const VERSION ='):
 					prefix, version = line.strip().split('const VERSION =')
