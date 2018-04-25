@@ -40,6 +40,7 @@ var CompleteSubmissionSQL *sql.Stmt
 var AddFeedbackSQL *sql.Stmt
 var AddScoreSQL *sql.Stmt
 var UpdateScoreSQL *sql.Stmt
+var AddTagSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication
@@ -108,6 +109,7 @@ type ProblemInfo struct {
 	Merit           int
 	Effort          int
 	Attempts        int
+	Tag             string
 	Pid             int
 	NextIfCorrect   int
 	NextIfIncorrect int

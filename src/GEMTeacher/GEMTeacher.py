@@ -10,10 +10,11 @@ import json
 import socket
 import webbrowser
 import random
+import re
 
-gemtOrTag = '<GEM_OR>'
-gemtAndTag = '<GEM_AND>'
-gemtSeqTag = '<GEM_NEXT>'
+gemtOrDivider = '<GEM_OR>'
+gemtAndDivider = '<GEM_AND>'
+gemtSeqDivider = '<GEM_NEXT>'
 gemtAnswerTag = 'ANSWER:'
 gemtFOLDER = ''
 gemtTIMEOUT = 7
@@ -56,7 +57,7 @@ class gemtShare(sublime_plugin.TextCommand):
 
 # ------------------------------------------------------------------
 def gemt_get_problem_info(fname):
-	merit, effort, attempts = 0, 0, -1
+	merit, effort, attempts, tag = 0, 0, 0, ''
 	ext = fname.rsplit('.', 1)[-1]
 	with open(fname, 'r', encoding='utf-8') as fp:
 		content = fp.read()
@@ -72,10 +73,14 @@ def gemt_get_problem_info(fname):
 	elif first_line.startswith('/'):
 		first_line = first_line.strip('/ ')
 	try:
-		items = first_line.split(' ')
-		merit, effort = int(items[0]), int(items[1])
-		if len(items) > 2:
-			attempts = int(items[2])
+		# items = first_line.split(' ')
+		# merit, effort, attempts = int(items[0]), int(items[1]), int(items[2])
+		# if len(items) > 3:
+		# 	tag = items[3]
+		items = re.match('(\d+)\s+(\d+)\s+(\d+)(\s+(\w.*))?', first_line).groups()
+		merit, effort, attempts, tag = int(items[0]), int(items[1]), int(items[2]), items[4]
+		if tag is None:
+			tag = ''
 	except:
 		sublime.message_dialog('Improper problem definition')
 		raise Exception('Improper problem definition')
@@ -96,7 +101,7 @@ def gemt_get_problem_info(fname):
 		answer = items[1].strip()
 
 	basename = os.path.basename(fname)
-	return body, answer, str(merit), str(effort), str(attempts), basename, ext
+	return body, answer, str(merit), str(effort), str(attempts), tag, basename, ext
 
 
 # ------------------------------------------------------------------
@@ -140,7 +145,7 @@ def gemt_get_next_problems(fns, mode):
 # ------------------------------------------------------------------
 # used by gemt_multicast and gemtUnicast to start a new problem
 # ------------------------------------------------------------------
-def gemt_broadcast(content, answers, merits, efforts, attempts, filenames, exts, tag, mode, nic='', nii=''):
+def gemt_broadcast(content, answers, merits, efforts, attempts, tags, filenames, exts, divider, mode, nic='', nii=''):
 	data = {
 		'content': 			content,
 		'answers':			answers,
@@ -149,7 +154,8 @@ def gemt_broadcast(content, answers, merits, efforts, attempts, filenames, exts,
 		'merits':			merits,
 		'efforts':			efforts,
 		'attempts':			attempts,
-		'divider_tag':	 	tag,
+		'tags':				tags,
+		'divider':	 		divider,
 		'mode':				mode,
 		'nic': 				nic,
 		'nii':				nii,
@@ -159,19 +165,20 @@ def gemt_broadcast(content, answers, merits, efforts, attempts, filenames, exts,
 		sublime.status_message(response)
 
 # ------------------------------------------------------------------
-def gemt_multicast(self, edit, tag, mode, mesg):
+def gemt_multicast(self, edit, divider, mode, mesg):
 	fnames = [ v.file_name() for v in sublime.active_window().views() ]
 	fnames = [ fname for fname in fnames if fname is not None ]
 	if len(fnames)>0 and sublime.ok_cancel_dialog(mesg):
-		content, answers, merits, efforts, attempts, fns, exts = [],[],[],[],[],[],[]
+		content, answers, merits, efforts, attempts, tags, fns, exts = [], [],[],[],[],[],[],[]
 		nic, nii = [], []
 		for fname in fnames:
-			c, an, m, e, at, fn, ex = gemt_get_problem_info(fname)
+			c, an, m, e, at, tg, fn, ex = gemt_get_problem_info(fname)
 			content.append(c)
 			answers.append(an)
 			merits.append(m)
 			efforts.append(e)
 			attempts.append(at)
+			tags.append(tg)
 			fns.append(fn)
 			exts.append(ex)
 
@@ -180,11 +187,12 @@ def gemt_multicast(self, edit, tag, mode, mesg):
 			sublime.message_dialog('Could not detect difficulty level in file names.  Example of a correctly named file at level 1: abc_1.py')
 			return
 
-		content = '\n{}\n'.format(tag).join(content)
+		content = '\n{}\n'.format(divider).join(content)
 		answers = '\n'.join(answers)
 		merits = '\n'.join(merits)
 		efforts = '\n'.join(efforts)
 		attempts = '\n'.join(attempts)
+		tags = '\n'.join(tags)
 		fns = '\n'.join(fns)
 		exts = '\n'.join(exts)
 		nic = '\n'.join([str(i) for i in nic])
@@ -196,9 +204,10 @@ def gemt_multicast(self, edit, tag, mode, mesg):
 			merits,
 			efforts,
 			attempts,
+			tags,
 			fns,
 			exts,
-			tag,
+			divider,
 			mode,
 			nic,
 			nii,
@@ -212,8 +221,8 @@ class gemtUnicast(sublime_plugin.TextCommand):
 			if fname is None:
 				sublime.message_dialog('Content must be saved first.')
 				return
-			content, answers, merits, efforts, attempts, fns, exts = gemt_get_problem_info(fname)
-			gemt_broadcast(content, answers, merits, efforts, attempts, fns, exts, tag='', mode='unicast')
+			content, answers, merits, efforts, attempts, tags, fns, exts = gemt_get_problem_info(fname)
+			gemt_broadcast(content, answers, merits, efforts, attempts, tags, fns, exts, divider='', mode='unicast')
 
 # ------------------------------------------------------------------
 class gemtMulticastOr(sublime_plugin.TextCommand):
@@ -222,7 +231,7 @@ class gemtMulticastOr(sublime_plugin.TextCommand):
 			gemt_multicast(
 				self,
 				edit,
-				gemtOrTag,
+				gemtOrDivider,
 				'multicast_or',
 				'Send problems *randomly* to students, where problems are defined in all non-empty tabs in this window?',
 			)
@@ -234,7 +243,7 @@ class gemtMulticastAnd(sublime_plugin.TextCommand):
 			gemt_multicast(
 				self,
 				edit,
-				gemtAndTag,
+				gemtAndDivider,
 				'multicast_and',
 				'Send problems *simultaneously* to students, where problems are defined in all non-empty tabs in this window?',
 			)
@@ -246,7 +255,7 @@ class gemtMulticastSeq(sublime_plugin.TextCommand):
 			gemt_multicast(
 				self,
 				edit,
-				gemtSeqTag,
+				gemtSeqDivider,
 				'multicast_seq',
 				'Send problems *sequentially* to students, where problems are defined in all non-empty tabs in this window?',
 			)
@@ -274,7 +283,7 @@ class gemtClearSubmissions(sublime_plugin.ApplicationCommand):
 		if sublime.ok_cancel_dialog('Do you want to clear all submissions and white boards?'):
 			response = gemtRequest('teacher_clears_submissions', {})
 			sublime.message_dialog(response)
-
+# ----------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------

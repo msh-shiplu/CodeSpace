@@ -21,12 +21,12 @@ func create_tables() {
 	}
 	execSQL("create table if not exists student (id integer primary key, name text unique, password text)")
 	execSQL("create table if not exists teacher (id integer primary key, name text unique, password text)")
-	execSQL("create table if not exists problem (id integer primary key, tid integer, content blob, answer text, filename text, merit integer, effort integer, attempts integer, at timestamp)")
+	execSQL("create table if not exists problem (id integer primary key, tid integer, content blob, answer text, filename text, merit integer, effort integer, attempts integer, tag text, at timestamp)")
 	execSQL("create table if not exists submission (id integer primary key, pid integer, sid integer, content blob, priority integer, at timestamp, completed timestamp)")
 	execSQL("create table if not exists score (id integer primary key, pid integer, stid integer, tid integer, points integer, attempts integer, at timestamp, unique(pid,stid))")
 	execSQL("create table if not exists feedback (id integer primary key, tid integer, stid integer, content text, date timestamp)")
 	execSQL("create table if not exists attendance (id integer primary key, stid integer, at timestamp)")
-
+	execSQL("create table if not exists tag (id integer primary key, description text unique)")
 	// foreign key example: http://www.sqlitetutorial.net/sqlite-foreign-key/
 }
 
@@ -48,7 +48,7 @@ func init_database(db_name string) {
 	create_tables()
 	AddStudentSQL = prepare("insert into student (name, password) values (?, ?)")
 	AddTeacherSQL = prepare("insert into teacher (name, password) values (?, ?)")
-	AddProblemSQL = prepare("insert into problem (tid, content, answer, filename, merit, effort, attempts, at) values (?, ?, ?, ?, ?, ?, ?, ?)")
+	AddProblemSQL = prepare("insert into problem (tid, content, answer, filename, merit, effort, attempts, tag, at) values (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	AddSubmissionSQL = prepare("insert into submission (pid, sid, content, priority, at) values (?, ?, ?, ?, ?)")
 	AddSubmissionCompleteSQL = prepare("insert into submission (pid, sid, content, priority, at, completed) values (?, ?, ?, ?, ?, ?)")
 	CompleteSubmissionSQL = prepare("update submission set completed=? where id=?")
@@ -56,7 +56,7 @@ func init_database(db_name string) {
 	AddFeedbackSQL = prepare("insert into feedback (tid, stid, content, date) values (?, ?, ?, ?)")
 	UpdateScoreSQL = prepare("update score set tid=?, points=?, attempts=? where id=?")
 	AddAttendanceSQL = prepare("insert into attendance (stid, at) values (?, ?)")
-
+	AddTagSQL = prepare("insert into tag (description) values (?)")
 	// Initialize passcode for current session and default board
 	Passcode = RandStringRunes(12)
 	Students[0] = &StudenInfo{

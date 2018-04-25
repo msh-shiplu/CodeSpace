@@ -14,8 +14,8 @@ import (
 )
 
 //-----------------------------------------------------------------------------------
-func extract_problems(content, answers, merits, efforts, attempts, filenames, divider_tag string) []*ProblemInfo {
-	if divider_tag == "" {
+func extract_problems(content, answers, merits, efforts, attempts, tags, filenames, divider string) []*ProblemInfo {
+	if divider == "" {
 		merit, _ := strconv.Atoi(merits)
 		effort, _ := strconv.Atoi(efforts)
 		attempt, _ := strconv.Atoi(attempts)
@@ -26,13 +26,15 @@ func extract_problems(content, answers, merits, efforts, attempts, filenames, di
 			Merit:       merit,
 			Effort:      effort,
 			Attempts:    attempt,
+			Tag:         tags,
 		}}
 	}
-	c := strings.Split(content, divider_tag)
+	c := strings.Split(content, divider)
 	an := strings.Split(answers, "\n")
 	m := strings.Split(merits, "\n")
 	ef := strings.Split(efforts, "\n")
 	at := strings.Split(attempts, "\n")
+	tg := strings.Split(tags, "\n")
 	fn := strings.Split(filenames, "\n")
 	problems := make([]*ProblemInfo, 0)
 	for i := 0; i < len(c); i++ {
@@ -46,6 +48,7 @@ func extract_problems(content, answers, merits, efforts, attempts, filenames, di
 			Merit:           merit,
 			Effort:          effort,
 			Attempts:        attempt,
+			Tag:             tg[i],
 			NextIfCorrect:   0,
 			NextIfIncorrect: 0,
 		}
@@ -78,38 +81,29 @@ func assign_next_problem_pid(problems []*ProblemInfo, next_if_correct, next_if_i
 }
 
 //-----------------------------------------------------------------------------------
-// Teacher starts one or more problems.
-//-----------------------------------------------------------------------------------
-func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	content := r.FormValue("content")
-	answers := r.FormValue("answers")
-	merits := r.FormValue("merits")
-	efforts := r.FormValue("efforts")
-	attempts := r.FormValue("attempts")
-	filenames := r.FormValue("filenames")
-	divider_tag := r.FormValue("divider_tag")
-	mode := r.FormValue("mode")
-	nic, nii := r.FormValue("nic"), r.FormValue("nii")
-
-	problems := make([]*ProblemInfo, 0)
-
-	// Deactivate active problems and clear student boards
-	for _, prob := range ActiveProblems {
-		prob.Active = false
-	}
-	for stid, _ := range Students {
-		Students[stid].Boards = make([]*Board, 0)
-		Students[stid].SubmissionStatus = 0
-	}
-
-	// Extract info
-	problems = extract_problems(content, answers, merits, efforts, attempts, filenames, divider_tag)
-
+func insert_problems(uid int, problems []*ProblemInfo) {
 	// Create new problems
 	for i := 0; i < len(problems); i++ {
 		pid := int64(0)
 		if problems[i].Merit > 0 {
-			// insert only real problems into database
+			// Find Tag id
+			rows, _ := Database.Query("select id from tag where description=?", problems[i].Tag)
+			tagID := int64(0)
+			for rows.Next() {
+				rows.Scan(&tagID)
+				break
+			}
+			rows.Close()
+			if tagID == 0 {
+				result, err := AddTagSQL.Exec(problems[i].Tag)
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					tagID, _ = result.LastInsertId()
+				}
+			}
+
+			// Insert only real problems into database
 			result, err := AddProblemSQL.Exec(
 				uid,
 				problems[i].Description,
@@ -118,6 +112,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 				problems[i].Merit,
 				problems[i].Effort,
 				problems[i].Attempts,
+				int(tagID),
 				time.Now(),
 			)
 			if err != nil {
@@ -133,6 +128,38 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 			}
 		}
 	}
+}
+
+//-----------------------------------------------------------------------------------
+// Teacher starts one or more problems.
+//-----------------------------------------------------------------------------------
+func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	content := r.FormValue("content")
+	answers := r.FormValue("answers")
+	merits := r.FormValue("merits")
+	efforts := r.FormValue("efforts")
+	attempts := r.FormValue("attempts")
+	tags := r.FormValue("tags")
+	filenames := r.FormValue("filenames")
+	divider := r.FormValue("divider")
+	mode := r.FormValue("mode")
+	nic, nii := r.FormValue("nic"), r.FormValue("nii")
+
+	problems := make([]*ProblemInfo, 0)
+
+	// Deactivate active problems and clear student boards
+	for _, prob := range ActiveProblems {
+		prob.Active = false
+	}
+	for stid, _ := range Students {
+		Students[stid].Boards = make([]*Board, 0)
+		Students[stid].SubmissionStatus = 0
+	}
+
+	// Extract info
+	problems = extract_problems(content, answers, merits, efforts, attempts, tags, filenames, divider)
+
+	insert_problems(uid, problems)
 
 	if mode == "multicast_seq" {
 		assign_next_problem_pid(problems, nic, nii)
