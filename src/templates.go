@@ -133,29 +133,35 @@ var VIEW_ANSWERS_TEMPLATE = `
       google.charts.load('current', {'packages':['corechart']});
       google.charts.setOnLoadCallback(drawChart);
       function drawChart() {
-        var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Answer');
-        data.addColumn('number', 'Count');
-        data.addRows([
+        var data = google.visualization.arrayToDataTable([
+          ["Answer", "Count", {role: 'style'}, {role: 'annotation'}],
+          	{{$total := .Total}}
 			{{ range $key, $value := .Counts }}
-				[{{ $key }}, {{ $value }}],
+				[{{ $key }}, {{ $value }}, '#76A7FA', Math.round(100 * {{$value}} / {{ $total }})  + '%'],
 			{{ end }}
-        ]);
-        var options = {'title':'',
-                       'width':"70%",
-                       'height':600};
-        var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+		]);
+        var options = {
+        	'title':'',
+        	'width':"70%",
+        	'height':600,
+        	'legend': {position: "none"},
+        	'fontSize': 24,
+	        'chartArea': {width:'70%',height:'70%'},
+        };
+        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
         chart.draw(data, options);
       }
     </script>
     <style>
-    #chart_div{ margin: auto; }
+    #chart_div{ margin: auto; width:70%; border: 5px solid #F0F0F0; }
     pre{ margin: auto; width:70%}
+    .spacer{ width:100%; height:50px; }
     </style>
   </head>
 
   <body>
     <div id="chart_div"></div>
+    <div class="spacer"></div>
     <pre id="content">{{ .Content }}</pre>
   </body>
 </html>

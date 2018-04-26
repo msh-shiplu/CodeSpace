@@ -18,7 +18,7 @@ func add_multiple(filename, role string) {
 	}
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		name := strings.Trim(scanner.Text(), " \n")
+		name := strings.TrimSpace(scanner.Text())
 		if name != "" {
 			add_user(name, role)
 		}
@@ -66,7 +66,7 @@ func add_user(name, role string) {
 	} else {
 		init_student(int(id), password)
 	}
-	fmt.Printf("%s is added. Must complete registeration.\n", name)
+	fmt.Printf("|%s| is added. Must complete registeration.\n", name)
 }
 
 //-----------------------------------------------------------------

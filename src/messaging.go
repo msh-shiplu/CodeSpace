@@ -30,6 +30,7 @@ type BulletinBoardMessage struct {
 type AnswersBoardMessage struct {
 	Counts  map[string]int
 	Content string
+	Total   int
 }
 
 //-----------------------------------------------------------------------------------
@@ -42,18 +43,24 @@ func view_answersHandler(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			answers := ActiveProblems[pid].Answers
 			counts := make(map[string]int)
+			total := 0
 			for i := 0; i < len(answers); i++ {
 				counts[answers[i]]++
+				total++
 			}
-
-			rows, _ := Database.Query("select content from problem where id=?", pid)
-			defer rows.Close()
-			content := ""
-			for rows.Next() {
-				rows.Scan(&content)
-			}
+			// rows, _ := Database.Query("select content from problem where id=?", pid)
+			// defer rows.Close()
+			// content := ""
+			// for rows.Next() {
+			// 	rows.Scan(&content)
+			// }
+			content := ActiveProblems[pid].Info.Description
 			w.Header().Set("Content-Type", "text/html")
-			t.Execute(w, &AnswersBoardMessage{Counts: counts, Content: content})
+			data := &AnswersBoardMessage{Counts: counts, Content: content, Total: total}
+			err = t.Execute(w, data)
+			if err != nil {
+				fmt.Println(err)
+			}
 		} else {
 			fmt.Println(err)
 		}
