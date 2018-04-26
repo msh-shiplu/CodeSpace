@@ -141,7 +141,7 @@ var VIEW_ANSWERS_TEMPLATE = `
 			{{ end }}
 		]);
         var options = {
-        	'title':'',
+        	'title':'Total votes: {{ .Total }}',
         	'width':"70%",
         	'height':600,
         	'legend': {position: "none"},
