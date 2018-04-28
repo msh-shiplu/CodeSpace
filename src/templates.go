@@ -130,32 +130,32 @@ var VIEW_ANSWERS_TEMPLATE = `
     <!--Load the AJAX API-->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-      google.charts.load('current', {'packages':['corechart']});
+      google.charts.load('current', {'packages':['bar']});
       google.charts.setOnLoadCallback(drawChart);
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
-          ["Answer", "Count", {role: 'style'}, {role: 'annotation'}],
+          ["Answer", "Count", {role: 'annotation'}],
           	{{$total := .Total}}
 			{{ range $key, $value := .Counts }}
-				[{{ $key }}, {{ $value }}, '#76A7FA', Math.round(100 * {{$value}} / {{ $total }})  + '%'],
+				[{{ $key }}, {{ $value }}, Math.round(100 * {{$value}} / {{ $total }})  + '%'],
 			{{ end }}
 		]);
         var options = {
         	'title':'Total votes: {{ .Total }}',
-        	'width':"70%",
-        	'height':600,
+        	'height':300,
         	'legend': {position: "none"},
         	'fontSize': 24,
-	        'chartArea': {width:'70%',height:'70%'},
+            vAxis: { textStyle: { fontSize: 20} },
+            hAxis: { title: "", textStyle: { fontSize: 20} },
         };
-        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-        chart.draw(data, options);
+        var chart = new google.charts.Bar(document.getElementById('chart_div'));
+        chart.draw(data, google.charts.Bar.convertOptions(options));
       }
     </script>
     <style>
-    #chart_div{ margin: auto; width:70%; border: 5px solid #F0F0F0; }
-    pre{ margin: auto; width:70%}
-    .spacer{ width:100%; height:50px; }
+    #chart_div{ margin: auto; width:70%; }
+    pre{ margin: auto; width:60%}
+    .spacer{ width:100%; height:40px; }
     </style>
   </head>
 
@@ -163,6 +163,83 @@ var VIEW_ANSWERS_TEMPLATE = `
     <div id="chart_div"></div>
     <div class="spacer"></div>
     <pre id="content">{{ .Content }}</pre>
+    <div class="spacer"></div>
+  </body>
+</html>
+`
+
+var TAG_REPORT_TEMPLATE = `
+<html>
+  <head>
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['bar','line']});
+      google.charts.setOnLoadCallback(drawSuccess_vs_Activity);
+      google.charts.setOnLoadCallback(drawSuccess_vs_Time);
+      function drawSuccess_vs_Activity() {
+	      var data = google.visualization.arrayToDataTable([
+	        ['Time', 'Success Rate', 'Activity'],
+			{{ range $pid, $rec := .Performance }}
+				[ '{{$pid}}', {{$rec.Success}}, {{$rec.Activity}}/100 ],
+			{{ end }}
+	      ]);
+	      var options = {
+	        title: 'Analyze running time of nested loops.',
+        	height: 350,
+	        vAxis: { format: 'percent', textStyle: { fontSize: 20} },
+            hAxis: { title: 'Problem ID', textStyle: { fontSize: 20} },
+        	fontSize: 24,
+	      };
+        var chart = new google.charts.Bar(document.getElementById('chart1_div'));
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+
+      function drawSuccess_vs_Time() {
+	      var data = google.visualization.arrayToDataTable([
+	        ['Time', 'Success Rate'],
+			{{ range $pid, $rec := .Performance }}
+				[ new Date({{$rec.Timestamp}} / 1000000), {{$rec.Success}} ],
+			{{ end }}
+	      ]);
+	      var options = {
+        	height: 350,
+	        vAxis: { format: 'percent', textStyle: { fontSize: 20}},
+            hAxis: { title: '', textStyle: { fontSize: 20} },
+        	fontSize: 24,
+	      };
+        var chart = new google.charts.Line(document.getElementById('chart2_div'));
+        chart.draw(data, google.charts.Line.convertOptions(options));
+      }
+    </script>
+    <style>
+    #chart1_div,#chart2_div{ margin: auto; width:75%; }
+    .spacer{ width:100%; height:40px; }
+    </style>
+  </head>
+
+  <body>
+    <div id="chart1_div"></div>
+    <div class="spacer"></div>
+    <div id="chart2_div"></div>
+  </body>
+</html>
+`
+
+var TAGS_VIEW_TEMPLATE = `
+<html>
+  <head>
+    <style>
+    body { font-size: 16pt;}
+    </style>
+  </head>
+  <body>
+  	<h1>Learning objectives</h1>
+  	<ul>
+	{{ range . }}
+	<li><a href="report_tag?pc={{.PC}}&tag_id={{.Id}}">{{.Description}}</a></li>
+	{{ end }}
+	</ul>
   </body>
 </html>
 `

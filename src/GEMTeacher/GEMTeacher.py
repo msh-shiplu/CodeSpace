@@ -34,6 +34,15 @@ class gemtTest(sublime_plugin.WindowCommand):
 		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
+class gemtViewTags(sublime_plugin.WindowCommand):
+	def run(self):
+		passcode = gemtRequest('teacher_gets_passcode', {})
+		with open(gemtFILE, 'r') as f:
+			info = json.loads(f.read())
+		data = urllib.parse.urlencode({'pc' : passcode})
+		webbrowser.open(info['Server'] + '/view_tags?' + data)
+
+# ------------------------------------------------------------------
 class gemtShare(sublime_plugin.TextCommand):
 	def run(self, edit):
 		fname = self.view.file_name()

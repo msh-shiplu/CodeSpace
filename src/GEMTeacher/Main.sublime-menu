@@ -107,6 +107,17 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
+                "caption": "Report",
+                "id": "GEMTReport",
+                "children": [
+                    {
+                        "caption": "View learning objectives",
+                        "id": "gemtViewTags",
+                        "command": "gemt_view_tags",
+                    },
+                ]
+            },
+            {
                 "caption": "Update GEM",
                 "id": "gemtUpdate",
                 "command": "gemt_update",
