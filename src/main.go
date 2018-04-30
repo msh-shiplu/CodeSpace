@@ -22,6 +22,7 @@ func init_handlers() {
 	http.HandleFunc("/test", Authorize(testHandler))
 	http.HandleFunc("/student_periodic_update", Authorize(student_periodic_updateHandler))
 
+	http.HandleFunc("/view_activities", view_activitiesHandler)
 	http.HandleFunc("/view_tags", view_tagsHandler)
 	http.HandleFunc("/report_tag", report_tagHandler)
 

@@ -14,6 +14,55 @@ import (
 )
 
 //-----------------------------------------------------------------------------------
+type DailyActivityData struct {
+	Pids     map[int]bool
+	Sids     map[int]bool
+	Count    int
+	PidCount int
+	SidCount int
+}
+
+func view_activitiesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.FormValue("pc") != Passcode {
+		fmt.Fprintf(w, "Unauthorized")
+		return
+	}
+	rows, _ := Database.Query("select pid, sid, at from submission")
+	var at time.Time
+	var pid, sid int
+	data := make(map[int64]*DailyActivityData)
+	for rows.Next() {
+		rows.Scan(&pid, &sid, &at)
+		date := time.Date(at.Year(), at.Month(), at.Day(), 0, 0, 0, 0, at.Location()).UnixNano()
+		if _, ok := data[date]; !ok {
+			data[date] = &DailyActivityData{
+				Pids:  make(map[int]bool),
+				Sids:  make(map[int]bool),
+				Count: 0,
+			}
+		}
+		data[date].Count++
+		data[date].Pids[pid] = true
+		data[date].Sids[sid] = true
+	}
+	rows.Close()
+	for d, _ := range data {
+		// fmt.Println(d, val.Count, len(val.Pids), len(val.Sids))
+		data[d].PidCount = len(data[d].Pids)
+		data[d].SidCount = len(data[d].Sids)
+	}
+	w.Header().Set("Content-Type", "text/html")
+	t, err := template.New("").Parse(ACTIVITY_VIEW_TEMPLATE)
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = t.Execute(w, data)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+//-----------------------------------------------------------------------------------
 type TagsData struct {
 	Id          int
 	Description string

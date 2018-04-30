@@ -115,6 +115,11 @@
                         "id": "gemtViewTags",
                         "command": "gemt_view_tags",
                     },
+                    {
+                        "caption": "View activities",
+                        "id": "gemtViewActivities",
+                        "command": "gemt_view_activities",
+                    },
                 ]
             },
             {

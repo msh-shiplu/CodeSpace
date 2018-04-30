@@ -243,3 +243,63 @@ var TAGS_VIEW_TEMPLATE = `
   </body>
 </html>
 `
+
+var ACTIVITY_VIEW_TEMPLATE = `
+<html>
+  <head>
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['bar','line']});
+      google.charts.setOnLoadCallback(drawStudentCount);
+      google.charts.setOnLoadCallback(drawExerciseCount);
+
+      function drawStudentCount() {
+	      var data = google.visualization.arrayToDataTable([
+	        ['Time', 'Student Count'],
+			{{ range $day, $val := . }}
+				[  new Date({{$day}} / 1000000), {{$val.SidCount}} ],
+			{{ end }}
+	      ]);
+	      var options = {
+	        title: 'Daily student participation',
+        	height: 350,
+	        vAxis: { textStyle: { fontSize: 20} },
+            hAxis: { title: '', textStyle: { fontSize: 20} },
+        	fontSize: 24,
+	      };
+        var chart = new google.charts.Bar(document.getElementById('chart1_div'));
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+
+      function drawExerciseCount() {
+	      var data = google.visualization.arrayToDataTable([
+	        ['Time', 'Excercise Count'],
+			{{ range $day, $val := . }}
+				[  new Date({{$day}} / 1000000), {{$val.PidCount}} ],
+			{{ end }}
+	      ]);
+	      var options = {
+	        title: 'Daily exercise',
+        	height: 350,
+	        vAxis: { textStyle: { fontSize: 20} },
+            hAxis: { title: '', textStyle: { fontSize: 20} },
+        	fontSize: 24,
+	      };
+        var chart = new google.charts.Bar(document.getElementById('chart2_div'));
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+    </script>
+    <style>
+    #chart1_div,#chart2_div{ margin: auto; width:75%; }
+    .spacer{ width:100%; height:40px; }
+    </style>
+  </head>
+
+  <body>
+    <div id="chart1_div"></div>
+    <div class="spacer"></div>
+    <div id="chart2_div"></div>
+  </body>
+</html>
+`

@@ -43,6 +43,15 @@ class gemtViewTags(sublime_plugin.WindowCommand):
 		webbrowser.open(info['Server'] + '/view_tags?' + data)
 
 # ------------------------------------------------------------------
+class gemtViewActivities(sublime_plugin.WindowCommand):
+	def run(self):
+		passcode = gemtRequest('teacher_gets_passcode', {})
+		with open(gemtFILE, 'r') as f:
+			info = json.loads(f.read())
+		data = urllib.parse.urlencode({'pc' : passcode})
+		webbrowser.open(info['Server'] + '/view_activities?' + data)
+
+# ------------------------------------------------------------------
 class gemtShare(sublime_plugin.TextCommand):
 	def run(self, edit):
 		fname = self.view.file_name()
@@ -82,10 +91,6 @@ def gemt_get_problem_info(fname):
 	elif first_line.startswith('/'):
 		first_line = first_line.strip('/ ')
 	try:
-		# items = first_line.split(' ')
-		# merit, effort, attempts = int(items[0]), int(items[1]), int(items[2])
-		# if len(items) > 3:
-		# 	tag = items[3]
 		items = re.match('(\d+)\s+(\d+)\s+(\d+)(\s+(\w.*))?', first_line).groups()
 		merit, effort, attempts, tag = int(items[0]), int(items[1]), int(items[2]), items[4]
 		if tag is None:
