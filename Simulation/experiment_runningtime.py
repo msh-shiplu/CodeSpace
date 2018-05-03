@@ -13,7 +13,7 @@ def foo(L):
 			sum = x * y
 	return sum
 
-The running time of foo is:
+Select one of these as the running time of foo:
 
 A 	O(n)
 B 	O(n^2)

@@ -4,20 +4,13 @@ import urllib.request
 import os
 import random
 
-# ConfigFile = 'config_home.json'
-ConfigFile = 'config_um.json'
-Config = None
 TeacherDir = 'Teachers'
 StudentDir = 'Students'
 
-#-------------------------------------------------------------------
-def init():
-	global Config
-	Config = json.load(open(ConfigFile))
-	if not Config['Server'].startswith('http://'):
-		Config['Server'] = 'http://' + Config['Server']
-
-init()
+Config = dict(
+	# Server = 'http://192.168.50.253:8083', 		# HOME
+	Server = 'http://141.225.9.111:8083',			# UM
+)
 
 #-------------------------------------------------------------------
 def request(path, data):
