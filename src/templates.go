@@ -215,12 +215,38 @@ var TAG_REPORT_TEMPLATE = `
     <style>
     #chart1_div,#chart2_div{ margin: auto; width:75%; }
     .spacer{ width:100%; height:40px; }
+    #problem_ids{
+    	margin:auto;
+    	width:70%;
+    	height:40px;
+		overflow-x: scroll;
+	    white-space: nowrap;
+    	border-bottom:10px solid #F0F0F0;
+    	text-align: center;
+    }
+    .problem_id{
+    	padding-left:10px;
+    	padding-right:10px;
+    	margin:auto;
+    	text-align: center;
+    	display: inline;
+    	font-size: 110%;
+    }
+    .problem_id a{
+    	text-decoration: none;
+    }
     </style>
   </head>
 
   <body>
     <div id="chart1_div"></div>
-    <div class="spacer"></div>
+	<div class="spacer"></div>
+    <div id="problem_ids">
+	{{ range $pid, $rec := .Performance }}
+		<div class="problem_id"><a href="view_submissions?pid={{$pid}}" target="_blank">{{$pid}}</a></div>
+	{{ end }}
+	</div>
+	<div class="spacer"></div>
     <div id="chart2_div"></div>
   </body>
 </html>
