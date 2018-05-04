@@ -382,12 +382,34 @@ var ANALYZE_SUBMISSIONS_TEMPLATE = `
     <script type="text/javascript">
       google.charts.load('current', {'packages':['timeline','corechart','bar']});
       google.charts.setOnLoadCallback(drawSubmissions);
-      google.charts.setOnLoadCallback(drawWaitingTimes);
+      google.charts.setOnLoadCallback(drawWaitingTime);
+      google.charts.setOnLoadCallback(drawResponseTime);
       google.charts.setOnLoadCallback(drawAttempts);
 
-      function drawWaitingTimes() {
+
+      function drawResponseTime() {
         var data = google.visualization.arrayToDataTable([
 			['Student', 'Duration'],
+			{{ range $sid, $rec := . }}
+				{{ range $rec }}
+				[  String({{$sid}}), ({{.At}} - {{.Start}})/1e9],
+				{{ end }}
+			{{ end }}
+        ]);
+
+        var options = {
+          title: 'Student response time to a problem',
+          legend: { position: 'none' },
+        };
+
+        var chart = new google.visualization.Histogram(document.getElementById('response'));
+        chart.draw(data, options);
+      }
+
+      //---------------------------------------------------
+      function drawWaitingTime() {
+        var data = google.visualization.arrayToDataTable([
+			['Student', 'Waiting time'],
 			{{ range $sid, $rec := . }}
 				{{ range $rec }}
 				[  String({{$sid}}), ({{.Completed}} - {{.At}})/1e9],
@@ -396,7 +418,7 @@ var ANALYZE_SUBMISSIONS_TEMPLATE = `
         ]);
 
         var options = {
-          title: 'Waiting times',
+          title: 'Waiting time for response from teacher',
           legend: { position: 'none' },
         };
 
@@ -417,7 +439,6 @@ var ANALYZE_SUBMISSIONS_TEMPLATE = `
         var options = {
 			title: 'Solution attempts',
 			legend: { position: 'none' },
-			histogram: {bucketSize: 1},
 	        hAxis: { 
 	            viewWindowMode:'explicit',
 		        viewWindow: { min:1 }
@@ -453,15 +474,17 @@ var ANALYZE_SUBMISSIONS_TEMPLATE = `
       }
     </script>
     <style>
-    #waiting,#attempts{ margin: auto; width:75%; height:300px; }
+    #waiting,#attempts,#response{ margin: auto; width:75%; height:300px; }
     #timeline{ margin: auto; width:75%; height:500px; }
     .spacer{ width:100%; height:40px; }
     </style>
   </head>
   <body>
-    <div id="waiting"></div>
-    <div class="spacer"></div>
     <div id="attempts"></div>
+    <div class="spacer"></div>
+    <div id="response"></div>
+    <div class="spacer"></div>
+    <div id="waiting"></div>
     <div class="spacer"></div>
     <div id="timeline"></div>
   </body>
