@@ -20,11 +20,15 @@ import (
 //-----------------------------------------------------------------
 func init_handlers() {
 	http.HandleFunc("/test", Authorize(testHandler))
-	http.HandleFunc("/student_periodic_update", Authorize(student_periodic_updateHandler))
 
+	// Analytics
+	http.HandleFunc("/analyze_submissions", analyze_submissionsHandler)
 	http.HandleFunc("/view_activities", view_activitiesHandler)
 	http.HandleFunc("/view_tags", view_tagsHandler)
 	http.HandleFunc("/report_tag", report_tagHandler)
+
+	// Others
+	http.HandleFunc("/student_periodic_update", Authorize(student_periodic_updateHandler))
 
 	http.HandleFunc("/student_gets_report", Authorize(student_gets_reportHandler))
 	http.HandleFunc("/student_checks_in", Authorize(student_checks_inHandler))

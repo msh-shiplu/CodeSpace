@@ -47,7 +47,6 @@ func view_activitiesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	rows.Close()
 	for d, _ := range data {
-		// fmt.Println(d, val.Count, len(val.Pids), len(val.Sids))
 		data[d].PidCount = len(data[d].Pids)
 		data[d].SidCount = len(data[d].Sids)
 	}
@@ -100,10 +99,11 @@ func view_tagsHandler(w http.ResponseWriter, r *http.Request) {
 type ProblemPerformance struct {
 	Pid       int
 	Timestamp int64
-	Activity  int
 	Correct   int
 	Incorrect int
+	Activity  float32
 	Success   float32
+	PC        string
 }
 
 type TagData struct {
@@ -113,10 +113,10 @@ type TagData struct {
 
 //-----------------------------------------------------------------------------------
 func report_tagHandler(w http.ResponseWriter, r *http.Request) {
-	if r.FormValue("pc") != Passcode {
-		fmt.Fprintf(w, "Unauthorized")
-		return
-	}
+	// if r.FormValue("pc") != Passcode {
+	// 	fmt.Fprintf(w, "Unauthorized")
+	// 	return
+	// }
 	tag_id := r.FormValue("tag_id")
 	row, _ := Database.Query("select description from tag where id=? limit 1", tag_id)
 	tag_description := ""
@@ -140,10 +140,10 @@ func report_tagHandler(w http.ResponseWriter, r *http.Request) {
 			record[pid] = &ProblemPerformance{
 				Pid:       pid,
 				Timestamp: at.UnixNano(),
-				// Timestamp: at.Format("2016-01-02 15:04"),
 				Correct:   0,
 				Incorrect: 0,
 				Activity:  0,
+				PC:        Passcode,
 			}
 		}
 		if merit == points {
@@ -151,12 +151,22 @@ func report_tagHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			record[pid].Incorrect++
 		}
-		record[pid].Activity++
+		record[pid].Activity += 1.0
 	}
 	rows.Close()
+
+	var student_count float32
+	rows, err = Database.Query("select count(*) from student")
+	for rows.Next() {
+		rows.Scan(&student_count)
+	}
+	rows.Close()
+
 	for pid, _ := range record {
 		record[pid].Success = float32(record[pid].Correct) / float32(record[pid].Correct+record[pid].Incorrect)
+		record[pid].Activity = record[pid].Activity / student_count
 	}
+
 	w.Header().Set("Content-Type", "text/html")
 	t, _ := template.New("").Parse(TAG_REPORT_TEMPLATE)
 	err = t.Execute(w, &TagData{Description: tag_description, Performance: record})
