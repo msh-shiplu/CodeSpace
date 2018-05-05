@@ -134,31 +134,8 @@ var TAG_REPORT_TEMPLATE = `
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
       google.charts.load('current', {'packages':['bar','scatter']});
-      google.charts.setOnLoadCallback(draw_by_pids);
       google.charts.setOnLoadCallback(draw_success);
       google.charts.setOnLoadCallback(draw_participation);
-
-      function draw_by_pids() {
-	      var data = google.visualization.arrayToDataTable([
-	        ['Time', 'Success', 'Participation'],
-			{{ range $pid, $rec := .Performance }}
-				[ '{{$pid}}', {{$rec.Success}}, {{$rec.Activity}} ],
-			{{ end }}
-	      ]);
-	      var options = {
-	        title: {{.Description}},
-        	height: 300,
-	        vAxis: {
-	        	textStyle: { fontSize: 20},
-	            viewWindowMode:'explicit',
-    	        viewWindow: { min:0, max:1.05 }
-	        },
-            hAxis: { title: 'Problem ID', textStyle: { fontSize: 20} },
-        	fontSize: 24,
-	      };
-        var chart = new google.charts.Bar(document.getElementById('bypids'));
-        chart.draw(data, google.charts.Bar.convertOptions(options));
-      }
 
       function draw_success() {
 	      var data = google.visualization.arrayToDataTable([
@@ -170,11 +147,11 @@ var TAG_REPORT_TEMPLATE = `
 	      var options = {
 	        title: 'Success', legend: {position: 'none'},
 	        vAxis: {
-	        	textStyle: { fontSize: 20},
+	        	textStyle: { fontSize: 18},
 	            viewWindowMode:'explicit',
     	        viewWindow: { min:0, max:1.05 }
 	        },
-            hAxis: { title: '', textStyle: { fontSize: 20} },
+            hAxis: { title: '', textStyle: {fontSize: 18} },
         	fontSize: 24,
 	      };
         var chart = new google.charts.Scatter(document.getElementById('success'));
@@ -191,11 +168,11 @@ var TAG_REPORT_TEMPLATE = `
 	      var options = {
 	        title: 'Participation', legend: {position: 'none'},
 	        vAxis: {
-	        	textStyle: { fontSize: 20},
+	        	textStyle: {fontSize: 18},
 	            viewWindowMode:'explicit',
     	        viewWindow: { min:0, max:1.05 }
 	        },
-            hAxis: { title: '', textStyle: { fontSize: 20} },
+            hAxis: { title: '', textStyle: {fontSize: 18} },
         	fontSize: 24,
 	      };
         var chart = new google.charts.Scatter(document.getElementById('participation'));
@@ -203,8 +180,8 @@ var TAG_REPORT_TEMPLATE = `
       }
       </script>
     <style>
-    #bypids{ margin: auto; width:75%; }
-    #row{
+    body{ margin: auto; width:75%; }
+    .row{
 	    display:flex;
 	    flex-direction:row;
 	    justify-content: space-around;
@@ -217,20 +194,19 @@ var TAG_REPORT_TEMPLATE = `
     .spacer{ width:100%; height:40px; }
     #problem_ids{
     	margin:auto;
-    	width:70%;
-    	height:40px;
+    	height:100px;
+    	padding-top:20px;
 		overflow-x: scroll;
 	    white-space: nowrap;
-    	border-bottom:10px solid #F0F0F0;
     	text-align: center;
+		vertical-align: middle;
     }
     .problem_id{
-    	padding-left:10px;
-    	padding-right:10px;
-    	margin:auto;
+		padding: 15px 20px 15px 20px;
     	text-align: center;
-    	display: inline;
     	font-size: 110%;
+    	border:2px solid #dedede;
+		display: inline-block;
     }
     .problem_id a{
     	text-decoration: none;
@@ -239,18 +215,17 @@ var TAG_REPORT_TEMPLATE = `
   </head>
 
   <body>
-    <div id="bypids"></div>
+  	<div class="spacer"><h2>{{.Description}}</h2></div>
+	<div class="row">
+	    <div id="success"></div>
+	    <div id="participation"></div>
+    </div>
 	<div class="spacer"></div>
     <div id="problem_ids">
 	{{ range $pid, $rec := .Performance }}
 		<div class="problem_id"><a href="analyze_submissions?pid={{$pid}}&pc={{$rec.PC}}" target="_blank">{{$pid}}</a></div>
 	{{ end }}
 	</div>
-	<div class="spacer"></div>
-	<div id="row">
-	    <div id="success"></div>
-	    <div id="participation"></div>
-    </div>
   </body>
 </html>
 `

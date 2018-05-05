@@ -79,12 +79,10 @@ var ANALYZE_SUBMISSIONS_TEMPLATE = `
     <!--Load the AJAX API-->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-      google.charts.load('current', {'packages':['timeline','corechart','bar']});
-      google.charts.setOnLoadCallback(drawSubmissions);
+      google.charts.load('current', {'packages':['corechart','bar']});
       google.charts.setOnLoadCallback(drawWaitingTime);
       google.charts.setOnLoadCallback(drawResponseTime);
       google.charts.setOnLoadCallback(drawAttempts);
-
 
       function drawResponseTime() {
         var data = google.visualization.arrayToDataTable([
@@ -97,7 +95,7 @@ var ANALYZE_SUBMISSIONS_TEMPLATE = `
         ]);
 
         var options = {
-          title: 'Student response time to a problem',
+          title: 'Student response time',
           legend: { position: 'none' },
         };
 
@@ -117,7 +115,7 @@ var ANALYZE_SUBMISSIONS_TEMPLATE = `
         ]);
 
         var options = {
-          title: 'Waiting time for response from teacher',
+          title: 'Waiting for teacher',
           legend: { position: 'none' },
         };
 
@@ -150,42 +148,27 @@ var ANALYZE_SUBMISSIONS_TEMPLATE = `
 
 
       //---------------------------------------------------
-      function drawSubmissions() {
-        var container = document.getElementById('timeline');
-        var chart = new google.visualization.Timeline(container);
-        var dataTable = new google.visualization.DataTable();
-
-        dataTable.addColumn({ type: 'string', id: 'Student' });
-        dataTable.addColumn({ type: 'string', id: 'Flag' });
-        dataTable.addColumn({ type: 'date', id: 'Start' });
-        dataTable.addColumn({ type: 'date', id: 'End' });
-        dataTable.addRows([
-			{{ range $sid, $rec := . }}
-				{{ range $rec }}
-				[  String({{$sid}}), {{.Flag}}, new Date({{.At}}/1000000), new Date({{.Completed}}/1000000)],
-				{{ end }}
-			{{ end }}
-		]);
-	    var options = {
-	    	title: 'Submissions',
-	    };
-        chart.draw(dataTable, options);
-      }
     </script>
     <style>
-    #waiting,#attempts,#response{ margin: auto; width:75%; height:300px; }
-    #timeline{ margin: auto; width:75%; height:500px; }
     .spacer{ width:100%; height:40px; }
+    .row{
+	    display:flex;
+	    flex-direction:row;
+	    justify-content: space-around;
+    }
+    #attempts,#response,#waiting{
+	    width:420px; height:400px;
+	    display:flex;
+	    flex-direction:column;
+    }
     </style>
   </head>
   <body>
+  	<div class="row">
     <div id="attempts"></div>
-    <div class="spacer"></div>
     <div id="response"></div>
-    <div class="spacer"></div>
     <div id="waiting"></div>
-    <div class="spacer"></div>
-    <div id="timeline"></div>
+	</div>
   </body>
 </html>
 `
