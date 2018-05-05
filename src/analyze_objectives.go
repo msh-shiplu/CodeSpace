@@ -62,7 +62,7 @@ var TAGS_VIEW_TEMPLATE = `
     <!--Load the AJAX API-->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-      google.charts.load('current', {'packages':['bar']});
+      google.charts.load('current', {'packages':['corechart']});
       google.charts.setOnLoadCallback(drawActivity);
 
       function drawActivity() {
@@ -76,15 +76,14 @@ var TAGS_VIEW_TEMPLATE = `
 	        title: '',
         	height: 350,
             hAxis: { title: 'Total submissions' },
-        	fontSize: 20,
 	        legend: { position: 'none' },
 	      };
-        var chart = new google.charts.Bar(document.getElementById('chart_div'));
-        chart.draw(data, google.charts.Bar.convertOptions(options));
+        var chart = new google.visualization.SteppedAreaChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
       }
     </script>
     <style>
-    body { margin:auto; width:75%; font-size: 16pt;}
+    body { margin:auto; width:90%; font-size:16pt;}
     #chart_div{ margin:auto; }
     .spacer{ width:100%; height:30px; }
     </style>
