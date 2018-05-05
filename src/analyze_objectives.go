@@ -12,10 +12,10 @@ import (
 )
 
 //-----------------------------------------------------------------------------------
-type TagsData struct {
-	Id          int
-	Description string
-	PC          string
+type TagsViewData struct {
+	Tags            map[int]string
+	SubmissionCount map[string]int
+	PC              string
 }
 
 //-----------------------------------------------------------------------------------
@@ -24,26 +24,86 @@ func view_tagsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Unauthorized")
 		return
 	}
-	rows, err := Database.Query("select id, description from tag")
-	defer rows.Close()
+	rows, _ := Database.Query("select id, description from tag")
+	record := &TagsViewData{
+		Tags:            make(map[int]string),
+		SubmissionCount: make(map[string]int),
+		PC:              Passcode,
+	}
+
+	var id int
+	var des string
+	for rows.Next() {
+		rows.Scan(&id, &des)
+		record.Tags[id] = des
+	}
+	rows.Close()
+
+	rows, _ = Database.Query("select at from submission")
+	var at time.Time
+	for rows.Next() {
+		rows.Scan(&at)
+		date := fmt.Sprintf("%d.%d.%d", at.Month(), at.Day(), at.Year())
+		record.SubmissionCount[date]++
+	}
+	rows.Close()
+
+	w.Header().Set("Content-Type", "text/html")
+	t, _ := template.New("").Parse(TAGS_VIEW_TEMPLATE)
+	err := t.Execute(w, record)
 	if err != nil {
 		fmt.Println(err)
-	} else {
-		tags := make([]*TagsData, 0)
-		var id int
-		var des string
-		for rows.Next() {
-			rows.Scan(&id, &des)
-			tags = append(tags, &TagsData{Id: id, Description: des, PC: Passcode})
-		}
-		w.Header().Set("Content-Type", "text/html")
-		t, _ := template.New("").Parse(TAGS_VIEW_TEMPLATE)
-		err = t.Execute(w, tags)
-		if err != nil {
-			fmt.Println(err)
-		}
 	}
 }
+
+var TAGS_VIEW_TEMPLATE = `
+<html>
+  <head>
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawActivity);
+
+      function drawActivity() {
+	      var data = google.visualization.arrayToDataTable([
+	        ['Date', 'Total submissions'],
+			{{ range $day, $val := .SubmissionCount }}
+				[  {{$day}}, {{$val}} ],
+			{{ end }}
+	      ]);
+	      var options = {
+	        title: '',
+        	height: 350,
+            hAxis: { title: 'Total submissions' },
+        	fontSize: 20,
+	        legend: { position: 'none' },
+	      };
+        var chart = new google.charts.Bar(document.getElementById('chart_div'));
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+    </script>
+    <style>
+    body { margin:auto; width:75%; font-size: 16pt;}
+    #chart_div{ margin:auto; }
+    .spacer{ width:100%; height:30px; }
+    </style>
+  </head>
+  <body>
+  	<div class="spacer"></div>
+  	<h4>Activities</h4>
+  	<div id="chart_div"></div>
+  	<div class="spacer"></div>
+  	<h4>Learning objectives</h4>
+  	<ul>
+	{{$pc := .PC}}
+	{{ range $tag_id, $tag_des := .Tags }}
+	<li><a href="report_tag?pc={{$pc}}&tag_id={{$tag_id}}" target="_blank">{{$tag_des}}</a></li>
+	{{ end }}
+	</ul>
+  </body>
+</html>
+`
 
 //-----------------------------------------------------------------------------------
 type ProblemPerformance struct {
@@ -63,10 +123,10 @@ type TagData struct {
 
 //-----------------------------------------------------------------------------------
 func report_tagHandler(w http.ResponseWriter, r *http.Request) {
-	// if r.FormValue("pc") != Passcode {
-	// 	fmt.Fprintf(w, "Unauthorized")
-	// 	return
-	// }
+	if r.FormValue("pc") != Passcode {
+		fmt.Fprintf(w, "Unauthorized")
+		return
+	}
 	tag_id := r.FormValue("tag_id")
 	row, _ := Database.Query("select description from tag where id=? limit 1", tag_id)
 	tag_description := ""
@@ -226,24 +286,6 @@ var TAG_REPORT_TEMPLATE = `
 		<div class="problem_id"><a href="analyze_submissions?pid={{$pid}}&pc={{$rec.PC}}" target="_blank">{{$pid}}</a></div>
 	{{ end }}
 	</div>
-  </body>
-</html>
-`
-
-var TAGS_VIEW_TEMPLATE = `
-<html>
-  <head>
-    <style>
-    body { font-size: 16pt;}
-    </style>
-  </head>
-  <body>
-  	<h1>Learning objectives</h1>
-  	<ul>
-	{{ range . }}
-	<li><a href="report_tag?pc={{.PC}}&tag_id={{.Id}}">{{.Description}}</a></li>
-	{{ end }}
-	</ul>
   </body>
 </html>
 `

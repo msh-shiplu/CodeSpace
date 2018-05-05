@@ -108,19 +108,8 @@
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Report",
-                "id": "GEMTReport",
-                "children": [
-                    {
-                        "caption": "View learning objectives",
-                        "id": "gemtViewTags",
-                        "command": "gemt_view_tags",
-                    },
-                    {
-                        "caption": "View activities",
-                        "id": "gemtViewActivities",
-                        "command": "gemt_view_activities",
-                    },
-                ]
+                "id": "gemtViewTags",
+                "command": "gemt_view_tags",
             },
             {
                 "caption": "Update GEM",
