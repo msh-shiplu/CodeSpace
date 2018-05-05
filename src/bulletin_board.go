@@ -13,6 +13,22 @@ import (
 )
 
 //-----------------------------------------------------------------------------------
+type BulletinBoardMessage struct {
+	Code           string
+	I              int
+	NextI          int
+	PrevI          int
+	PC             string
+	P1             int
+	P2             int
+	ActiveProblems int
+	BulletinItems  int
+	Attendance     int
+	Address        string
+	Authenticated  bool
+}
+
+//-----------------------------------------------------------------------------------
 func teacher_adds_bulletin_pageHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	BulletinSem.Lock()
 	defer BulletinSem.Unlock()
