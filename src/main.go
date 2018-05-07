@@ -22,6 +22,7 @@ func init_handlers() {
 	http.HandleFunc("/test", Authorize(testHandler))
 
 	// Analytics
+	// http.HandleFunc("/learning_report", learning_reportHandler)
 	http.HandleFunc("/analyze_submissions", analyze_submissionsHandler)
 	http.HandleFunc("/view_activities", view_activitiesHandler)
 	http.HandleFunc("/view_tags", view_tagsHandler)
@@ -105,12 +106,13 @@ func inform_name_server() {
 func main() {
 	rand.Seed(time.Now().UnixNano())
 	config_file, teacher_file, student_file := "", "", ""
-	flag.StringVar(&config_file, "config", config_file, "configuration file.")
+	flag.StringVar(&config_file, "c", config_file, "json-formatted configuration file.")
 	flag.StringVar(&teacher_file, "add_teacher", teacher_file, "teacher file.")
 	flag.StringVar(&student_file, "add_student", student_file, "student file.")
 	flag.Parse()
 	if config_file == "" {
-		log.Fatal("Must provide configuration file.")
+		flag.Usage()
+		os.Exit(1)
 	}
 	Config = init_config(config_file)
 	if Config.NameServer != "" {

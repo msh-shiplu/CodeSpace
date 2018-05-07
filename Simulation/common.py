@@ -8,8 +8,8 @@ TeacherDir = 'Teachers'
 StudentDir = 'Students'
 
 Config = dict(
-	Server = 'http://192.168.50.253:8083', 		# HOME
-	# Server = 'http://141.225.9.111:8083',			# UM
+	# Server = 'http://192.168.50.253:8083', 		# HOME
+	Server = 'http://141.225.9.111:8083',			# UM
 )
 
 #-------------------------------------------------------------------
