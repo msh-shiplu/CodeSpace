@@ -19,7 +19,7 @@ import (
 
 //-----------------------------------------------------------------
 func init_handlers() {
-	http.HandleFunc("/test", Authorize(testHandler))
+	http.HandleFunc("/test", testHandler)
 
 	// Analytics
 	// http.HandleFunc("/learning_report", learning_reportHandler)

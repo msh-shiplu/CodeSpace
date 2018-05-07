@@ -14,7 +14,7 @@ func teacher_gets_passcodeHandler(w http.ResponseWriter, r *http.Request, who st
 }
 
 //-----------------------------------------------------------------------------------
-func testHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+func testHandler(w http.ResponseWriter, r *http.Request) {
 	// Show content of boards
 	fmt.Println("Students:", len(Students))
 	for uid, st := range Students {

@@ -3,12 +3,12 @@
         "caption": "GEM",
         "id": "GEMTeacher",
         "children": [
-            {
-                "caption": "Test",
-                "id": "gemtTest",
-                "command": "gemt_test",
-            },
-            {"caption":"-", "id":"side-bar-separator"},
+            // {
+            //     "caption": "Test",
+            //     "id": "gemtTest",
+            //     "command": "gemt_test",
+            // },
+            // {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Share current file",
                 "id": "gemtShare",
