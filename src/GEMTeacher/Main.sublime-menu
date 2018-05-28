@@ -108,8 +108,8 @@
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Report",
-                "id": "gemtViewTags",
-                "command": "gemt_view_tags",
+                "id": "gemtReport",
+                "command": "gemt_report",
             },
             {
                 "caption": "Update GEM",

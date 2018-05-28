@@ -12,14 +12,22 @@ import (
 )
 
 //-----------------------------------------------------------------------------------
+type ScoreEntry struct {
+	Name     string
+	Points   int
+	Attempts int
+	Count    int
+}
+
 type TagsViewData struct {
 	Tags            map[int]string
 	SubmissionCount map[string]int
+	Scores          map[int]*ScoreEntry
 	PC              string
 }
 
 //-----------------------------------------------------------------------------------
-func view_tagsHandler(w http.ResponseWriter, r *http.Request) {
+func reportHandler(w http.ResponseWriter, r *http.Request) {
 	if r.FormValue("pc") != Passcode {
 		fmt.Fprintf(w, "Unauthorized")
 		return
@@ -28,6 +36,7 @@ func view_tagsHandler(w http.ResponseWriter, r *http.Request) {
 	record := &TagsViewData{
 		Tags:            make(map[int]string),
 		SubmissionCount: make(map[string]int),
+		Scores:          make(map[int]*ScoreEntry),
 		PC:              Passcode,
 	}
 
@@ -48,9 +57,27 @@ func view_tagsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	rows.Close()
 
+	rows, err := Database.Query("select score.points, score.attempts, score.stid, student.name from score join student on score.stid==student.id")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	var points, attempts, stid int
+	var stname string
+	for rows.Next() {
+		rows.Scan(&points, &attempts, &stid, &stname)
+		if _, ok := record.Scores[stid]; !ok {
+			record.Scores[stid] = &ScoreEntry{Name: stname}
+		}
+		record.Scores[stid].Points += points
+		record.Scores[stid].Attempts += attempts
+		record.Scores[stid].Count += 1
+	}
+	rows.Close()
+
 	w.Header().Set("Content-Type", "text/html")
 	t, _ := template.New("").Parse(TAGS_VIEW_TEMPLATE)
-	err := t.Execute(w, record)
+	err = t.Execute(w, record)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -62,8 +89,9 @@ var TAGS_VIEW_TEMPLATE = `
     <!--Load the AJAX API-->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-      google.charts.load('current', {'packages':['corechart']});
+      google.charts.load('current', {'packages':['corechart', 'table']});
       google.charts.setOnLoadCallback(drawActivity);
+      google.charts.setOnLoadCallback(drawScores);
 
       function drawActivity() {
 	      var data = google.visualization.arrayToDataTable([
@@ -81,10 +109,24 @@ var TAGS_VIEW_TEMPLATE = `
         var chart = new google.visualization.SteppedAreaChart(document.getElementById('chart_div'));
         chart.draw(data, options);
       }
+
+      function drawScores() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Name');
+        data.addColumn('number', 'Points');
+        data.addColumn('number', 'Attempts');
+        data.addRows([
+			{{ range $stid, $entry := .Scores }}
+				[{{$entry.Name}},{{$entry.Points}},{{$entry.Attempts}}],
+			{{ end }}
+        ]);
+        var table = new google.visualization.Table(document.getElementById('scores_div'));
+        table.draw(data, {showRowNumber: true, width: '400px', height: '100%'});
+      }
     </script>
     <style>
     body { margin:auto; width:90%; font-size:16pt;}
-    #chart_div{ margin:auto; }
+    #chart_div,#scores_div{ margin:auto; }
     .spacer{ width:100%; height:30px; }
     </style>
   </head>
@@ -100,6 +142,9 @@ var TAGS_VIEW_TEMPLATE = `
 	<li><a href="report_tag?pc={{$pc}}&tag_id={{$tag_id}}" target="_blank">{{$tag_des}}</a></li>
 	{{ end }}
 	</ul>
+	<h4>Points</h4>
+	<div id="scores_div"></div>
+  	<div class="spacer"></div>
   </body>
 </html>
 `
@@ -134,7 +179,7 @@ func report_tagHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	row.Close()
 
-	query := "select problem.id, problem.merit, problem.at, score.points, score.stid from problem join score on problem.id == score.pid where problem.tag=?"
+	query := "select problem.id, problem.merit, problem.at, score.points, score.stid from problem join score on problem.id == score.pid join student where problem.tag=?"
 	rows, err := Database.Query(query, tag_id)
 	if err != nil {
 		fmt.Println(err)

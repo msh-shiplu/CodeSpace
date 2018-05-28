@@ -25,7 +25,7 @@ func init_handlers() {
 	// http.HandleFunc("/learning_report", learning_reportHandler)
 	http.HandleFunc("/analyze_submissions", analyze_submissionsHandler)
 	http.HandleFunc("/view_activities", view_activitiesHandler)
-	http.HandleFunc("/view_tags", view_tagsHandler)
+	http.HandleFunc("/report", reportHandler)
 	http.HandleFunc("/report_tag", report_tagHandler)
 
 	// Others
