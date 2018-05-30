@@ -17,13 +17,13 @@ Download gem server: http://umdrive.memphis.edu/vphan/public/GEM
 Run the server:
 
 ```
-go run *.go -c config.json
+    ./gem -c config.json
 ```
 
 #### Add teachers
 
 ```
-    ./go run *.go -config config.json -add_teacher teachers.txt
+    ./gem -c config.json -add_teacher teachers.txt
 ```
 
 #### Add students
@@ -35,7 +35,7 @@ go run *.go -c config.json
 #### Run the server in class
 
 ```
-    ./go run *.go -config config.json
+    ./gem -c config.json
 ```
 
 ### TA's installation
