@@ -14,6 +14,11 @@ import os; package_path = os.path.join(sublime.packages_path(), "GEMTeacher"); o
 
 Download gem server: http://umdrive.memphis.edu/vphan/public/GEM
 
+Run the server:
+
+```
+go run *.go -c config.json
+```
 
 #### Add teachers
 
