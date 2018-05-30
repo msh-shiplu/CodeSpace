@@ -29,7 +29,7 @@ Run the server:
 #### Add students
 
 ```
-    ./go run *.go -config config.json -add_student students.txt
+    ./gem -c config.json -add_student students.txt
 ```
 
 #### Run the server in class
