@@ -12,6 +12,9 @@ import os; package_path = os.path.join(sublime.packages_path(), "GEMTeacher"); o
 ```
 + Paste copied code to Console and hit enter.
 
+Download gem server: http://umdrive.memphis.edu/vphan/public/GEM
+
+
 #### Add teachers
 
 ```
