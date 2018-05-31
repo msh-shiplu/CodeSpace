@@ -4,7 +4,7 @@
         "id": "GEMTeacher",
         "children": [
             {
-                "caption": "Share current file",
+                "caption": "Broadcast",
                 "id": "gemtShare",
                 "command": "gemt_share",
             },

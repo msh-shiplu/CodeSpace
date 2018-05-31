@@ -10,12 +10,12 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Help me! 😥",
+                "caption": "Send 😥",
                 "id": "gemsNeedHelp",
                 "command": "gems_need_help",
             },
             {
-                "caption": "I got this 😎",
+                "caption": "Send 😎",
                 "id": "gemsGotIt",
                 "command": "gems_got_it",
             },
