@@ -68,6 +68,7 @@ type Board struct {
 	Filename     string
 	Pid          int // problem id
 	StartingTime time.Time
+	Type         string
 }
 
 type StudenInfo struct {
@@ -100,6 +101,7 @@ type Submission struct {
 }
 
 var WorkingSubs = make([]*Submission, 0)
+var Submissions = make(map[int]*Submission)
 
 //---------------------------------------------------------
 type ProblemInfo struct {
@@ -122,7 +124,7 @@ type ActiveProblem struct {
 	Attempts map[int]int
 }
 
-var ActiveProblems = make(map[int]*ActiveProblem)
+var ActiveProblems = make(map[string]*ActiveProblem)
 
 //---------------------------------------------------------
 // Utilities

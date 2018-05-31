@@ -17,39 +17,38 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	content, filename := r.FormValue("content"), r.FormValue("filename")
 	answer := r.FormValue("answer")
 	priority, _ := strconv.Atoi(r.FormValue("priority"))
-	pid, _ := strconv.Atoi(r.FormValue("pid"))
+	// pid, _ := strconv.Atoi(r.FormValue("pid"))
 	sid := int64(0)
 	correct_answer := ""
 	complete := false
 	var err error
 	msg := "Your submission will be looked at soon."
 
-	if pid > 0 { // only keep in database submissions related to problems
-		if prob, ok := ActiveProblems[pid]; !ok || !prob.Active {
-			fmt.Fprintf(w, "This problem is no longer active.")
-			return
+	pid := 0
+	prob, ok := ActiveProblems[filename]
+	if ok && prob.Active {
+		pid = prob.Info.Pid
+		if _, ok := prob.Attempts[uid]; !ok {
+			ActiveProblems[filename].Attempts[uid] = prob.Info.Attempts
 		}
-		if _, ok := ActiveProblems[pid].Attempts[uid]; !ok {
-			ActiveProblems[pid].Attempts[uid] = ActiveProblems[pid].Info.Attempts
-		}
-		if ActiveProblems[pid].Attempts[uid] == 0 {
+		if ActiveProblems[filename].Attempts[uid] == 0 {
 			fmt.Fprintf(w, "This is not submitted because either you have reached the submission limit or your solution was previously graded correctly.")
 			return
 		}
 
 		// Decrement attempts
-		ActiveProblems[pid].Attempts[uid] -= 1
-		if ActiveProblems[pid].Attempts[uid] <= 3 {
-			msg += fmt.Sprintf(" You have %d attempt(s) left.", ActiveProblems[pid].Attempts[uid])
+		ActiveProblems[filename].Attempts[uid] -= 1
+		if ActiveProblems[filename].Attempts[uid] <= 3 {
+			msg += fmt.Sprintf(" You have %d attempt(s) left.", ActiveProblems[filename].Attempts[uid])
 		}
 
 		// Autograding if possible
-		correct_answer = ActiveProblems[pid].Info.Answer
+		correct_answer = ActiveProblems[filename].Info.Answer
 		if answer != "" {
-			ActiveProblems[pid].Answers = append(ActiveProblems[pid].Answers, answer)
+			ActiveProblems[filename].Answers = append(ActiveProblems[filename].Answers, answer)
 			if correct_answer == answer {
 				scoring_mesg := add_or_update_score("correct", pid, uid, 0)
-				ActiveProblems[pid].Attempts[uid] = 0 // This prevents further submission
+				ActiveProblems[filename].Attempts[uid] = 0 // This prevents further submission
 				complete = true
 				fmt.Fprintf(w, scoring_mesg)
 			}
@@ -78,6 +77,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			At:       time.Now(),
 		}
 		WorkingSubs = append(WorkingSubs, sub)
+		Submissions[int(sid)] = sub
 		fmt.Fprintf(w, msg)
 	}
 }

@@ -51,44 +51,23 @@ class gemtViewActivities(sublime_plugin.WindowCommand):
 		data = urllib.parse.urlencode({'pc' : passcode})
 		webbrowser.open(info['Server'] + '/view_activities?' + data)
 
-# ------------------------------------------------------------------
-class gemtShare(sublime_plugin.TextCommand):
-	def run(self, edit):
-		fname = self.view.file_name()
-		if fname is None:
-			sublime.message_dialog('Cannot share unsaved content.')
-			return
-		basename = os.path.basename(fname)
-		# ext = basename.rsplit('.',1)[-1]
-		content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
-		if content == '':
-			sublime.message_dialog("File is empty.")
-			return
-		data = {
-			'content': 	content,
-			'filename': basename,
-			# 'ext': 		ext,
-		}
-		response = gemtRequest('teacher_shares', data)
-		if response is not None:
-			sublime.status_message(response)
 
 # ------------------------------------------------------------------
 def gemt_get_problem_info(fname):
-	merit, effort, attempts, tag = 0, 0, 0, ''
-	ext = fname.rsplit('.', 1)[-1]
+	basename = os.path.basename(fname)
 	with open(fname, 'r', encoding='utf-8') as fp:
 		content = fp.read()
 	items = content.split('\n',1)
-	if len(items)==1:
-		sublime.message_dialog('Improper problem definition')
-		raise Exception('Improper problem definition')
+	if len(items)==0 or (not items[0].startswith('#') and not items[0].startswith('//')):
+		return content, '', 0, 0, 0, '', basename
+
+	merit, effort, attempts, tag = 0, 0, 0, ''
 	first_line, body = items[0], items[1]
-	prefix = '//'
 	if first_line.startswith('#'):
 		prefix = '#'
 		first_line = first_line.strip('# ')
-	elif first_line.startswith('/'):
+	else:
+		prefix = '//'
 		first_line = first_line.strip('/ ')
 	try:
 		items = re.match('(\d+)\s+(\d+)\s+(\d+)(\s+(\w.*))?', first_line).groups()
@@ -96,11 +75,10 @@ def gemt_get_problem_info(fname):
 		if tag is None:
 			tag = ''
 	except:
-		sublime.message_dialog('Improper problem definition')
-		raise Exception('Improper problem definition')
+		return content, '', 0, 0, 0, '', basename
+
 	if merit < effort:
-		sublime.message_dialog('Merit points ({}) should be higher than effort points {}.'.format(merit, effort))
-		raise Exception('Merit points lower than effort points.')
+		return content, '', 0, 0, 0, '', basename
 
 	items = body.split(gemtAnswerTag)
 	if len(items) > 2:
@@ -114,165 +92,34 @@ def gemt_get_problem_info(fname):
 		body += '\n{} '.format(gemtAnswerTag)
 		answer = items[1].strip()
 
-	basename = os.path.basename(fname)
-	return body, answer, str(merit), str(effort), str(attempts), tag, basename, ext
+	return body, answer, merit, effort, attempts, tag, basename
 
 
 # ------------------------------------------------------------------
-# Input: file names
-# Output:
-# - files sorted by difficulty level
-# - list of index of the next problem if solution is correct
-# - list of index of the next problem if solution is incorrect
-# ------------------------------------------------------------------
-def gemt_get_next_problems(fns, mode):
-	nic = [-1] * len(fns)
-	nii = [-1] * len(fns)
-	if mode != 'multicast_seq':
-		return fns, nic, nii
-	# Remove .py or .java
-	names = [ f.rsplit('.', 1)[0] for f in fns ]
-	for n in names:
-		# Properly named files must have at least one "_"
-		if n.count('_') < 1:
-			return None, None, None
-	try:
-		nums = [ int(n.rsplit('_', 1)[1]) for n in names ]
-		names = [ (nums[i],fns[i]) for i in range(len(fns)) ]
-		names = sorted(names)
-		# determine next if correct or fns[i]
-		for i in range(len(names)):
-			for j in range(i+1,len(names)):
-				if names[j][0] > names[i][0]:
-					nic[i] = j
-					break
-		# determine next if incorrect or fns[i]
-		for i in range(len(names)-1):
-			nii[i] = i+1
-		# print(names)
-		# print(nic)
-		# print(nii)
-		return [n[1] for n in names], nic, nii
-	except:
-		return None, None, None
-
-# ------------------------------------------------------------------
-# used by gemt_multicast and gemtUnicast to start a new problem
-# ------------------------------------------------------------------
-def gemt_broadcast(content, answers, merits, efforts, attempts, tags, filenames, exts, divider, mode, nic='', nii=''):
-	data = {
-		'content': 			content,
-		'answers':			answers,
-		'filenames':		filenames,
-		'exts': 			exts,
-		'merits':			merits,
-		'efforts':			efforts,
-		'attempts':			attempts,
-		'tags':				tags,
-		'divider':	 		divider,
-		'mode':				mode,
-		'nic': 				nic,
-		'nii':				nii,
-	}
-	response = gemtRequest('teacher_broadcasts', data)
-	if response is not None:
-		sublime.status_message(response)
-
-# ------------------------------------------------------------------
-def gemt_multicast(self, edit, divider, mode, mesg):
-	fnames = [ v.file_name() for v in sublime.active_window().views() ]
-	fnames = [ fname for fname in fnames if fname is not None ]
-	if len(fnames)>0 and sublime.ok_cancel_dialog(mesg):
-		content, answers, merits, efforts, attempts, tags, fns, exts = [], [],[],[],[],[],[],[]
-		nic, nii = [], []
-		for fname in fnames:
-			c, an, m, e, at, tg, fn, ex = gemt_get_problem_info(fname)
-			content.append(c)
-			answers.append(an)
-			merits.append(m)
-			efforts.append(e)
-			attempts.append(at)
-			tags.append(tg)
-			fns.append(fn)
-			exts.append(ex)
-
-		fns, nic, nii = gemt_get_next_problems(fns, mode)
-		if fns == None:
-			sublime.message_dialog('Could not detect difficulty level in file names.  Example of a correctly named file at level 1: abc_1.py')
+class gemtShare(sublime_plugin.TextCommand):
+	def run(self, edit):
+		fname = self.view.file_name()
+		if fname is None:
+			sublime.message_dialog('Content must be saved first.')
 			return
-
-		content = '\n{}\n'.format(divider).join(content)
-		answers = '\n'.join(answers)
-		merits = '\n'.join(merits)
-		efforts = '\n'.join(efforts)
-		attempts = '\n'.join(attempts)
-		tags = '\n'.join(tags)
-		fns = '\n'.join(fns)
-		exts = '\n'.join(exts)
-		nic = '\n'.join([str(i) for i in nic])
-		nii = '\n'.join([str(i) for i in nii])
-
-		gemt_broadcast(
-			content,
-			answers,
-			merits,
-			efforts,
-			attempts,
-			tags,
-			fns,
-			exts,
-			divider,
-			mode,
-			nic,
-			nii,
-		)
-
-# ------------------------------------------------------------------
-class gemtUnicast(sublime_plugin.TextCommand):
-	def run(self, edit):
-		if sublime.ok_cancel_dialog('Starting a new problem will close up active problems.  Do you want to proceed?'):
-			fname = self.view.file_name()
-			if fname is None:
-				sublime.message_dialog('Content must be saved first.')
-				return
-			content, answers, merits, efforts, attempts, tags, fns, exts = gemt_get_problem_info(fname)
-			gemt_broadcast(content, answers, merits, efforts, attempts, tags, fns, exts, divider='', mode='unicast')
-
-# ------------------------------------------------------------------
-class gemtMulticastOr(sublime_plugin.TextCommand):
-	def run(self, edit):
-		if sublime.ok_cancel_dialog('Starting new problems will close up active problems.  Do you want to proceed?'):
-			gemt_multicast(
-				self,
-				edit,
-				gemtOrDivider,
-				'multicast_or',
-				'Send problems *randomly* to students, where problems are defined in all non-empty tabs in this window?',
-			)
-
-# ------------------------------------------------------------------
-class gemtMulticastAnd(sublime_plugin.TextCommand):
-	def run(self, edit):
-		if sublime.ok_cancel_dialog('Starting problems will close up active problems.  Do you want to proceed?'):
-			gemt_multicast(
-				self,
-				edit,
-				gemtAndDivider,
-				'multicast_and',
-				'Send problems *simultaneously* to students, where problems are defined in all non-empty tabs in this window?',
-			)
-
-# ------------------------------------------------------------------
-class gemtMulticastSeq(sublime_plugin.TextCommand):
-	def run(self, edit):
-		if sublime.ok_cancel_dialog('Starting problems will close up active problems.  Do you want to proceed?'):
-			gemt_multicast(
-				self,
-				edit,
-				gemtSeqDivider,
-				'multicast_seq',
-				'Send problems *sequentially* to students, where problems are defined in all non-empty tabs in this window?',
-			)
+		content, answer, merit, effort, attempts, tag, name = gemt_get_problem_info(fname)
+		data = {
+			'content': 		content,
+			'answer':		answer,
+			'merit':		merit,
+			'effort':		effort,
+			'attempts':		attempts,
+			'tag':			tag,
+			'filename':		name,
+		}
+		response = gemtRequest('teacher_broadcasts', data)
+		if response is not None:
+			if merit==0:
+				mesg = 'Sharing not-graded content. '
+			else:
+				mesg = 'Sharing graded content. '
+			mesg += response
+			sublime.message_dialog(mesg)
 
 # ------------------------------------------------------------------
 class gemtDeactivateProblems(sublime_plugin.ApplicationCommand):
@@ -282,13 +129,13 @@ class gemtDeactivateProblems(sublime_plugin.ApplicationCommand):
 			json_response = gemtRequest('teacher_deactivates_problems', {})
 			with open(gemtFILE, 'r') as f:
 				info = json.loads(f.read())
-			active_pids = json.loads(json_response)
+			filenames = json.loads(json_response)
 			mesg = "Problems closed."
-			if len(active_pids) > 0:
+			if len(filenames) > 0:
 				mesg += " Answers to be summarized."
 			sublime.message_dialog(mesg)
-			for pid in active_pids:
-				p = urllib.parse.urlencode({'pc' : passcode, 'pid':pid})
+			for fname in filenames:
+				p = urllib.parse.urlencode({'pc' : passcode, 'filename':fname})
 				webbrowser.open(info['Server'] + '/view_answers?' + p)
 
 # ------------------------------------------------------------------
@@ -379,36 +226,31 @@ class gemtAddBulletin(sublime_plugin.TextCommand):
 # ------------------------------------------------------------------
 def gemt_grade(self, edit, decision):
 	fname = self.view.file_name()
-	basename = os.path.basename(fname)
-	if not basename.startswith('gemt') or basename.count('_') < 2:
-		sublime.message_dialog('This is not a student submission.')
-		return
-	if '.' in basename:
-		prefix, ext = basename.rsplit('.', 1)
-	else:
-		prefix = basename
-	prefix = prefix[4:]
-	stid, pid, sid = prefix.split('_')
-	try:
-		stid = int(stid)
-		pid = int(pid)
-		sid = int(sid)
-	except:
-		sublime.message_dialog('This is not a student submission.')
-		return
-	if pid == 0:
-		sublime.message_dialog('This is not a graded problem.')
-		return
 	changed = False
+	sid = os.path.basename(os.path.dirname(fname))
 	if decision=='dismissed':
 		content = ''
 	else:
 		content = self.view.substr(sublime.Region(0, self.view.size())).strip()
-		if pid in gemtStudentSubmissions and content.strip()!=gemtStudentSubmissions[pid].strip():
-			changed = True
+		if sid in gemtStudentSubmissions:
+			if gemtStudentSubmissions[sid].strip() != content.strip():
+				changed = True
+				
+	stop = False
+	if sid == '0':
+		stop = True
+	try:
+		int(sid)
+	except:
+		stop = True
+	if stop:
+		if decision=='dismissed':
+			self.view.window().run_command('close')
+		else:
+			sublime.message_dialog('This is not a graded problem.')
+		return
+
 	data = dict(
-		stid = stid,
-		pid = pid,
 		sid = sid,
 		content = content,
 		decision = decision,
@@ -440,19 +282,17 @@ def gemt_gets(self, index, priority):
 		sub = json.loads(response)
 		if sub['Content'] != '':
 			filename = sub['Filename']
-			if '.' in filename:
-				ext = filename.rsplit('.',1)[1]
-			else:
-				ext = 'txt'
-			pid, sid, uid = sub['Pid'], sub['Sid'], sub['Uid']
-			fname = 'gemt{}_{}_{}.{}'.format(uid,pid,sid,ext)
-			fname = os.path.join(gemtFOLDER, fname)
-			with open(fname, 'w', encoding='utf-8') as fp:
+			sid = str(sub['Sid'])
+			dir = os.path.join(gemtFOLDER, sid)
+			if not os.path.exists(dir):
+				os.mkdir(dir)
+			local_file = os.path.join(dir, filename)
+			with open(local_file, 'w', encoding='utf-8') as fp:
 				fp.write(sub['Content'])
-			gemtStudentSubmissions[pid] = sub['Content']
+			gemtStudentSubmissions[sid] = sub['Content']
 			if sublime.active_window().id() == 0:
 				sublime.run_command('new_window')
-			sublime.active_window().open_file(fname)
+			sublime.active_window().open_file(local_file)
 		elif priority == 0:
 			sublime.message_dialog('There are no submissions.')
 		elif priority > 0:

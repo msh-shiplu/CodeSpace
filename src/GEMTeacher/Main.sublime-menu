@@ -3,38 +3,11 @@
         "caption": "GEM",
         "id": "GEMTeacher",
         "children": [
-            // {
-            //     "caption": "Test",
-            //     "id": "gemtTest",
-            //     "command": "gemt_test",
-            // },
-            // {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Share current file",
                 "id": "gemtShare",
                 "command": "gemt_share",
             },
-            {"caption":"-", "id":"side-bar-separator"},
-            {
-                "caption": "Start a problem",
-                "id": "gemtUnicast",
-                "command": "gemt_unicast",
-            },
-            {
-                "caption": "Start problems (Concurrent)",
-                "id": "gemtMulticastAnd",
-                "command": "gemt_multicast_and",
-            },
-            {
-                "caption": "Start problems (Sequential)",
-                "id": "gemtMulticastSeq",
-                "command": "gemt_multicast_seq",
-            },
-            // {
-            //     "caption": "Start problems (Randomized)",
-            //     "id": "gemtMulticastOr",
-            //     "command": "gemt_multicast_or",
-            // },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Get submission",

@@ -14,12 +14,12 @@ import (
 // When problems are deactivated, boards cleared, no new submissions are possibile.
 //-----------------------------------------------------------------------------------
 func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	active_pids := make([]int, 0)
-	for pid, prob := range ActiveProblems {
+	filenames := make([]string, 0)
+	for fname, prob := range ActiveProblems {
 		if prob.Active {
 			prob.Active = false
 			if len(prob.Answers) > 0 {
-				active_pids = append(active_pids, pid)
+				filenames = append(filenames, fname)
 			}
 		}
 	}
@@ -27,7 +27,7 @@ func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request,
 		Students[stid].Boards = make([]*Board, 0)
 		Students[stid].SubmissionStatus = 0
 	}
-	js, err := json.Marshal(active_pids)
+	js, err := json.Marshal(filenames)
 	if err == nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(js)

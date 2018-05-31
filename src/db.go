@@ -21,13 +21,12 @@ func create_tables() {
 	}
 	execSQL("create table if not exists student (id integer primary key, name text unique, password text)")
 	execSQL("create table if not exists teacher (id integer primary key, name text unique, password text)")
-	// execSQL("create table if not exists problem (id integer primary key, tid integer, content blob, answer text, filename text, merit integer, effort integer, attempts integer, tag text, at timestamp)")
+	execSQL("create table if not exists attendance (id integer primary key, stid integer, at timestamp)")
+	execSQL("create table if not exists tag (id integer primary key, description text unique)")
 	execSQL("create table if not exists problem (id integer primary key, tid integer, content blob, answer text, filename text, merit integer, effort integer, attempts integer, tag integer, at timestamp)")
 	execSQL("create table if not exists submission (id integer primary key, pid integer, sid integer, content blob, priority integer, at timestamp, completed timestamp)")
 	execSQL("create table if not exists score (id integer primary key, pid integer, stid integer, tid integer, points integer, attempts integer, at timestamp, unique(pid,stid))")
 	execSQL("create table if not exists feedback (id integer primary key, tid integer, stid integer, content text, date timestamp)")
-	execSQL("create table if not exists attendance (id integer primary key, stid integer, at timestamp)")
-	execSQL("create table if not exists tag (id integer primary key, description text unique)")
 	// foreign key example: http://www.sqlitetutorial.net/sqlite-foreign-key/
 }
 
@@ -66,40 +65,40 @@ func init_database(db_name string) {
 }
 
 //-----------------------------------------------------------------
-func add_next_problem_to_board(pid, stid int, decision string) string {
-	prob, ok := ActiveProblems[pid]
-	msg := ""
-	if ok {
-		next_pid := 0
-		if decision == "correct" {
-			next_pid = prob.Info.NextIfCorrect
-			msg = "\nNew problem added to white board."
-		} else if decision == "incorrect" && prob.Attempts[stid] <= 0 {
-			next_pid = prob.Info.NextIfIncorrect
-			msg = "\nNew problem added to white board."
-		}
-		if next_pid == 0 {
-			return ""
-		}
-		new_content, new_answer, new_fn, new_merit, new_effort, new_attempts := "", "", "", 0, 0, 0
-		rows, _ := Database.Query("select content, answer, filename, merit, effort, attempts from problem where id=?", next_pid)
-		for rows.Next() {
-			rows.Scan(&new_content, &new_answer, &new_fn, &new_merit, &new_effort, &new_attempts)
-			break
-		}
-		rows.Close()
-		b := &Board{
-			Content:      new_content,
-			Answer:       new_answer,
-			Attempts:     new_attempts,
-			Filename:     new_fn,
-			Pid:          next_pid,
-			StartingTime: time.Now(),
-		}
-		Students[stid].Boards = append(Students[stid].Boards, b)
-	}
-	return msg
-}
+// func add_next_problem_to_board(pid, stid int, decision string) string {
+// 	prob, ok := ActiveProblems[pid]
+// 	msg := ""
+// 	if ok {
+// 		next_pid := 0
+// 		if decision == "correct" {
+// 			next_pid = prob.Info.NextIfCorrect
+// 			msg = "\nNew problem added to white board."
+// 		} else if decision == "incorrect" && prob.Attempts[stid] <= 0 {
+// 			next_pid = prob.Info.NextIfIncorrect
+// 			msg = "\nNew problem added to white board."
+// 		}
+// 		if next_pid == 0 {
+// 			return ""
+// 		}
+// 		new_content, new_answer, new_fn, new_merit, new_effort, new_attempts := "", "", "", 0, 0, 0
+// 		rows, _ := Database.Query("select content, answer, filename, merit, effort, attempts from problem where id=?", next_pid)
+// 		for rows.Next() {
+// 			rows.Scan(&new_content, &new_answer, &new_fn, &new_merit, &new_effort, &new_attempts)
+// 			break
+// 		}
+// 		rows.Close()
+// 		b := &Board{
+// 			Content:      new_content,
+// 			Answer:       new_answer,
+// 			Attempts:     new_attempts,
+// 			Filename:     new_fn,
+// 			Pid:          next_pid,
+// 			StartingTime: time.Now(),
+// 		}
+// 		Students[stid].Boards = append(Students[stid].Boards, b)
+// 	}
+// 	return msg
+// }
 
 //-----------------------------------------------------------------
 // Add or update score based on a decision. If decision is "correct"
@@ -141,8 +140,8 @@ func add_or_update_score(decision string, pid, stid, tid int) string {
 		}
 		mesg = "Answer is incorrect."
 	}
-	m := add_next_problem_to_board(pid, stid, decision)
-	mesg = mesg + m
+	// m := add_next_problem_to_board(pid, stid, decision)
+	// mesg = mesg + m
 
 	// Add a new score or update a current score for this student & problem
 	if score_id == 0 {

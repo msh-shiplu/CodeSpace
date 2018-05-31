@@ -94,12 +94,6 @@ func inform_name_server() {
 	if err != nil {
 		log.Fatal("Unable to contact with name server.")
 	}
-	// defer resp.Body.Close()
-	// body, err := ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println(">", string(body))
 }
 
 //-----------------------------------------------------------------
@@ -107,8 +101,8 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 	config_file, teacher_file, student_file := "", "", ""
 	flag.StringVar(&config_file, "c", config_file, "json-formatted configuration file.")
-	flag.StringVar(&teacher_file, "add_teacher", teacher_file, "teacher file.")
-	flag.StringVar(&student_file, "add_student", student_file, "student file.")
+	flag.StringVar(&teacher_file, "add_teachers", teacher_file, "teacher file.")
+	flag.StringVar(&student_file, "add_students", student_file, "student file.")
 	flag.Parse()
 	if config_file == "" {
 		flag.Usage()

@@ -34,9 +34,9 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println()
 
 	fmt.Println("ActiveProblems:", ActiveProblems)
-	for pid, v := range ActiveProblems {
-		fmt.Println(pid, v.Active, "Answers:", v.Answers, "Attempts:", v.Attempts)
-		fmt.Println(pid, v.Info.Filename, v.Info.Merit, v.Info.Effort, v.Info.Attempts, v.Info.NextIfCorrect, v.Info.NextIfIncorrect)
+	for fname, v := range ActiveProblems {
+		fmt.Println(fname, v.Active, "Answers:", v.Answers, "Attempts:", v.Attempts)
+		fmt.Println(fname, v.Info.Pid, v.Info.Merit, v.Info.Effort, v.Info.Attempts, v.Info.NextIfCorrect, v.Info.NextIfIncorrect)
 		// fmt.Print(v.Info.Description)
 	}
 	fmt.Fprintf(w, Passcode)

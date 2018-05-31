@@ -8,6 +8,7 @@ import os
 import json
 import time
 import random
+import shutil
 import datetime
 import webbrowser
 
@@ -77,26 +78,6 @@ class gemsPointsReport(sublime_plugin.ApplicationCommand):
 			sublime.active_window().open_file(report_file)
 
 # ------------------------------------------------------------------
-def gems_problem_info(fname):
-	basename = os.path.basename(fname)
-	if '.' in fname:
-		prefix, ext = fname.rsplit('.',1)
-	else:
-		prefix, ext = fname, ''
-	if prefix.count('_') < 1:
-		return basename, 0
-	prefix, pid = prefix.rsplit('_', 1)
-	try:
-		pid = int(pid)
-	except:
-		return basename, 0
-	if ext == '':
-		orginal_fname = prefix
-	else:
-		orginal_fname = prefix + '.' + ext
-	return orginal_fname, pid
-
-# ------------------------------------------------------------------
 def gems_periodic_update():
 	global gemsTracking
 	response = gemsRequest('student_periodic_update', {}, verbal=False)
@@ -120,10 +101,10 @@ def gems_periodic_update():
 			sublime.message_dialog(mesg)
 
 		# Open board pages and feedback automatically
-		if board_stat == 1:
-			if sublime.active_window().id() == 0:
-				sublime.run_command('new_window')
-			sublime.active_window().run_command('gems_get_board_content')
+		# if board_stat == 1:
+		# 	if sublime.active_window().id() == 0:
+		# 		sublime.run_command('new_window')
+		# 	sublime.active_window().run_command('gems_get_board_content')
 
 		# Keep checking periodically
 		update_timeout = gemsUpdateIntervalLong
@@ -141,28 +122,23 @@ def gems_share(self, edit, priority):
 	if fname is None:
 		sublime.message_dialog('Cannot share unsaved content.')
 		return
-	original_fname, pid = gems_problem_info(fname)
-	if pid == 0:
-		priority = 1
-	if pid > 0 or sublime.ok_cancel_dialog('This file is not a graded problem. Do you want to send it?'):
-		content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
-		items = content.rsplit(gemsAnswerTag, 1)
-		if len(items)==2:
-			answer = items[1].strip()
-		else:
-			answer = ''
-		data = dict(
-			content=content,
-			answer=answer,
-			pid=pid,
-			filename=original_fname,
-			priority=priority,
-		)
-		response = gemsRequest('student_shares', data)
-		sublime.message_dialog(response)
-		if pid > 0 and gemsTracking==False:
-			gemsTracking = True
-			sublime.set_timeout_async(gems_periodic_update, 5000)
+	content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
+	items = content.rsplit(gemsAnswerTag, 1)
+	if len(items)==2:
+		answer = items[1].strip()
+	else:
+		answer = ''
+	data = dict(
+		content=content,
+		answer=answer,
+		filename=os.path.basename(fname),
+		priority=priority,
+	)
+	response = gemsRequest('student_shares', data)
+	sublime.message_dialog(response)
+	if gemsTracking==False:
+		gemsTracking = True
+		sublime.set_timeout_async(gems_periodic_update, 5000)
 
 # ------------------------------------------------------------------
 class gemsNeedHelp(sublime_plugin.TextCommand):
@@ -184,24 +160,36 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
 		if json_obj == []:
 			sublime.message_dialog("Whiteboard is empty.")
 			return
+
+		feedback_dir = os.path.join(gemsFOLDER, 'FEEDBACK')
+		if not os.path.exists(feedback_dir):
+			os.mkdir(feedback_dir)				
+		old_dir = os.path.join(gemsFOLDER, 'OLD')
+		if not os.path.exists(old_dir):
+			os.mkdir(old_dir)
+
 		for board in json_obj:
 			content = board['Content']
-			attempts = board['Attempts']
 			filename = board['Filename']
-			pid = board['Pid']
-			today = datetime.datetime.today()
-			if '.' in filename:
-				fname, ext = filename.rsplit('.',1)
+			mesg = ''
+			if board['Type'] == 'feedback':
+				local_file = os.path.join(feedback_dir, filename)
+				mesg = 'Teacher has some feedback for you.'
 			else:
-				fname, ext = filename, ''
-			new_fname = os.path.join(gemsFOLDER, '{}_{}.{}'.format(fname,pid,ext))
-			if pid>0 and os.path.exists(new_fname):
-				new_fname = os.path.join(gemsFOLDER, 'FEEDBACK.txt')
-			with open(new_fname, 'w', encoding='utf-8') as f:
+				local_file = os.path.join(gemsFOLDER, filename)
+				if os.path.exists(local_file):
+					with open(local_file) as f:
+						moved_file = os.path.join(old_dir, filename)
+						with open(moved_file, 'w', encoding='utf-8') as newf:
+							newf.write(f.read())
+					mesg = 'Move existing file, {}, to {}.'.format(filename,old_dir)
+			with open(local_file, 'w', encoding='utf-8') as f:
 				f.write(content)
 			if sublime.active_window().id() == 0:
 				sublime.run_command('new_window')
-			sublime.active_window().open_file(new_fname)
+			sublime.active_window().open_file(local_file)
+			if mesg != '':
+				sublime.message_dialog(mesg)
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
@@ -280,6 +268,7 @@ class gemsSetLocalFolder(sublime_plugin.ApplicationCommand):
 			if not os.path.exists(folder):
 				try:
 					os.mkdir(folder)
+					os.mkdir(os.path.join(folder,'FEEDBACK'))
 					with open(gemsFILE, 'w') as f:
 						f.write(json.dumps(info, indent=4))
 				except:

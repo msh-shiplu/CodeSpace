@@ -8,7 +8,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"html/template"
 	"net/http"
-	"strconv"
+	// "strconv"
 )
 
 type AnswersBoardMessage struct {
@@ -19,19 +19,19 @@ type AnswersBoardMessage struct {
 
 //-----------------------------------------------------------------------------------
 func view_answersHandler(w http.ResponseWriter, r *http.Request) {
-	pid, err := strconv.Atoi(r.FormValue("pid"))
+	filename := r.FormValue("filename")
 	passcode := r.FormValue("pc")
-	if _, ok := ActiveProblems[pid]; err == nil && ok && passcode == Passcode {
+	if prob, ok := ActiveProblems[filename]; ok && passcode == Passcode {
 		t, err := template.New("").Parse(VIEW_ANSWERS_TEMPLATE)
 		if err == nil {
-			answers := ActiveProblems[pid].Answers
+			answers := prob.Answers
 			counts := make(map[string]int)
 			total := 0
 			for i := 0; i < len(answers); i++ {
 				counts[answers[i]]++
 				total++
 			}
-			content := ActiveProblems[pid].Info.Description
+			content := prob.Info.Description
 			w.Header().Set("Content-Type", "text/html")
 			data := &AnswersBoardMessage{Counts: counts, Content: content, Total: total}
 			err = t.Execute(w, data)
