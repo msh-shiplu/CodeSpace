@@ -121,7 +121,7 @@ var TAGS_VIEW_TEMPLATE = `
 			{{ end }}
         ]);
         var table = new google.visualization.Table(document.getElementById('scores_div'));
-        table.draw(data, {showRowNumber: true, width: '400px', height: '100%'});
+        table.draw(data, {showRowNumber: true, width: '400px'});
       }
     </script>
     <style>
