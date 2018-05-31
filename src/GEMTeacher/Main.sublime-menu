@@ -53,7 +53,7 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Add to bullentin board",
+                "caption": "Copy text to bullentin board",
                 "id": "gemtAddBulletin",
                 "command": "gemt_add_bulletin",
             },

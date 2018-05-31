@@ -130,10 +130,8 @@ class gemtDeactivateProblems(sublime_plugin.ApplicationCommand):
 			with open(gemtFILE, 'r') as f:
 				info = json.loads(f.read())
 			filenames = json.loads(json_response)
-			mesg = "Problems closed."
 			if len(filenames) > 0:
-				mesg += " Answers to be summarized."
-			sublime.message_dialog(mesg)
+				sublime.message_dialog("Answers to be summarized.")
 			for fname in filenames:
 				p = urllib.parse.urlencode({'pc' : passcode, 'filename':fname})
 				webbrowser.open(info['Server'] + '/view_answers?' + p)
@@ -235,7 +233,7 @@ def gemt_grade(self, edit, decision):
 		if sid in gemtStudentSubmissions:
 			if gemtStudentSubmissions[sid].strip() != content.strip():
 				changed = True
-				
+
 	stop = False
 	if sid == '0':
 		stop = True
