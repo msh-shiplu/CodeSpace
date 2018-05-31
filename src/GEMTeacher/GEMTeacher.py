@@ -59,9 +59,9 @@ def gemt_get_problem_info(fname):
 		content = fp.read()
 	items = content.split('\n',1)
 	if len(items)==0 or (not items[0].startswith('#') and not items[0].startswith('//')):
-		return content, '', 0, 0, 0, '', basename
+		return content, '', 0, 0, 0, '', basename, False
 
-	merit, effort, attempts, tag = 0, 0, 0, ''
+	merit, effort, attempts, tag, exact_answer = 0, 0, 0, '', False
 	first_line, body = items[0], items[1]
 	if first_line.startswith('#'):
 		prefix = '#'
@@ -74,11 +74,14 @@ def gemt_get_problem_info(fname):
 		merit, effort, attempts, tag = int(items[0]), int(items[1]), int(items[2]), items[4]
 		if tag is None:
 			tag = ''
+		tag = tag.strip()
+		if tag.startswith('multiple_choice'):
+			exact_answer = True
 	except:
-		return content, '', 0, 0, 0, '', basename
+		return content, '', 0, 0, 0, '', basename, False
 
 	if merit < effort:
-		return content, '', 0, 0, 0, '', basename
+		return content, '', 0, 0, 0, '', basename, False
 
 	items = body.split(gemtAnswerTag)
 	if len(items) > 2:
@@ -92,7 +95,7 @@ def gemt_get_problem_info(fname):
 		body += '\n{} '.format(gemtAnswerTag)
 		answer = items[1].strip()
 
-	return body, answer, merit, effort, attempts, tag, basename
+	return body, answer, merit, effort, attempts, tag, basename, exact_answer
 
 
 # ------------------------------------------------------------------
@@ -102,7 +105,7 @@ class gemtShare(sublime_plugin.TextCommand):
 		if fname is None:
 			sublime.message_dialog('Content must be saved first.')
 			return
-		content, answer, merit, effort, attempts, tag, name = gemt_get_problem_info(fname)
+		content, answer, merit, effort, attempts, tag, name, exact_answer = gemt_get_problem_info(fname)
 		data = {
 			'content': 		content,
 			'answer':		answer,
@@ -111,6 +114,7 @@ class gemtShare(sublime_plugin.TextCommand):
 			'attempts':		attempts,
 			'tag':			tag,
 			'filename':		name,
+			'exact_answer':	exact_answer,
 		}
 		response = gemtRequest('teacher_broadcasts', data)
 		if response is not None:

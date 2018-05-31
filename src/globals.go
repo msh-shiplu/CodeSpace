@@ -105,16 +105,15 @@ var Submissions = make(map[int]*Submission)
 
 //---------------------------------------------------------
 type ProblemInfo struct {
-	Description     string
-	Filename        string
-	Answer          string
-	Merit           int
-	Effort          int
-	Attempts        int
-	Tag             string
-	Pid             int
-	NextIfCorrect   int
-	NextIfIncorrect int
+	Description string
+	Filename    string
+	Answer      string
+	Merit       int
+	Effort      int
+	Attempts    int
+	Tag         string
+	Pid         int
+	ExactAnswer bool
 }
 
 type ActiveProblem struct {

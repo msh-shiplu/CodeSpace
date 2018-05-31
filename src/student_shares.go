@@ -54,6 +54,11 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 					ActiveProblems[filename].Attempts[uid] = 0 // This prevents further submission
 					complete = true
 					fmt.Fprintf(w, scoring_mesg)
+				} else if ActiveProblems[filename].Info.ExactAnswer {
+					scoring_mesg := add_or_update_score("incorrect", pid, uid, 0)
+					ActiveProblems[filename].Attempts[uid] = 0 // This prevents further submission
+					complete = true
+					fmt.Fprintf(w, scoring_mesg)
 				}
 			}
 			var result sql.Result

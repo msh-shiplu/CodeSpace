@@ -72,6 +72,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 	attempts, _ := strconv.Atoi(r.FormValue("attempts"))
 	tag := r.FormValue("tag")
 	filename := r.FormValue("filename")
+	exact_answer := r.FormValue("exact_answer")
 
 	fmt.Printf("%d,Answer:%s, Merit:%d, Effort:%d, Attempts:%d, Tag:%s, Filename:%s\n", len(content), answer, merit, effort, attempts, tag, filename)
 
@@ -83,6 +84,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 		Effort:      effort,
 		Attempts:    attempts,
 		Tag:         tag,
+		ExactAnswer: exact_answer == "True",
 	}
 	insert_problem(uid, problem)
 	BoardsSem.Lock()
