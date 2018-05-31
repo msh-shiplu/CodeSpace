@@ -87,7 +87,7 @@
             {
                 "caption": "Update GEM",
                 "id": "gemtUpdate",
-                // "command": "gemt_update",
+                "command": "gemt_update",
             },
         ]
     }

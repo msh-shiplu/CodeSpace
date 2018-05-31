@@ -50,7 +50,7 @@
             {
                 "caption": "Update GEM",
                 "id": "gemsUpdate",
-                // "command": "gems_update",
+                "command": "gems_update",
             },
         ]
     }
