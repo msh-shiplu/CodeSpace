@@ -19,6 +19,7 @@ gemsFOLDER = ''
 gemsTIMEOUT = 7
 gemsAnswerTag = 'ANSWER:'
 gemsTracking = False
+gemsConnected = False
 gemsUpdateMessage = {
 	1 : "Your submission is being looked at.",
 	2 : "Teacher did not grade your submission.",
@@ -163,7 +164,7 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
 
 		feedback_dir = os.path.join(gemsFOLDER, 'FEEDBACK')
 		if not os.path.exists(feedback_dir):
-			os.mkdir(feedback_dir)				
+			os.mkdir(feedback_dir)
 		old_dir = os.path.join(gemsFOLDER, 'OLD')
 		if not os.path.exists(old_dir):
 			os.mkdir(old_dir)
@@ -197,7 +198,11 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 def gemsRequest(path, data, authenticated=True, method='POST', verbal=True):
-	global gemsFOLDER
+	global gemsFOLDER, gemsConnected
+	if not gemsConnected:
+		sublime.run_command('gems_connect')
+		gemsConnected = True
+
 	try:
 		with open(gemsFILE, 'r') as f:
 			info = json.loads(f.read())
@@ -312,7 +317,7 @@ class gemsConnect(sublime_plugin.ApplicationCommand):
 				info['Server'] = server
 				with open(gemsFILE, 'w') as f:
 					f.write(json.dumps(info, indent=4))
-				sublime.message_dialog('Connected to server at {}'.format(server))
+				sublime.status_message('Connected to server at {}'.format(server))
 		except urllib.error.HTTPError as err:
 			sublime.message_dialog("{0}".format(err))
 		except urllib.error.URLError as err:

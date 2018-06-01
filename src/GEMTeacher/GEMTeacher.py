@@ -303,6 +303,27 @@ def gemt_gets(self, index, priority):
 			sublime.message_dialog('There are no submission with index {}.'.format(index))
 
 # ------------------------------------------------------------------
+class gemtSeeQueue(sublime_plugin.ApplicationCommand):
+	def run(self):
+		response = gemtRequest('teacher_gets_queue', {})
+		if response is not None:
+			json_obj = json.loads(response)
+			if json_obj is None:
+				sublime.status_message("Queue is empty.")
+			else:
+				users = [ 'Uid {}'.format(entry['Uid']) for entry in json_obj ]
+				if users:
+					sublime.active_window().active_view().show_popup_menu(users, self.request_entry)
+				else:
+					sublime.status_message("Queue is empty.")
+
+	# ---------------------------------------------------------
+	def request_entry(self, selected):
+		if selected < 0:
+			return
+		gemt_gets(self, selected, 1)
+
+# ------------------------------------------------------------------
 # Priorities: 1 (I got it), 2 (I need help),
 # ------------------------------------------------------------------
 class gemtGetPrioritized(sublime_plugin.ApplicationCommand):

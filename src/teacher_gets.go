@@ -65,3 +65,14 @@ func teacher_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 }
 
 //-----------------------------------------------------------------------------------
+func teacher_gets_queueHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	js, err := json.Marshal(WorkingSubs)
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	}
+}
+
+//-----------------------------------------------------------------------------------

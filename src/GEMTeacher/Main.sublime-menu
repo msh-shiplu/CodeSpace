@@ -10,20 +10,25 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Get submission",
+                "caption": "Get a submission",
                 "id": "gemtGetPrioritized",
                 "command": "gemt_get_prioritized",
             },
             {
-                "caption": "Get 😎 submission",
-                "id": "gemtGetFromOk",
-                "command": "gemt_get_from_ok",
+                "caption": "Submission queue",
+                "id": "gemtSeeQueue",
+                "command": "gemt_see_queue",
             },
-            {
-                "caption": "Get 😥 submission",
-                "id": "gemtGetFromNeedHelp",
-                "command": "gemt_get_from_need_help",
-            },
+            // {
+            //     "caption": "Get 😎 submission",
+            //     "id": "gemtGetFromOk",
+            //     "command": "gemt_get_from_ok",
+            // },
+            // {
+            //     "caption": "Get 😥 submission",
+            //     "id": "gemtGetFromNeedHelp",
+            //     "command": "gemt_get_from_need_help",
+            // },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "✔  Mark correct",
@@ -64,6 +69,12 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
+                "caption": "Report",
+                "id": "gemtReport",
+                "command": "gemt_report",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
                 "caption": "Set working folder",
                 "id": "gemtSetLocalFolder",
                 "command": "gemt_set_local_folder",
@@ -79,11 +90,6 @@
                 "command": "gemt_complete_registration",
             },
             {"caption":"-", "id":"side-bar-separator"},
-            {
-                "caption": "Report",
-                "id": "gemtReport",
-                "command": "gemt_report",
-            },
             {
                 "caption": "Update GEM",
                 "id": "gemtUpdate",
