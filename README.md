@@ -4,39 +4,34 @@ To install Sublime Text 3, [go here.](https://www.sublimetext.com/3)
 
 ### Teacher's installation
 
-+ Open Sublime Text
-+ Click Show Console in the View menu.
-+ Copy this code:
+(1) Open Sublime Text
+(2) Click Show Console in the View menu.
+(3) Copy this code:
 ```
 import os; package_path = os.path.join(sublime.packages_path(), "GEMTeacher"); os.mkdir(package_path) if not os.path.isdir(package_path) else print("dir exists"); module_file = os.path.join(package_path, "GEMTeacher.py") ; menu_file = os.path.join(package_path, "Main.sublime-menu"); version_file = os.path.join(package_path, "version.go"); import urllib.request; urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMTeacher/GEMTeacher.py", module_file); urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMTeacher/Main.sublime-menu", menu_file); urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/version.go", version_file)
 ```
-+ Paste copied code to Console and hit enter.
+(4) Paste copied code to Console and hit enter.
 
-Download gem server: http://umdrive.memphis.edu/vphan/public/GEM
+(5) Download the latest server ([Windows](http://umdrive.memphis.edu/vphan/public/GEM/gem.exe), [MacOS](http://umdrive.memphis.edu/vphan/public/GEM/gem)) and make them *executable* on teacher's computer.  This command-line server needs to be run on the teacher's computer every time GEM is used in class.
 
-Run the server:
-
-```
-    ./gem -c config.json
-```
-
-#### Add teachers
-
+(6) First-time configuration:
+Add teachers
 ```
     ./gem -c config.json -add_teacher teachers.txt
 ```
 
-#### Add students
-
+Add students
 ```
     ./gem -c config.json -add_student students.txt
 ```
 
-#### Run the server in class
-
+Run the server
 ```
     ./gem -c config.json
 ```
+
+(7) When the server is run for the first time after teachers and students are added, teachers and students must configure their Sublime Text modules by going through 3 steps in Sublime Text: (i) specify a local folder on their computers, (ii) set the server address, which is shown when the server is run, and (iii) complete the registration by simply entering their usernames, as specify in *teachers.txt* and *students.txt*.
+
 
 ### TA's installation
 
