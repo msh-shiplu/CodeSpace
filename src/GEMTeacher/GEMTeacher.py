@@ -77,6 +77,7 @@ def gemt_get_problem_info(fname):
 		tag = tag.strip()
 		if tag.startswith('multiple_choice'):
 			exact_answer = True
+			tag = tag.split('multiple_choice')[1].strip()
 	except:
 		return content, '', 0, 0, 0, '', basename, False
 
