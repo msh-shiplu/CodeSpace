@@ -16,11 +16,11 @@ If the file is gradable, students can submit their work on it.  To make a file *
 
 This means the problem has 5 points for merit (for correct solution), 2 points for effort (for trying at least once), and students have 3 attempts to try.  Further, the learning objective for this problem is "Loop and iteration".
 
-For Java/C++/Go files, you can use "//" instead of "#".
+For Java/C++/Go files, we should use "//" instead of "#" to by syntatically correct.
 
 ### Automatic grading
 
-In the example below, a correct answer (D) will be automatically graded correct by GEM.  However, if the answer is incorrect, the instructor will have to look at the student's submission and grades it.
+In the example below, a correct answer (D) will be automatically graded correct by GEM.  However, if the answer is incorrect, the instructor needs to look at the student's submission and grades it.
 
 ```
 # 5 2 1 Cardinality
