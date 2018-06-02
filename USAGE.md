@@ -2,7 +2,7 @@ This page explains how to use GEM, as a teacher, in the class room.
 
 The basic classroom workflow includes: (i) the teacher broadcasts a file, which is opened in the current tab; (ii) students get the file from their virtual white boards, work on them and submit their work; (iii) if the work is gradable, the teacher grades and possibly sends feedback to students.
 
-#### Teacher broadcasting a file.
+### Teacher broadcasting a file.
 
 Click on "Broadcast" on the GEM menu in Sublime Text.  This will send whichever file is open in the current tab.
 
@@ -18,7 +18,7 @@ This means the problem has 5 points for merit (for correct solution), 2 points f
 
 For Java/C++/Go files, you can use "//" instead of "#".
 
-#### Automatic grading
+### Automatic grading
 
 In the example below, a correct answer (D) will be automatically graded correct by GEM.  However, if the answer is incorrect, the instructor will have to look at the student's submission and grades it.
 
@@ -50,15 +50,15 @@ D. 4
 ANSWER: D
 ```
 
-#### Getting a student's submission and Grading
+### Getting a student's submission and Grading
 
 By selecting an appropriate item in the GEM menu, the teacher get a student's submission and then can give a grading of "correct" or "incorrect" to it.  The teacher can also "dismiss" the submission without grading it.
 
-#### Time's Up
+### Time's Up
 
 This feature disallows students to submit answers to the current problem.  If the problem has answers (see above), GEM will automatically summarizes the answers.
 
-#### Excerpting selected content to share on the bulletin board
+### Excerpting selected content to share on the bulletin board
 
 Selecting a specific content, the teacher can share this content to the "bulletin board" so all students can see.  This feature is particular useful for teaching assistants, who help the teacher with grading but do not have their computers connected to the projector.
 
