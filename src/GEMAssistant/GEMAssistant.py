@@ -450,7 +450,7 @@ class gemaUpdate(sublime_plugin.WindowCommand):
 		if sublime.ok_cancel_dialog("Current version is {}. Click OK to update.".format(version)):
 			if not os.path.isdir(package_path):
 				os.mkdir(package_path)
-			module_file = os.path.join(package_path, "gemaeacher.py")
+			module_file = os.path.join(package_path, "GEMAssistant.py")
 			menu_file = os.path.join(package_path, "Main.sublime-menu")
 			version_file = os.path.join(package_path, "version.go")
 			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMAssistant/GEMAssistant.py", module_file)
