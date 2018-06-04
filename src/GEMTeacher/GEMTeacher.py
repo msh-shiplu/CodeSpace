@@ -1,5 +1,5 @@
-# Code4Brownies - Instructor module
-# Author: Vinhthuy Phan, 2015-2017
+# GEMTeacher
+# Author: Vinhthuy Phan, 2018
 #
 
 import sublime, sublime_plugin
@@ -12,9 +12,6 @@ import webbrowser
 import random
 import re
 
-gemtOrDivider = '<GEM_OR>'
-gemtAndDivider = '<GEM_AND>'
-gemtSeqDivider = '<GEM_NEXT>'
 gemtAnswerTag = 'ANSWER:'
 gemtFOLDER = ''
 gemtTIMEOUT = 7
@@ -27,11 +24,6 @@ gemtFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 # These functionalities are unique to the GEMTeacher module
 # ------------------------------------------------------------------
 # ------------------------------------------------------------------
-
-class gemtTest(sublime_plugin.WindowCommand):
-	def run(self):
-		response = gemtRequest('test', {})
-		sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
 class gemtReport(sublime_plugin.WindowCommand):
@@ -223,6 +215,15 @@ class gemtAddBulletin(sublime_plugin.TextCommand):
 			sublime.message_dialog('Select more text to show on the bulletin board.')
 			return
 		response = gemtRequest('teacher_adds_bulletin_page', {'content':content})
+		if response:
+			sublime.message_dialog(response)
+
+# ------------------------------------------------------------------
+class gemtPutBack(sublime_plugin.TextCommand):
+	def run(self, edit):
+		fname = self.view.file_name()
+		sid = os.path.basename(os.path.dirname(fname))
+		response = gemtRequest('teacher_puts_back', {'sid':sid})
 		if response:
 			sublime.message_dialog(response)
 

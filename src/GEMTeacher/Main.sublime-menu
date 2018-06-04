@@ -45,6 +45,11 @@
                 "id": "gemtDismissed",
                 "command": "gemt_dismissed",
             },
+            {
+                "caption": "⏎ Put back",
+                "id": "gemtPutBack",
+                "command": "gemt_put_back",
+            },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Time's up!",

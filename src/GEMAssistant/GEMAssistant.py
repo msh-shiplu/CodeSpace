@@ -1,5 +1,5 @@
-# Code4Brownies - Instructor module
-# Author: Vinhthuy Phan, 2015-2017
+# GEMAssistant
+# Author: Vinhthuy Phan, 2018
 #
 
 import sublime, sublime_plugin
@@ -10,53 +10,20 @@ import json
 import socket
 import webbrowser
 import random
+import re
 
-gemaFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
+gemaAnswerTag = 'ANSWER:'
 gemaFOLDER = ''
 gemaTIMEOUT = 7
-gemaHighestPriority = 2
-gemaConnected = False
 gemaStudentSubmissions = {}
+gemaConnected = False
+gemaFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 
-# ------------------------------------------------------------------
-# These functionalities are unique to the GEMAssistant module
-# ------------------------------------------------------------------
-class gemaPutBack(sublime_plugin.TextCommand):
-	def run(self, edit):
-		fname = self.view.file_name()
-		basename = os.path.basename(fname)
-		if not basename.startswith('gemt') or basename.count('_') < 2:
-			sublime.message_dialog('This is not a student submission.')
-			return
-		if '.' in basename:
-			prefix, ext = basename.rsplit('.', 1)
-		else:
-			prefix = basename
-		prefix = prefix[4:]
-		stid, pid, sid = prefix.split('_')
-		try:
-			stid = int(stid)
-			pid = int(pid)
-			sid = int(sid)
-		except:
-			sublime.message_dialog('This is not a student submission.')
-			return
-		content = self.view.substr(sublime.Region(0, self.view.size())).strip()
-		data = dict(
-			sid = sid,
-			stid = stid,
-			pid = pid,
-			content = content,
-			priority = gemaHighestPriority,
-		)
-		response = gemaRequest('teacher_puts_back', data)
-		if response:
-			sublime.message_dialog(response)
-		self.view.window().run_command('close')
-
-# ------------------------------------------------------------------
-# These functionalities should be identical to the GEMTeacher module
-# ------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# These functionalities below are identical to the GEMAssistant module
+# ----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 def gemaRequest(path, data, authenticated=True, method='POST'):
 	global gemaFOLDER, gemaConnected
 	if not gemaConnected:
@@ -100,7 +67,6 @@ def gemaRequest(path, data, authenticated=True, method='POST'):
 	print('Something is wrong')
 	return None
 
-
 # ------------------------------------------------------------------
 class gemaViewBulletinBoard(sublime_plugin.ApplicationCommand):
 	def run(self):
@@ -129,40 +95,43 @@ class gemaAddBulletin(sublime_plugin.TextCommand):
 		if response:
 			sublime.message_dialog(response)
 
+# ------------------------------------------------------------------
+class gemaPutBack(sublime_plugin.TextCommand):
+	def run(self, edit):
+		fname = self.view.file_name()
+		sid = os.path.basename(os.path.dirname(fname))
+		response = gemaRequest('teacher_puts_back', {'sid':sid})
+		if response:
+			sublime.message_dialog(response)
 
 # ------------------------------------------------------------------
 def gema_grade(self, edit, decision):
 	fname = self.view.file_name()
-	basename = os.path.basename(fname)
-	if not basename.startswith('gemt') or basename.count('_') < 2:
-		sublime.message_dialog('This is not a student submission.')
-		return
-	if '.' in basename:
-		prefix, ext = basename.rsplit('.', 1)
-	else:
-		prefix = basename
-	prefix = prefix[4:]
-	stid, pid, sid = prefix.split('_')
-	try:
-		stid = int(stid)
-		pid = int(pid)
-		sid = int(sid)
-	except:
-		sublime.message_dialog('This is not a student submission.')
-		return
-	if pid == 0:
-		sublime.message_dialog('This is not a graded problem.')
-		return
 	changed = False
+	sid = os.path.basename(os.path.dirname(fname))
 	if decision=='dismissed':
 		content = ''
 	else:
 		content = self.view.substr(sublime.Region(0, self.view.size())).strip()
-		if pid in gemaStudentSubmissions and content.strip()!=gemaStudentSubmissions[pid].strip():
-			changed = True
+		if sid in gemaStudentSubmissions:
+			if gemaStudentSubmissions[sid].strip() != content.strip():
+				changed = True
+
+	stop = False
+	if sid == '0':
+		stop = True
+	try:
+		int(sid)
+	except:
+		stop = True
+	if stop:
+		if decision=='dismissed':
+			self.view.window().run_command('close')
+		else:
+			sublime.message_dialog('This is not a graded problem.')
+		return
+
 	data = dict(
-		stid = stid,
-		pid = pid,
 		sid = sid,
 		content = content,
 		decision = decision,
@@ -194,25 +163,52 @@ def gema_gets(self, index, priority):
 		sub = json.loads(response)
 		if sub['Content'] != '':
 			filename = sub['Filename']
-			if '.' in filename:
-				ext = filename.rsplit('.',1)[1]
-			else:
-				ext = 'txt'
-			pid, sid, uid = sub['Pid'], sub['Sid'], sub['Uid']
-			fname = 'gemt{}_{}_{}.{}'.format(uid,pid,sid,ext)
-			fname = os.path.join(gemaFOLDER, fname)
-			with open(fname, 'w', encoding='utf-8') as fp:
+			sid = str(sub['Sid'])
+			dir = os.path.join(gemaFOLDER, sid)
+			if not os.path.exists(dir):
+				os.mkdir(dir)
+			local_file = os.path.join(dir, filename)
+			with open(local_file, 'w', encoding='utf-8') as fp:
 				fp.write(sub['Content'])
-			gemaStudentSubmissions[pid] = sub['Content']
+			gemaStudentSubmissions[sid] = sub['Content']
 			if sublime.active_window().id() == 0:
 				sublime.run_command('new_window')
-			sublime.active_window().open_file(fname)
+			sublime.active_window().open_file(local_file)
 		elif priority == 0:
 			sublime.message_dialog('There are no submissions.')
 		elif priority > 0:
 			sublime.message_dialog('There are no submissions with priority {}.'.format(priority))
 		elif index >= 0:
 			sublime.message_dialog('There are no submission with index {}.'.format(index))
+
+# ------------------------------------------------------------------
+class gemaSeeQueue(sublime_plugin.ApplicationCommand):
+	def run(self):
+		response = gemaRequest('teacher_gets_queue', {})
+		if response is not None:
+			json_obj = json.loads(response)
+			if json_obj is None:
+				sublime.status_message("Queue is empty.")
+			else:
+				users = []
+				for entry in json_obj:
+					if entry['Priority'] == 2:
+						status = '😥'
+					elif entry['Priority'] == 1:
+						status = '😎'
+					else:
+						status = ''
+					users.append( '{} {}'.format(entry['Name'], status))
+				if users:
+					sublime.active_window().active_view().show_popup_menu(users, self.request_entry)
+				else:
+					sublime.status_message("Queue is empty.")
+
+	# ---------------------------------------------------------
+	def request_entry(self, selected):
+		if selected < 0:
+			return
+		gema_gets(self, selected, 1)
 
 # ------------------------------------------------------------------
 # Priorities: 1 (I got it), 2 (I need help),
@@ -241,7 +237,7 @@ class gemaSetLocalFolder(sublime_plugin.ApplicationCommand):
 			info['Folder'] = os.path.join(os.path.expanduser('~'), 'GEMA')
 		if sublime.active_window().id() == 0:
 			sublime.run_command('new_window')
-		sublime.active_window().show_input_panel("This folder will be used to store working files.",
+		sublime.active_window().show_input_panel("Specify a folder on your computer to store working files.",
 			info['Folder'],
 			self.set,
 			None,
@@ -302,7 +298,7 @@ class gemaConnect(sublime_plugin.ApplicationCommand):
 				info['Server'] = server
 				with open(gemaFILE, 'w') as f:
 					f.write(json.dumps(info, indent=4))
-				sublime.message_dialog('Connected to server at {}'.format(server))
+				sublime.status_message('Connected to server at {}'.format(server))
 		except urllib.error.HTTPError as err:
 			sublime.message_dialog("{0}".format(err))
 		except urllib.error.URLError as err:
@@ -452,7 +448,7 @@ class gemaUpdate(sublime_plugin.WindowCommand):
 		if sublime.ok_cancel_dialog("Current version is {}. Click OK to update.".format(version)):
 			if not os.path.isdir(package_path):
 				os.mkdir(package_path)
-			module_file = os.path.join(package_path, "GEMAssistant.py")
+			module_file = os.path.join(package_path, "gemaeacher.py")
 			menu_file = os.path.join(package_path, "Main.sublime-menu")
 			version_file = os.path.join(package_path, "version.go")
 			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMAssistant/GEMAssistant.py", module_file)
@@ -471,4 +467,5 @@ class gemaUpdate(sublime_plugin.WindowCommand):
 			sublime.message_dialog("GEM has been updated to version %s." % version)
 
 # ------------------------------------------------------------------
+
 

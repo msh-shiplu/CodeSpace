@@ -1,7 +1,7 @@
 [
     {
-        "caption": "GemTA",
-        "id": "GemTA",
+        "caption": "GEMA",
+        "id": "GEMA",
         "children": [
             {
                 "caption": "Get a submission",
@@ -9,14 +9,9 @@
                 "command": "gema_get_prioritized",
             },
             {
-                "caption": "Get a 😎 submission",
-                "id": "gemaGetFromOk",
-                "command": "gema_get_from_ok",
-            },
-            {
-                "caption": "Get a 😥 submission",
-                "id": "gemaGetFromNeedHelp",
-                "command": "gema_get_from_need_help",
+                "caption": "Check submission queue",
+                "id": "gemaSeeQueue",
+                "command": "gema_see_queue",
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
@@ -31,7 +26,7 @@
             },
             {
                 "caption": "✂ Mark dismissed",
-                "id": "gemaDismiss",
+                "id": "gemaDismissed",
                 "command": "gema_dismissed",
             },
             {
@@ -41,7 +36,7 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Add to bullentin board",
+                "caption": "Copy text to bullentin board",
                 "id": "gemaAddBulletin",
                 "command": "gema_add_bulletin",
             },
