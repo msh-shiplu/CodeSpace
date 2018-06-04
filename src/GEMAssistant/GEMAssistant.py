@@ -103,6 +103,8 @@ class gemaPutBack(sublime_plugin.TextCommand):
 		response = gemaRequest('teacher_puts_back', {'sid':sid})
 		if response:
 			sublime.message_dialog(response)
+		if response != 'Unknown submission.':
+			self.view.window().run_command('close')
 
 # ------------------------------------------------------------------
 def gema_grade(self, edit, decision):
