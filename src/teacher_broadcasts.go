@@ -74,7 +74,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 	filename := r.FormValue("filename")
 	exact_answer := r.FormValue("exact_answer")
 
-	fmt.Printf("%d,Answer:%s, Merit:%d, Effort:%d, Attempts:%d, Tag:%s, Filename:%s\n", len(content), answer, merit, effort, attempts, tag, filename)
+	// fmt.Printf("%d,Answer:%s, Merit:%d, Effort:%d, Attempts:%d, Tag:%s, Filename:%s\n", len(content), answer, merit, effort, attempts, tag, filename)
 
 	problem := &ProblemInfo{
 		Description: content,

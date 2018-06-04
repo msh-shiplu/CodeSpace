@@ -4,7 +4,7 @@
         "id": "GEMTeacher",
         "children": [
             {
-                "caption": "Broadcast",
+                "caption": "Broadcast content to white boards",
                 "id": "gemtShare",
                 "command": "gemt_share",
             },
@@ -15,7 +15,7 @@
                 "command": "gemt_get_prioritized",
             },
             {
-                "caption": "Submission queue",
+                "caption": "Check submission queue",
                 "id": "gemtSeeQueue",
                 "command": "gemt_see_queue",
             },

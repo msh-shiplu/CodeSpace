@@ -45,7 +45,6 @@ func init_handlers() {
 	http.HandleFunc("/teacher_adds_bulletin_page", Authorize(teacher_adds_bulletin_pageHandler))
 	http.HandleFunc("/teacher_clears_submissions", Authorize(teacher_clears_submissionsHandler))
 	http.HandleFunc("/teacher_deactivates_problems", Authorize(teacher_deactivates_problemsHandler))
-	http.HandleFunc("/teacher_shares", Authorize(teacher_sharesHandler))
 	http.HandleFunc("/teacher_grades", Authorize(teacher_gradesHandler))
 	http.HandleFunc("/teacher_puts_back", Authorize(teacher_puts_backHandler))
 	http.HandleFunc("/teacher_gets", Authorize(teacher_getsHandler))

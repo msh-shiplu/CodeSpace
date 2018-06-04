@@ -312,7 +312,15 @@ class gemtSeeQueue(sublime_plugin.ApplicationCommand):
 			if json_obj is None:
 				sublime.status_message("Queue is empty.")
 			else:
-				users = [ 'Uid {}'.format(entry['Uid']) for entry in json_obj ]
+				users = []
+				for entry in json_obj:
+					if entry['Priority'] == 2:
+						status = '😥'
+					elif entry['Priority'] == 1:
+						status = '😎'
+					else:
+						status = ''
+					users.append( '{} {}'.format(entry['Name'], status))
 				if users:
 					sublime.active_window().active_view().show_popup_menu(users, self.request_entry)
 				else:

@@ -98,6 +98,7 @@ type Submission struct {
 	Filename string
 	Priority int
 	At       time.Time
+	Name     string
 }
 
 var WorkingSubs = make([]*Submission, 0)

@@ -17,7 +17,6 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	content, filename := r.FormValue("content"), r.FormValue("filename")
 	answer := r.FormValue("answer")
 	priority, _ := strconv.Atoi(r.FormValue("priority"))
-	// pid, _ := strconv.Atoi(r.FormValue("pid"))
 	sid := int64(0)
 	correct_answer := ""
 	complete := false
@@ -84,6 +83,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			Filename: filename,
 			Priority: priority,
 			At:       time.Now(),
+			Name:     r.FormValue("name"),
 		}
 		WorkingSubs = append(WorkingSubs, sub)
 		Submissions[int(sid)] = sub
