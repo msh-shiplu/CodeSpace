@@ -35,7 +35,7 @@ D. 4
 ANSWER: D
 ```
 
-Here's an example, where GEM can automatically grades correct and incorrect answers without borthering the instructor.  The difference in this example is the keyword *multiple_choice* that comes after the set of 3 numbers (specifying merit, effort, attempt).  This keyword indicates that the answer should be simple enough that an answer that is different from the correct answer (D) should be automatically graded incorrect.
+Here's an example, where GEM can automatically grades correct and incorrect answers without borthering the instructor.  The difference in this example is the keyword *multiple_choice* that comes after the set of 3 numbers (specifying merit, effort, attempt).  This keyword indicates that the answer should be simple enough that an answer that is different from the correct answer should be *automatically* graded incorrect.
 
 ```
 # 5 2 1 multiple_choice Cardinality
@@ -47,7 +47,7 @@ B. 2
 C. 3
 D. 4
 
-ANSWER: D
+ANSWER: A
 ```
 
 ### Getting a student's submission and Grading
