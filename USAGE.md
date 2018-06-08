@@ -62,7 +62,19 @@ This feature disallows students to submit answers to the current problem.  If th
 
 Selecting a specific content, the teacher can share this content to the "bulletin board" so all students can see.  This feature is particular useful for teaching assistants, who help the teacher with grading but do not have their computers connected to the projector.
 
+### Keyboard short-cuts 
 
+In Sublime Text, select Preferences --> Key Bindings. This will open two files: (1) Default/Default.sublime-keymap and (2) User/Default.sublime-keymap.
+
+Put this in the User/Default.sublime-keymap:
+
+```
+[
+    { "keys": ["ctrl+1"], "command": "gemt_get_prioritized" },
+    { "keys": ["ctrl+2"], "command": "gemt_grade_correct" },
+    { "keys": ["ctrl+3"], "command": "gemt_grade_incorrect" },
+]
+```
 
 
 
