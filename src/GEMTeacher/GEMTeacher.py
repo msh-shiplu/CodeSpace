@@ -53,7 +53,7 @@ def gemt_get_problem_info(fname):
 	if len(items)==0 or (not items[0].startswith('#') and not items[0].startswith('//')):
 		return content, '', 0, 0, 0, '', basename, False
 
-	merit, effort, attempts, tag, exact_answer = 0, 0, 0, '', False
+	merit, effort, attempts, tag, exact_answer = 0, 0, 0, '', True
 	first_line, body = items[0], items[1]
 	if first_line.startswith('#'):
 		prefix = '#'
@@ -67,9 +67,9 @@ def gemt_get_problem_info(fname):
 		if tag is None:
 			tag = ''
 		tag = tag.strip()
-		if tag.startswith('multiple_choice'):
-			exact_answer = True
-			tag = tag.split('multiple_choice')[1].strip()
+		if tag.startswith('_manual_'):
+			exact_answer = False
+			tag = tag.split('_manual_')[1].strip()
 	except:
 		return content, '', 0, 0, 0, '', basename, False
 

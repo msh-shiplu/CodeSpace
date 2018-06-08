@@ -20,7 +20,7 @@ For Java/C++/Go files, we should use "//" instead of "#" to by syntatically corr
 
 ### Automatic grading
 
-In the example below, a correct answer (D) will be automatically graded correct by GEM.  However, if the answer is incorrect, the instructor needs to look at the student's submission and grades it.
+If a problem has an answer (i.e. the last line has the "ANSWER:" tag followed by a 1-line answer), there student submissions will be graded automatically.  If a student's answer matches the specified answer exactly, the solution is automatically marked correct. If they don't match, the solution is marked incorrect.
 
 ```
 # 5 2 1 Cardinality
@@ -35,10 +35,12 @@ D. 4
 ANSWER: D
 ```
 
-Here's an example, where GEM can automatically grades correct and incorrect answers without borthering the instructor.  The difference in this example is the keyword *multiple_choice* that comes after the set of 3 numbers (specifying merit, effort, attempt).  This keyword indicates that the answer should be simple enough that an answer that is different from the correct answer should be *automatically* graded incorrect.
+There are cases where teachers want to look at solutions whose answers do not exactly match the specified one.  If such is the case, the teacher can specify the keyword *_manual_* that comes after the set of 3 numbers (specifying merit, effort, attempt).  This keyword indicates that students' answers that are not exactly matched will be looked at by the instructor, instead of being marked "incorrect" automatically.
+
+Students' answers that are matched exactly are still automatically marked as "correct".
 
 ```
-# 5 2 1 multiple_choice Cardinality
+# 5 2 1 _manual_ Cardinality
 
 What is the cardinality of this set: {0, 1, 2, 3}?
 
@@ -47,7 +49,7 @@ B. 2
 C. 3
 D. 4
 
-ANSWER: A
+ANSWER: D
 ```
 
 ### Getting a student's submission and Grading
