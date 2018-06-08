@@ -20,7 +20,7 @@ For Java/C++/Go files, we should use "//" instead of "#" to by syntatically corr
 
 ### Automatic grading
 
-If a problem has an answer (i.e. the last line has the "ANSWER:" tag followed by a 1-line answer), there student submissions will be graded automatically.  If a student's answer matches the specified answer exactly, the solution is automatically marked correct. If they don't match, the solution is marked incorrect.
+If a problem has an answer (i.e. the last line has the "ANSWER:" tag followed by a 1-line answer), student submissions will be graded automatically.  If a student's answer matches the specified answer exactly, the solution is automatically marked correct. If they don't match, the solution is marked incorrect.
 
 ```
 # 5 2 1 Cardinality
