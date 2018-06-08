@@ -62,7 +62,7 @@ This feature disallows students to submit answers to the current problem.  If th
 
 Selecting a specific content, the teacher can share this content to the "bulletin board" so all students can see.  This feature is particular useful for teaching assistants, who help the teacher with grading but do not have their computers connected to the projector.
 
-### Keyboard short-cuts 
+### Keyboard shortcuts 
 
 In Sublime Text, select Preferences --> Key Bindings. This will open two files: (1) Default/Default.sublime-keymap and (2) User/Default.sublime-keymap.
 
@@ -76,7 +76,11 @@ Add (and save) the following to the file User/Default.sublime-keymap:
 ]
 ```
 
+The first (Ctrl+1) is a shortcut for getting a submision (prioritized those who need help).
 
+The second and third (Ctrl+2 and Ctrl+3) are shortcuts for marking a submission "correct" or "incorrect".
+
+These shortcuts can be customized, but make sure they do not "override" existing shortcuts.
 
 
 
