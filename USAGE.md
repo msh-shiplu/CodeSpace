@@ -66,7 +66,7 @@ Selecting a specific content, the teacher can share this content to the "bulleti
 
 In Sublime Text, select Preferences --> Key Bindings. This will open two files: (1) Default/Default.sublime-keymap and (2) User/Default.sublime-keymap.
 
-Put this in the User/Default.sublime-keymap:
+Add this to the file User/Default.sublime-keymap:
 
 ```
 [
