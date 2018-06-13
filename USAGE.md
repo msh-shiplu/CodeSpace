@@ -64,7 +64,7 @@ This feature disallows students to submit answers to the current problem.  If th
 
 Selecting a specific content, the teacher can share this content to the "bulletin board" so all students can see.  This feature is particular useful for teaching assistants, who help the teacher with grading but do not have their computers connected to the projector.
 
-### Keyboard shortcuts 
+### Keyboard shortcuts for teachers
 
 In Sublime Text, select Preferences --> Key Bindings. This will open two files: (1) Default/Default.sublime-keymap and (2) User/Default.sublime-keymap.
 
@@ -84,5 +84,25 @@ The second and third (Ctrl+2 and Ctrl+3) are shortcuts for marking a submission 
 
 These shortcuts can be customized, but make sure they do not "override" existing shortcuts.
 
+
+### Keyboard shortcuts for teaching assistants
+
+In Sublime Text, select Preferences --> Key Bindings. This will open two files: (1) Default/Default.sublime-keymap and (2) User/Default.sublime-keymap.
+
+Add (and save) the following to the file User/Default.sublime-keymap:
+
+```
+[
+    { "keys": ["ctrl+4"], "command": "gema_get_prioritized" },
+    { "keys": ["ctrl+5"], "command": "gema_grade_correct" },
+    { "keys": ["ctrl+6"], "command": "gema_grade_incorrect" },
+]
+```
+
+The first (Ctrl+4) is a shortcut for getting a submision (prioritized those who need help).
+
+The second and third (Ctrl+5 and Ctrl+6) are shortcuts for marking a submission "correct" or "incorrect".
+
+These shortcuts can be customized, but make sure they do not "override" existing shortcuts.
 
 
