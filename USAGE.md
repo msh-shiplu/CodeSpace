@@ -58,7 +58,7 @@ By selecting an appropriate item in the GEM menu, the teacher get a student's su
 
 ### Time's Up
 
-This feature disallows students to submit answers to the current problem.  If the problem has answers (see above), GEM will automatically summarizes the answers.
+Selecting "time's up" in the active tab that has a problem will disallow students to submit answers to the problem.  If the problem has answers (see above), GEM will automatically summarizes the answers.
 
 ### Excerpting selected content to share on the bulletin board
 
