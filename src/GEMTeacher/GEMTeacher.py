@@ -119,19 +119,33 @@ class gemtShare(sublime_plugin.TextCommand):
 			sublime.message_dialog(mesg)
 
 # ------------------------------------------------------------------
-class gemtDeactivateProblems(sublime_plugin.ApplicationCommand):
-	def run(self):
-		if sublime.ok_cancel_dialog('Do you want to close active problems?  No more submissions are possible until a new problem is started.'):
-			passcode = gemtRequest('teacher_gets_passcode', {})
-			json_response = gemtRequest('teacher_deactivates_problems', {})
-			with open(gemtFILE, 'r') as f:
-				info = json.loads(f.read())
-			filenames = json.loads(json_response)
-			if len(filenames) > 0:
-				sublime.message_dialog("Answers to be summarized.")
-			for fname in filenames:
-				p = urllib.parse.urlencode({'pc' : passcode, 'filename':fname})
+class gemtDeactivateProblems(sublime_plugin.TextCommand):
+	def run(self, edit):
+		if self.view.file_name() is None:
+			sublime.message_dialog('Unknown problem!')
+			return
+		filename = os.path.basename(self.view.file_name())
+		if sublime.ok_cancel_dialog('Submission for this problem will no longer be possible. Click OK to confirm.'):
+			response = gemtRequest('teacher_deactivates_problems', {'filename':filename})
+			if response == '-1':
+				sublime.message_dialog('Unknown or inactive problem!')
+			elif response == '0':
+				sublime.message_dialog('Problem is now inactive.')
+			elif response == '1':
+				with open(gemtFILE, 'r') as f:
+					info = json.loads(f.read())
+				passcode = gemtRequest('teacher_gets_passcode', {})
+				p = urllib.parse.urlencode({'pc' : passcode, 'filename':filename})
 				webbrowser.open(info['Server'] + '/view_answers?' + p)
+
+			# with open(gemtFILE, 'r') as f:
+			# 	info = json.loads(f.read())
+			# filenames = json.loads(json_response)
+			# if len(filenames) > 0:
+			# 	sublime.message_dialog("Answers to be summarized.")
+			# for fname in filenames:
+			# 	p = urllib.parse.urlencode({'pc' : passcode, 'filename':fname})
+			# 	webbrowser.open(info['Server'] + '/view_answers?' + p)
 
 # ------------------------------------------------------------------
 class gemtClearSubmissions(sublime_plugin.ApplicationCommand):

@@ -4,9 +4,9 @@
 package main
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	"fmt"
-	"log"
+	// "log"
 	"net/http"
 )
 
@@ -14,26 +14,37 @@ import (
 // When problems are deactivated, boards cleared, no new submissions are possibile.
 //-----------------------------------------------------------------------------------
 func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	filenames := make([]string, 0)
-	for fname, prob := range ActiveProblems {
-		if prob.Active {
-			prob.Active = false
-			if len(prob.Answers) > 0 {
-				filenames = append(filenames, fname)
-			}
+	filename := r.FormValue("filename")
+	if prob, ok := ActiveProblems[filename]; ok {
+		prob.Active = false
+		if len(prob.Answers) > 0 {
+			fmt.Fprintf(w, "1")
+		} else {
+			fmt.Fprintf(w, "0")
 		}
-	}
-	for stid, _ := range Students {
-		Students[stid].Boards = make([]*Board, 0)
-		Students[stid].SubmissionStatus = 0
-	}
-	js, err := json.Marshal(filenames)
-	if err == nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
 	} else {
-		log.Fatal(err)
+		fmt.Fprintf(w, "-1")
 	}
+	// filenames := make([]string, 0)
+	// for fname, prob := range ActiveProblems {
+	// 	if prob.Active {
+	// 		prob.Active = false
+	// 		if len(prob.Answers) > 0 {
+	// 			filenames = append(filenames, fname)
+	// 		}
+	// 	}
+	// }
+	// for stid, _ := range Students {
+	// 	Students[stid].Boards = make([]*Board, 0)
+	// 	Students[stid].SubmissionStatus = 0
+	// }
+	// js, err := json.Marshal(filenames)
+	// if err == nil {
+	// 	w.Header().Set("Content-Type", "application/json")
+	// 	w.Write(js)
+	// } else {
+	// 	log.Fatal(err)
+	// }
 }
 
 //-----------------------------------------------------------------------------------
