@@ -86,7 +86,8 @@ func complete_registrationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintf(w, "Failed")
+		// log.Fatal(err)
 	}
 	var password string
 	var id int

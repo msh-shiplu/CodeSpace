@@ -512,10 +512,6 @@ class gemtCompleteRegistration(sublime_plugin.ApplicationCommand):
 			{'name':name.strip(), 'role':'teacher'},
 			authenticated=False,
 		)
-		if response is None:
-			sublime.message_dialog('Response is None. Failed to complete registration.')
-			return
-
 		if response == 'Failed':
 			sublime.message_dialog('Failed to complete registration.')
 			return
@@ -577,7 +573,6 @@ class gemtSetServerAddress(sublime_plugin.ApplicationCommand):
 			info['Server'] = addr
 			with open(gemtFILE, 'w') as f:
 				f.write(json.dumps(info, indent=4))
-			sublime.message_dialog('Server address is set to ' + addr)
 		else:
 			sublime.message_dialog("Server address cannot be empty.")
 
