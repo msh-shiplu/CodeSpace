@@ -8,7 +8,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"html/template"
 	"net/http"
-	// "time"
+	"time"
 )
 
 //-----------------------------------------------------------------------------------
@@ -30,10 +30,26 @@ func statisticsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Unsupported")
 		return
 	}
-	fmt.Println(len(Students))
-	for k, p := range ActiveProblems {
-		fmt.Println(k, p.Info.Pid)
+	fmt.Println("Students", Students)
+	max_pid := 0
+	for _, p := range ActiveProblems {
+		if max_pid < p.Info.Pid {
+			max_pid = p.Info.Pid
+		}
 	}
+	fmt.Println(">", max_pid)
+	rows, err := Database.Query("select score.stid, score.points, score.attempts, problem.at, submission.at, submission.completed from score join problem on score.pid = problem.id join submission on score.pid==submission.pid where problem.id=?", max_pid)
+	var stid, score, attempts int
+	var prob_at, sub_at, sub_completed time.Time
+	var prob_duration float64
+	for rows.Next() {
+		rows.Scan(&stid, &score, &attempts, &prob_at, &sub_at, &sub_completed)
+		prob_duration = sub_at.Sub(prob_at).Seconds()
+		fmt.Println(stid, score, attempts, prob_duration)
+		fmt.Println(prob_at)
+		fmt.Println(sub_at)
+	}
+	rows.Close()
 	// rows, _ := Database.Query("select pid, sid, at from submission")
 	// var at time.Time
 	// var pid, sid int
