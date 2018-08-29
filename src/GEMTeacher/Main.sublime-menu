@@ -52,6 +52,11 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
+                "caption": "Statistics",
+                "id": "gemtStatistics",
+                "command": "gemt_statistics",
+            },
+            {
                 "caption": "Time's up!",
                 "id": "gemtDeactivateProblem",
                 "command": "gemt_deactivate_problems",
@@ -93,6 +98,11 @@
                 "caption": "Set course id",
                 "id": "gemtSetCourseId",
                 "command": "gemt_set_course_id",
+            },
+            {
+                "caption": "Set username",
+                "id": "gemtSetName",
+                "command": "gemt_set_name",
             },
             {
                 "caption": "Register",

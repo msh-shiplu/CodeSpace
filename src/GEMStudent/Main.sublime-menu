@@ -47,6 +47,11 @@
                 "command": "gems_set_course_id",
             },
             {
+                "caption": "Set username",
+                "id": "gemsSetName",
+                "command": "gems_set_name",
+            },
+            {
                 "caption": "Register",
                 "id": "gemsCompleteRegistration",
                 "command": "gems_complete_registration",

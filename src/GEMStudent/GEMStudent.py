@@ -345,27 +345,13 @@ class gemsCompleteRegistration(sublime_plugin.ApplicationCommand):
 			sublime.message_dialog('Please enter course id.')
 			return
 
-		mesg = 'Enter assigned_id'
 		if 'Name' not in info:
-			info['Name'] = ''
-
-		if sublime.active_window().id() == 0:
-			sublime.run_command('new_window')
-		sublime.active_window().show_input_panel(mesg,info['Name'],self.process,None,None)
-
-	# ------------------------------------------------------------------
-	def process(self, data):
-		name = data.strip()
-		try:
-			with open(gemsFILE, 'r') as f:
-				info = json.loads(f.read())
-		except:
-			info = dict()
-		info['Name'] = name
+			sublime.message_dialog('Please enter assigned username.')
+			return
 
 		response = gemsRequest(
 			'complete_registration',
-			{'name':name.strip(), 'role':'student', 'course_id':info['CourseId']},
+			{'role':'student', 'name':info['Name'], 'course_id':info['CourseId']},
 			authenticated=False,
 		)
 		if response is None:
@@ -378,7 +364,7 @@ class gemsCompleteRegistration(sublime_plugin.ApplicationCommand):
 			uid, password = response.split(',')
 			info['Uid'] = int(uid)
 			info['Password'] = password.strip()
-			sublime.message_dialog('{} registered'.format(name))
+			sublime.message_dialog('{} is registered.'.format(info['Name']))
 		with open(gemsFILE, 'w') as f:
 			f.write(json.dumps(info, indent=4))
 
@@ -390,6 +376,7 @@ class gemsSetServerAddress(sublime_plugin.ApplicationCommand):
 				info = json.loads(f.read())
 		except:
 			info = dict()
+
 		if 'Server' not in info:
 			info['Server'] = ''
 		if sublime.active_window().id() == 0:
@@ -424,6 +411,7 @@ class gemsSetCourseId(sublime_plugin.ApplicationCommand):
 				info = json.loads(f.read())
 		except:
 			info = dict()
+			
 		if 'CourseId' not in info:
 			info['CourseId'] = ''
 		if sublime.active_window().id() == 0:
@@ -448,6 +436,39 @@ class gemsSetCourseId(sublime_plugin.ApplicationCommand):
 			sublime.message_dialog('Course id is set to ' + cid)
 		else:
 			sublime.message_dialog("Server address cannot be empty.")
+
+# ------------------------------------------------------------------
+class gemsSetName(sublime_plugin.ApplicationCommand):
+	def run(self):
+		try:
+			with open(gemsFILE, 'r') as f:
+				info = json.loads(f.read())
+		except:
+			info = dict()
+		if 'Name' not in info:
+			info['Name'] = ''
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
+		sublime.active_window().show_input_panel("Set assgined username.  Press Enter:",
+			info['Name'],
+			self.set,
+			None,
+			None)
+
+	def set(self, name):
+		name = name.strip()
+		if len(name) > 0:
+			try:
+				with open(gemsFILE, 'r') as f:
+					info = json.loads(f.read())
+			except:
+				info = dict()
+			info['Name'] = name
+			with open(gemsFILE, 'w') as f:
+				f.write(json.dumps(info, indent=4))
+			sublime.message_dialog('Assigned name is set to ' + name)
+		else:
+			sublime.message_dialog("Name cannot be empty.")
 
 # ------------------------------------------------------------------
 class gemsUpdate(sublime_plugin.WindowCommand):

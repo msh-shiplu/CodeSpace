@@ -26,6 +26,21 @@ gemtSERVER = ''
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
+class gemtStatistics(sublime_plugin.WindowCommand):
+	def run(self):
+		global gemtSERVER
+		if gemtSERVER == '':
+			sublime.run_command('gemt_connect')
+			if gemtSERVER == '':
+				sublime.message_dialog('Unable to connect. Check server address.')
+				return
+		passcode = gemtRequest('teacher_gets_passcode', {})
+		with open(gemtFILE, 'r') as f:
+			info = json.loads(f.read())
+		data = urllib.parse.urlencode({'pc' : passcode, 'problem': 'latest'})
+		webbrowser.open(gemtSERVER + '/statistics?' + data)
+
+# ------------------------------------------------------------------
 class gemtReport(sublime_plugin.WindowCommand):
 	def run(self):
 		global gemtSERVER
@@ -470,26 +485,13 @@ class gemtCompleteRegistration(sublime_plugin.ApplicationCommand):
 			sublime.message_dialog('Please enter course id.')
 			return
 
-		mesg = 'Enter your assigned id'
 		if 'Name' not in info:
-			info['Name'] = ''
-		if sublime.active_window().id() == 0:
-			sublime.run_command('new_window')
-		sublime.active_window().show_input_panel(mesg,info['Name'],self.process,None,None)
-
-	# ------------------------------------------------------------------
-	def process(self, data):
-		name = data.strip()
-		try:
-			with open(gemtFILE, 'r') as f:
-				info = json.loads(f.read())
-		except:
-			info = dict()
-		info['Name'] = name
+			sublime.message_dialog('Please enter assigned username.')
+			return
 
 		response = gemtRequest(
 			'complete_registration',
-			{'name':name.strip(), 'role':'teacher', 'course_id':info['CourseId']},
+			{'role':'teacher', 'name':info['Name'], 'course_id':info['CourseId']},
 			authenticated=False,
 		)
 		if response is None:
@@ -502,7 +504,7 @@ class gemtCompleteRegistration(sublime_plugin.ApplicationCommand):
 			uid, password = response.split(',')
 			info['Uid'] = int(uid)
 			info['Password'] = password.strip()
-			sublime.message_dialog('{} registered'.format(name))
+			sublime.message_dialog('{} is registered.'.format(info['Name']))
 		with open(gemtFILE, 'w') as f:
 			f.write(json.dumps(info, indent=4))
 
@@ -549,6 +551,7 @@ class gemtSetCourseId(sublime_plugin.ApplicationCommand):
 				info = json.loads(f.read())
 		except:
 			info = dict()
+
 		if 'CourseId' not in info:
 			info['CourseId'] = ''
 		if sublime.active_window().id() == 0:
@@ -573,6 +576,39 @@ class gemtSetCourseId(sublime_plugin.ApplicationCommand):
 			sublime.message_dialog('Course id is set to ' + cid)
 		else:
 			sublime.message_dialog("Course id cannot be empty.")
+
+# ------------------------------------------------------------------
+class gemtSetName(sublime_plugin.ApplicationCommand):
+	def run(self):
+		try:
+			with open(gemtFILE, 'r') as f:
+				info = json.loads(f.read())
+		except:
+			info = dict()
+		if 'Name' not in info:
+			info['Name'] = ''
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
+		sublime.active_window().show_input_panel("Set assgined username.  Press Enter:",
+			info['Name'],
+			self.set,
+			None,
+			None)
+
+	def set(self, name):
+		name = name.strip()
+		if len(name) > 0:
+			try:
+				with open(gemtFILE, 'r') as f:
+					info = json.loads(f.read())
+			except:
+				info = dict()
+			info['Name'] = name
+			with open(gemtFILE, 'w') as f:
+				f.write(json.dumps(info, indent=4))
+			sublime.message_dialog('Assigned name is set to ' + name)
+		else:
+			sublime.message_dialog("Name cannot be empty.")
 
 # ------------------------------------------------------------------
 class gemtUpdate(sublime_plugin.WindowCommand):

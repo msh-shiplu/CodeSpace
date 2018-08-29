@@ -27,6 +27,8 @@ func init_handlers() {
 	http.HandleFunc("/view_activities", view_activitiesHandler)
 	http.HandleFunc("/report", reportHandler)
 	http.HandleFunc("/report_tag", report_tagHandler)
+	http.HandleFunc("/view_answers", view_answersHandler)
+	http.HandleFunc("/statistics", statisticsHandler)
 
 	// Others
 	http.HandleFunc("/student_periodic_update", Authorize(student_periodic_updateHandler))
@@ -38,7 +40,6 @@ func init_handlers() {
 	http.HandleFunc("/view_bulletin_board", view_bulletin_boardHandler)
 	http.HandleFunc("/remove_bulletin_page", remove_bulletin_pageHandler)
 	http.HandleFunc("/bulletin_board_data", bulletin_board_dataHandler)
-	http.HandleFunc("/view_answers", view_answersHandler)
 	http.HandleFunc("/complete_registration", complete_registrationHandler)
 
 	http.HandleFunc("/teacher_gets_queue", Authorize(teacher_gets_queueHandler))
