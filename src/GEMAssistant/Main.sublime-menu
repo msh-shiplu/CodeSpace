@@ -57,6 +57,11 @@
                 "command": "gema_set_server_address",
             },
             {
+                "caption": "Set course id",
+                "id": "gemaSetCourseId",
+                "command": "gema_set_course_id",
+            },
+            {
                 "caption": "Register",
                 "id": "gemaCompleteRegistration",
                 "command": "gema_complete_registration",
