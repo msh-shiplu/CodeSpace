@@ -23,6 +23,7 @@ type BulletinBoardMessage struct {
 	P2             int
 	ActiveProblems int
 	BulletinItems  int
+	Answers        int
 	Attendance     int
 	Address        string
 	Authenticated  bool
@@ -52,6 +53,9 @@ func remove_bulletin_pageHandler(w http.ResponseWriter, r *http.Request) {
 
 //-----------------------------------------------------------------------------------
 func get_bulletin_board_data(i int, passcode string) *BulletinBoardMessage {
+	BulletinSem.Lock()
+	defer BulletinSem.Unlock()
+
 	if i >= len(BulletinBoard) {
 		i = 0
 	}
@@ -71,6 +75,11 @@ func get_bulletin_board_data(i int, passcode string) *BulletinBoardMessage {
 		next_i = (i + 1 + len(BulletinBoard)) % len(BulletinBoard)
 		prev_i = (i - 1 + len(BulletinBoard)) % len(BulletinBoard)
 	}
+	answers := 0
+	for k, p := range ActiveProblems {
+		answers += len(p.Answers)
+		fmt.Println(k, p, p.Answers, answers)
+	}
 	data := &BulletinBoardMessage{
 		Code:           code,
 		I:              i,
@@ -81,10 +90,12 @@ func get_bulletin_board_data(i int, passcode string) *BulletinBoardMessage {
 		P2:             priority[2],
 		ActiveProblems: len(ActiveProblems),
 		BulletinItems:  len(BulletinBoard),
+		Answers:        answers,
 		Attendance:     len(Students),
 		Address:        Config.Address,
 		Authenticated:  passcode == Passcode,
 	}
+	// fmt.Println("answers:", answers, data.Answers)
 	return data
 }
 

@@ -104,17 +104,25 @@ def gemt_get_problem_info(fname):
 	if merit < effort:
 		return content, '', 0, 0, 0, '', basename, False
 
-	items = body.split(gemtAnswerTag)
-	if len(items) > 2:
-		sublime.message_dialog('This problem has {} answers. There should be at most 1.'.format(len(items)-1))
-		raise Exception('Too many answers')
-
 	body = '{} {} points, {} for effort. Maximum attempts: {}.\n{}'.format(
-		prefix, merit, effort, attempts, items[0])
+		prefix, merit, effort, attempts, body)
 	answer = ''
-	if len(items) == 2:
-		body += '\n{} '.format(gemtAnswerTag)
-		answer = items[1].strip()
+	if os.path.exists(fname + '.answer'):
+		with open(fname + '.answer', 'r', encoding='utf-8') as fp:
+			answer = fp.read().strip()
+
+
+	# items = body.split(gemtAnswerTag)
+	# if len(items) > 2:
+	# 	sublime.message_dialog('This problem has {} answers. There should be at most 1.'.format(len(items)-1))
+	# 	raise Exception('Too many answers')
+
+	# body = '{} {} points, {} for effort. Maximum attempts: {}.\n{}'.format(
+	# 	prefix, merit, effort, attempts, items[0])
+	# answer = ''
+	# if len(items) == 2:
+	# 	body += '\n{} '.format(gemtAnswerTag)
+	# 	answer = items[1].strip()
 
 	return body, answer, merit, effort, attempts, tag, basename, exact_answer
 
