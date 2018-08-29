@@ -25,9 +25,6 @@ func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request,
 	} else {
 		fmt.Fprintf(w, "-1")
 	}
-	// for k, p := range ActiveProblems {
-	// 	fmt.Println(k, p)
-	// }
 
 	// filenames := make([]string, 0)
 	// for fname, prob := range ActiveProblems {

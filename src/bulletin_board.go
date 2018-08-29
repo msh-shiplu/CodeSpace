@@ -23,7 +23,7 @@ type BulletinBoardMessage struct {
 	P2             int
 	ActiveProblems int
 	BulletinItems  int
-	Answers        int
+	AnswerCount    int
 	Attendance     int
 	Address        string
 	Authenticated  bool
@@ -76,9 +76,10 @@ func get_bulletin_board_data(i int, passcode string) *BulletinBoardMessage {
 		prev_i = (i - 1 + len(BulletinBoard)) % len(BulletinBoard)
 	}
 	answers := 0
-	for k, p := range ActiveProblems {
-		answers += len(p.Answers)
-		fmt.Println(k, p, p.Answers, answers)
+	for _, p := range ActiveProblems {
+		if p.Active {
+			answers += len(p.Answers)
+		}
 	}
 	data := &BulletinBoardMessage{
 		Code:           code,
@@ -90,12 +91,11 @@ func get_bulletin_board_data(i int, passcode string) *BulletinBoardMessage {
 		P2:             priority[2],
 		ActiveProblems: len(ActiveProblems),
 		BulletinItems:  len(BulletinBoard),
-		Answers:        answers,
+		AnswerCount:    answers,
 		Attendance:     len(Students),
 		Address:        Config.Address,
 		Authenticated:  passcode == Passcode,
 	}
-	// fmt.Println("answers:", answers, data.Answers)
 	return data
 }
 

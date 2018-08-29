@@ -39,6 +39,7 @@ var TEACHER_MESSAGING_TEMPLATE = `
 					console.log(data);
 					$("#p1").html(data["P1"]);
 					$("#p2").html(data["P2"]);
+					$("#ans").html(data["AnswerCount"]);
 					$("#ap").html(data["ActiveProblems"]);
 					$("#bu").html(data["BulletinItems"]);
 					$("#at").html(data["Attendance"]);
@@ -58,7 +59,7 @@ var TEACHER_MESSAGING_TEMPLATE = `
 			width: 100%;
 		}
 		.label{ display: inline; }
-		#p1, #p2, #ap, #bu, #at {
+		#p1, #p2, #ans, #ap, #bu, #at {
 			padding: 0.75em;
 			display: inline;
 		}
@@ -116,7 +117,7 @@ var TEACHER_MESSAGING_TEMPLATE = `
 	<div class="bottom">
 	<div class="label">&#128546;</div><div id="p2">{{.P2}}</div>
 	<div class="label">&#128526;</div><div id="p1">{{.P1}}</div>
-	<div class="label">Answers:</div><div id="ap">{{.Answers}}</div>
+	<div class="label">Answers:</div><div id="ans">{{.AnswerCount}}</div>
 	<div class="label">Problems:</div><div id="ap">{{.ActiveProblems}}</div>
 	<div class="label">Bulletin:</div><div id="bu">{{.BulletinItems}}</div>
 	<div class="label">Attendance:</div><div id="at">{{.Attendance}}</div>
