@@ -121,10 +121,10 @@ func main() {
 	}
 	init_handlers()
 	load_teachers()
-	fmt.Println("*********************************************")
-	fmt.Printf("*   GEM %s\n", VERSION)
-	fmt.Printf("*   Server address: %s\n", Config.Address)
-	fmt.Println("*********************************************\n")
+	fmt.Println("**************************************************")
+	fmt.Printf("*   GEM %s                                      *\n", VERSION)
+	fmt.Printf("*   Server address: %s  *\n", Config.NameServer)
+	fmt.Println("**************************************************\n")
 	err := http.ListenAndServe(Config.Address, nil)
 	if err != nil {
 		log.Fatal("Unable to serve gem server at " + Config.Address)

@@ -42,6 +42,11 @@
                 "command": "gems_set_server_address",
             },
             {
+                "caption": "Set course id",
+                "id": "gemsSetCourseId",
+                "command": "gems_set_course_id",
+            },
+            {
                 "caption": "Register",
                 "id": "gemsCompleteRegistration",
                 "command": "gems_complete_registration",

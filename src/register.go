@@ -73,6 +73,11 @@ func add_user(name, role string) {
 func complete_registrationHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	role := r.FormValue("role")
+	course_id := r.FormValue("course_id")
+	if course_id != Config.CourseId {
+		fmt.Fprintf(w, "Failed")
+		return
+	}
 	var err error
 	var rows *sql.Rows
 	if role == "teacher" {
@@ -93,12 +98,13 @@ func complete_registrationHandler(w http.ResponseWriter, r *http.Request) {
 	var id int
 	for rows.Next() {
 		rows.Scan(&id, &password)
-		msg := ""
-		if Config.NameServer != "" {
-			msg = fmt.Sprintf("%d,%s,%s,%s", id, password, Config.CourseId, Config.NameServer)
-		} else {
-			msg = fmt.Sprintf("%d,%s,%s", id, password, Config.CourseId)
-		}
+		msg := fmt.Sprintf("%d,%s", id, password)
+		// msg := ""
+		// if Config.NameServer != "" {
+		// 	msg = fmt.Sprintf("%d,%s,%s,%s", id, password, Config.CourseId, Config.NameServer)
+		// } else {
+		// 	msg = fmt.Sprintf("%d,%s,%s", id, password, Config.CourseId)
+		// }
 		fmt.Fprintf(w, msg)
 		return
 	}

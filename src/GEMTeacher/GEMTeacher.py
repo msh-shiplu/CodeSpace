@@ -16,8 +16,8 @@ gemtAnswerTag = 'ANSWER:'
 gemtFOLDER = ''
 gemtTIMEOUT = 7
 gemtStudentSubmissions = {}
-gemtConnected = False
 gemtFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
+gemtSERVER = ''
 
 # ------------------------------------------------------------------
 # ------------------------------------------------------------------
@@ -28,20 +28,33 @@ gemtFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 # ------------------------------------------------------------------
 class gemtReport(sublime_plugin.WindowCommand):
 	def run(self):
+		global gemtSERVER
+		if gemtSERVER == '':
+			sublime.run_command('gemt_connect')
+			if gemtSERVER == '':
+				sublime.message_dialog('Unable to connect. Check server address.')
+				return
+
 		passcode = gemtRequest('teacher_gets_passcode', {})
 		with open(gemtFILE, 'r') as f:
 			info = json.loads(f.read())
 		data = urllib.parse.urlencode({'pc' : passcode})
-		webbrowser.open(info['Server'] + '/report?' + data)
+		webbrowser.open(gemtSERVER + '/report?' + data)
 
 # ------------------------------------------------------------------
 class gemtViewActivities(sublime_plugin.WindowCommand):
 	def run(self):
+		global gemtSERVER
+		if gemtSERVER == '':
+			sublime.run_command('gemt_connect')
+			if gemtSERVER == '':
+				sublime.message_dialog('Unable to connect. Check server address.')
+				return
 		passcode = gemtRequest('teacher_gets_passcode', {})
 		with open(gemtFILE, 'r') as f:
 			info = json.loads(f.read())
 		data = urllib.parse.urlencode({'pc' : passcode})
-		webbrowser.open(info['Server'] + '/view_activities?' + data)
+		webbrowser.open(gemtSERVER + '/view_activities?' + data)
 
 
 # ------------------------------------------------------------------
@@ -132,20 +145,12 @@ class gemtDeactivateProblems(sublime_plugin.TextCommand):
 			elif response == '0':
 				sublime.message_dialog('Problem is now inactive.')
 			elif response == '1':
+				global gemtSERVER
 				with open(gemtFILE, 'r') as f:
 					info = json.loads(f.read())
 				passcode = gemtRequest('teacher_gets_passcode', {})
 				p = urllib.parse.urlencode({'pc' : passcode, 'filename':filename})
-				webbrowser.open(info['Server'] + '/view_answers?' + p)
-
-			# with open(gemtFILE, 'r') as f:
-			# 	info = json.loads(f.read())
-			# filenames = json.loads(json_response)
-			# if len(filenames) > 0:
-			# 	sublime.message_dialog("Answers to be summarized.")
-			# for fname in filenames:
-			# 	p = urllib.parse.urlencode({'pc' : passcode, 'filename':fname})
-			# 	webbrowser.open(info['Server'] + '/view_answers?' + p)
+				webbrowser.open(gemtSERVER + '/view_answers?' + p)
 
 # ------------------------------------------------------------------
 class gemtClearSubmissions(sublime_plugin.ApplicationCommand):
@@ -162,10 +167,7 @@ class gemtClearSubmissions(sublime_plugin.ApplicationCommand):
 # ----------------------------------------------------------------------
 # ----------------------------------------------------------------------
 def gemtRequest(path, data, authenticated=True, method='POST'):
-	global gemtFOLDER, gemtConnected
-	if not gemtConnected:
-		sublime.run_command('gemt_connect')
-		gemtConnected = True
+	global gemtFOLDER, gemtSERVER
 
 	try:
 		with open(gemtFILE, 'r') as f:
@@ -177,9 +179,19 @@ def gemtRequest(path, data, authenticated=True, method='POST'):
 		sublime.message_dialog("Please set a local folder for keeping working files.")
 		return None
 
-	if 'Server' not in info:
-		sublime.message_dialog("Please sett the server address.")
+	if 'CourseId' not in info:
+		sublime.message_dialog("Please set the course id.")
 		return None
+
+	if 'Server' not in info:
+		sublime.message_dialog("Please set server address.")
+		return None
+
+	if gemtSERVER == '':
+		sublime.run_command('gemt_connect')
+		if gemtSERVER == '':
+			sublime.message_dialog('Unable to connect. Check server address or course id.')
+			return
 
 	if authenticated:
 		if 'Name' not in info or 'Password' not in info:
@@ -191,7 +203,7 @@ def gemtRequest(path, data, authenticated=True, method='POST'):
 		data['role'] = 'teacher'
 		gemtFOLDER = info['Folder']
 
-	url = urllib.parse.urljoin(info['Server'], path)
+	url = urllib.parse.urljoin(gemtSERVER, path)
 	load = urllib.parse.urlencode(data).encode('utf-8')
 	req = urllib.request.Request(url, load, method=method)
 	try:
@@ -211,10 +223,11 @@ class gemtViewBulletinBoard(sublime_plugin.ApplicationCommand):
 		if response.startswith('Unauthorized'):
 			sublime.message_dialog('Unauthorized')
 		else:
+			global gemtSERVER
 			p = urllib.parse.urlencode({'pc' : response})
 			with open(gemtFILE, 'r') as f:
 				info = json.loads(f.read())
-			webbrowser.open(info['Server'] + '/view_bulletin_board?' + p)
+			webbrowser.open(gemtSERVER + '/view_bulletin_board?' + p)
 
 # ------------------------------------------------------------------
 class gemtAddBulletin(sublime_plugin.TextCommand):
@@ -413,14 +426,17 @@ class gemtConnect(sublime_plugin.ApplicationCommand):
 				info = json.loads(f.read())
 		except:
 			info = dict()
-		if 'NameServer' not in info:
-			self.ask_to_set_server_address(info)
-		else:
-			self.set_server_address_via_nameserver(info)
 
-	# ------------------------------------------------------------------
-	def set_server_address_via_nameserver(self, info):
-		url = urllib.parse.urljoin(info['NameServer'], 'ask')
+		if 'CourseId' not in info:
+			sublime.message_dialog("Please set the course id.")
+			return None
+
+		if 'Server' not in info:
+			sublime.message_dialog("Please set server address.")
+			return None
+
+		global gemtSERVER
+		url = urllib.parse.urljoin(info['Server'], 'ask')
 		load = urllib.parse.urlencode({'who':info['CourseId']}).encode('utf-8')
 		req = urllib.request.Request(url, load)
 		try:
@@ -432,50 +448,14 @@ class gemtConnect(sublime_plugin.ApplicationCommand):
 				except:
 					info = dict()
 				if not server.startswith('http://'):
-					sublime.message_dialog(server)
+					sublime.message_dialog('Unable to get address.')
 					return
-				info['Server'] = server
-				with open(gemtFILE, 'w') as f:
-					f.write(json.dumps(info, indent=4))
-				sublime.status_message('Connected to server at {}'.format(server))
+				gemtSERVER = server
+				sublime.status_message('Connected')
 		except urllib.error.HTTPError as err:
 			sublime.message_dialog("{0}".format(err))
 		except urllib.error.URLError as err:
-			sublime.message_dialog("{0}\nCannot connect to name server.".format(err))
-
-	# ------------------------------------------------------------------
-	def ask_to_set_server_address(self, info):
-		try:
-			with open(gemtFILE, 'r') as f:
-				info = json.loads(f.read())
-		except:
-			info = dict()
-		if 'Server' not in info:
-			info['Server'] = ''
-		if sublime.active_window().id() == 0:
-			sublime.run_command('new_window')
-		sublime.active_window().show_input_panel("Set server address:",
-			info['Server'],
-			self.set_server_address,
-			None,
-			None)
-
-	# ------------------------------------------------------------------
-	def set_server_address(self, addr):
-		addr = addr.strip()
-		if len(addr) > 0:
-			try:
-				with open(gemtFILE, 'r') as f:
-					info = json.loads(f.read())
-			except:
-				info = dict()
-			if not addr.startswith('http://'):
-				addr = 'http://' + addr
-			info['Server'] = addr
-			with open(gemtFILE, 'w') as f:
-				f.write(json.dumps(info, indent=4))
-		else:
-			sublime.message_dialog("Server address cannot be empty.")
+			sublime.message_dialog("{0}\nCannot connect to server.".format(err))
 
 # ------------------------------------------------------------------
 class gemtCompleteRegistration(sublime_plugin.ApplicationCommand):
@@ -486,18 +466,11 @@ class gemtCompleteRegistration(sublime_plugin.ApplicationCommand):
 		except:
 			info = dict()
 
-		if 'Folder' not in info:
-			sublime.message_dialog("Please set a local folder for keeping working files.")
-			return None
+		if 'CourseId' not in info:
+			sublime.message_dialog('Please enter course id.')
+			return
 
-		if 'Server' not in info:
-			sublime.message_dialog("Please set server address.")
-			return None
-
-		mesg = 'Enter assigned_id'
-		if 'Name' in info:
-			mesg = '{} is already registered. Enter assigned_id:'.format(info['Name'])
-
+		mesg = 'Enter your assigned id'
 		if 'Name' not in info:
 			info['Name'] = ''
 		if sublime.active_window().id() == 0:
@@ -507,44 +480,31 @@ class gemtCompleteRegistration(sublime_plugin.ApplicationCommand):
 	# ------------------------------------------------------------------
 	def process(self, data):
 		name = data.strip()
+		try:
+			with open(gemtFILE, 'r') as f:
+				info = json.loads(f.read())
+		except:
+			info = dict()
+		info['Name'] = name
+
 		response = gemtRequest(
 			'complete_registration',
-			{'name':name.strip(), 'role':'teacher'},
+			{'name':name.strip(), 'role':'teacher', 'course_id':info['CourseId']},
 			authenticated=False,
 		)
 		if response is None:
 			sublime.message_dialog('Response is None. Failed to complete registration.')
 			return
 
-		if response == 'Failed':
+		if response == 'Failed' or response.count(',') != 1:
 			sublime.message_dialog('Failed to complete registration.')
-			return
-
-		name_server = ""
-		if response.count(',') == 3:
-			uid, password, course_id, name_server = response.split(',')
-			if not name_server.strip().startswith('http://'):
-				name_server = 'http://' + name_server.strip()
-		elif response.count(',') == 2:
-			uid, password, course_id = response.split(',')
 		else:
-			sublime.message_dialog('Unable to complete registration.')
-			return
-		try:
-			with open(gemtFILE, 'r') as f:
-				info = json.loads(f.read())
-		except:
-			info = dict()
-
-		info['Uid'] = int(uid)
-		info['Password'] = password.strip()
-		info['Name'] = name.strip()
-		info['CourseId'] = course_id.strip()
-		if name_server != "":
-			info['NameServer'] = name_server
+			uid, password = response.split(',')
+			info['Uid'] = int(uid)
+			info['Password'] = password.strip()
+			sublime.message_dialog('{} registered'.format(name))
 		with open(gemtFILE, 'w') as f:
 			f.write(json.dumps(info, indent=4))
-		sublime.message_dialog('{} registered for {}'.format(name, course_id))
 
 # ------------------------------------------------------------------
 class gemtSetServerAddress(sublime_plugin.ApplicationCommand):
@@ -580,6 +540,39 @@ class gemtSetServerAddress(sublime_plugin.ApplicationCommand):
 			sublime.message_dialog('Server address is set to ' + addr)
 		else:
 			sublime.message_dialog("Server address cannot be empty.")
+
+# ------------------------------------------------------------------
+class gemtSetCourseId(sublime_plugin.ApplicationCommand):
+	def run(self):
+		try:
+			with open(gemtFILE, 'r') as f:
+				info = json.loads(f.read())
+		except:
+			info = dict()
+		if 'CourseId' not in info:
+			info['CourseId'] = ''
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
+		sublime.active_window().show_input_panel("Set course id.  Press Enter:",
+			info['CourseId'],
+			self.set,
+			None,
+			None)
+
+	def set(self, cid):
+		cid = cid.strip()
+		if len(cid) > 0:
+			try:
+				with open(gemtFILE, 'r') as f:
+					info = json.loads(f.read())
+			except:
+				info = dict()
+			info['CourseId'] = cid
+			with open(gemtFILE, 'w') as f:
+				f.write(json.dumps(info, indent=4))
+			sublime.message_dialog('Course id is set to ' + cid)
+		else:
+			sublime.message_dialog("Course id cannot be empty.")
 
 # ------------------------------------------------------------------
 class gemtUpdate(sublime_plugin.WindowCommand):
