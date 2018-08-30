@@ -7,6 +7,7 @@ import (
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"html/template"
+	"math"
 	"net/http"
 	"time"
 )
@@ -19,10 +20,10 @@ type StatsData struct {
 
 //-----------------------------------------------------------------------------------
 func statisticsHandler(w http.ResponseWriter, r *http.Request) {
-	// if r.FormValue("pc") != Passcode {
-	// 	fmt.Fprintf(w, "Unauthorized")
-	// 	return
-	// }
+	if r.FormValue("pc") != Passcode {
+		fmt.Fprintf(w, "Unauthorized")
+		return
+	}
 	if r.FormValue("problem") != "latest" {
 		fmt.Fprintf(w, "Unsupported")
 		return
@@ -45,7 +46,7 @@ func statisticsHandler(w http.ResponseWriter, r *http.Request) {
 	count := 0
 	for rows.Next() {
 		rows.Scan(&stid, &score, &attempts, &prob_at, &prob_content, &sub_at, &sub_completed)
-		prob_duration = sub_at.Sub(prob_at).Seconds()
+		prob_duration = math.Ceil(sub_at.Sub(prob_at).Minutes())
 		data.Performance[fmt.Sprintf("%d points", score)]++
 		data.Durations[fmt.Sprintf("STID %d", stid)] = prob_duration
 		count++
@@ -107,7 +108,7 @@ var STATS_TEMPLATE = `
         ]);
 
         var options = {
-          title: 'Durations in seconds',
+          title: 'Durations (minutes)',
           legend: { position: 'none' },
         };
 
