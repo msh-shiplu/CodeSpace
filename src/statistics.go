@@ -14,6 +14,7 @@ import (
 type StatsData struct {
 	Performance        map[string]int
 	ProblemDescription string
+	Durations          map[string]float64
 }
 
 //-----------------------------------------------------------------------------------
@@ -32,19 +33,23 @@ func statisticsHandler(w http.ResponseWriter, r *http.Request) {
 			max_pid = p.Info.Pid
 		}
 	}
-	data := &StatsData{Performance: make(map[string]int)}
+	data := &StatsData{
+		Performance: make(map[string]int),
+		Durations:   make(map[string]float64),
+	}
 	rows, err := Database.Query("select score.stid, score.points, score.attempts, problem.at, problem.content, submission.at, submission.completed from score join problem on score.pid=problem.id join submission on score.pid=submission.pid and score.stid=submission.sid where problem.id=?", max_pid)
 	var stid, score, attempts int
 	var prob_at, sub_at, sub_completed time.Time
 	var prob_content string
-	// var prob_duration float64
+	var prob_duration float64
 	count := 0
 	for rows.Next() {
 		rows.Scan(&stid, &score, &attempts, &prob_at, &prob_content, &sub_at, &sub_completed)
-		// prob_duration = sub_at.Sub(prob_at).Seconds()
-		// fmt.Printf("stid %d, score %d, attempts %d, duration %f\n", stid, score, attempts, prob_duration)
+		prob_duration = sub_at.Sub(prob_at).Seconds()
 		data.Performance[fmt.Sprintf("%d points", score)]++
+		data.Durations[fmt.Sprintf("STID %d", stid)] = prob_duration
 		count++
+		// fmt.Printf("stid %d, score %d, attempts %d, duration %f\n", stid, score, attempts, prob_duration)
 	}
 	rows.Close()
 	data.Performance["Not submitted"] = len(Students) - count - 1
@@ -75,6 +80,7 @@ var STATS_TEMPLATE = `
     <script type="text/javascript">
       google.charts.load('current', {'packages':['corechart']});
       google.charts.setOnLoadCallback(performancePieChart);
+      google.charts.setOnLoadCallback(durationHistogram);
 
       function performancePieChart() {
         var data = google.visualization.arrayToDataTable([
@@ -89,14 +95,34 @@ var STATS_TEMPLATE = `
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('performance'));
-
         chart.draw(data, options);
-      }
+      }     
+
+      function durationHistogram() {
+        var data = google.visualization.arrayToDataTable([
+          ['STID', 'Duration'],
+          {{ range $key, $val := .Durations }}
+          	[ {{$key}}, {{$val}} ],
+          {{ end }}
+        ]);
+
+        var options = {
+          title: 'Durations in seconds',
+          legend: { position: 'none' },
+        };
+
+        var chart = new google.visualization.Histogram(document.getElementById('durations'));
+        chart.draw(data, options);
+       }      
     </script>
   </head>
   <body>
     <div id="performance" style="width: 900px; height: 500px;"></div>
     <div class="spacer" style="width: 100%; height: 40px;"></div>
+
+    <div id="durations" style="width: 900px; height: 500px;"></div>
+    <div class="spacer" style="width: 100%; height: 40px;"></div>
+    
     <pre style="padding-left:100px;">
     {{.ProblemDescription}}
     </pre>
