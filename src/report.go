@@ -57,7 +57,7 @@ func reportHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	rows.Close()
 
-	rows, err := Database.Query("select score.points, score.attempts, score.stid, student.name from score join student on score.stid==student.id")
+	rows, err := Database.Query("select score.points, score.attempts, score.stid, student.name from score join student on score.stid=student.id")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -179,7 +179,7 @@ func report_tagHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	row.Close()
 
-	query := "select problem.id, problem.merit, problem.at, score.points, score.stid from problem join score on problem.id == score.pid join student where problem.tag=?"
+	query := "select problem.id, problem.merit, problem.at, score.points, score.stid from problem join score on problem.id=score.pid join student where problem.tag=?"
 	rows, err := Database.Query(query, tag_id)
 	if err != nil {
 		fmt.Println(err)
