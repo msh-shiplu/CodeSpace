@@ -19,6 +19,7 @@ type StatsData struct {
 	Durations          map[string]float64
 	NextPid            int
 	PrevPid            int
+	Date               string
 	PC                 string
 }
 
@@ -91,6 +92,7 @@ func statisticsHandler(w http.ResponseWriter, r *http.Request) {
 		rows.Close()
 
 		data.Performance["Inactive"] = len(attendance) - count
+		data.Date = the_date
 		// data.Performance["Inactive"] = len(Students) - count - 1
 		// if data.Performance["Inactive"] < 0 {
 		// 	// something is wrong.
@@ -179,7 +181,8 @@ var STATS_TEMPLATE = `
     <div id="performance"></div>
     <div id="durations"></div>
     <div class="spacer"></div>
-    <pre style="padding-left:100px;">{{.ProblemDescription}}</pre>
+    <pre style="padding-left:100px;">{{.Date}}
+{{.ProblemDescription}}</pre>
     <div class="spacer"></div>
     <div class="pager">
     <a href="statistics?pc={{.PC}}&pid={{.PrevPid}}">Previous</a>
