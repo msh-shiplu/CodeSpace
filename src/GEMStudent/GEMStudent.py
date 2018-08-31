@@ -411,12 +411,12 @@ class gemsSetCourseId(sublime_plugin.ApplicationCommand):
 				info = json.loads(f.read())
 		except:
 			info = dict()
-			
+
 		if 'CourseId' not in info:
 			info['CourseId'] = ''
 		if sublime.active_window().id() == 0:
 			sublime.run_command('new_window')
-		sublime.active_window().show_input_panel("Set server address.  Press Enter:",
+		sublime.active_window().show_input_panel("Set course id.  Press Enter:",
 			info['CourseId'],
 			self.set,
 			None,

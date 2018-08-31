@@ -329,26 +329,13 @@ class gemaCompleteRegistration(sublime_plugin.ApplicationCommand):
 			sublime.message_dialog('Please enter course id.')
 			return
 
-		mesg = 'Enter your assigned id'
 		if 'Name' not in info:
-			info['Name'] = ''
-		if sublime.active_window().id() == 0:
-			sublime.run_command('new_window')
-		sublime.active_window().show_input_panel(mesg,info['Name'],self.process,None,None)
-
-	# ------------------------------------------------------------------
-	def process(self, data):
-		name = data.strip()
-		try:
-			with open(gemaFILE, 'r') as f:
-				info = json.loads(f.read())
-		except:
-			info = dict()
-		info['Name'] = name
+			sublime.message_dialog('Please enter assigned username.')
+			return
 
 		response = gemaRequest(
 			'complete_registration',
-			{'name':name.strip(), 'role':'teacher', 'course_id':info['CourseId']},
+			{'role':'teacher', 'name':info['Name'], 'course_id':info['CourseId']},
 			authenticated=False,
 		)
 		if response is None:
@@ -361,7 +348,7 @@ class gemaCompleteRegistration(sublime_plugin.ApplicationCommand):
 			uid, password = response.split(',')
 			info['Uid'] = int(uid)
 			info['Password'] = password.strip()
-			sublime.message_dialog('{} registered'.format(name))
+			sublime.message_dialog('{} is registered.'.format(info['Name']))
 		with open(gemaFILE, 'w') as f:
 			f.write(json.dumps(info, indent=4))
 
@@ -431,6 +418,39 @@ class gemaSetCourseId(sublime_plugin.ApplicationCommand):
 			sublime.message_dialog('Course id is set to ' + cid)
 		else:
 			sublime.message_dialog("Course id cannot be empty.")
+
+# ------------------------------------------------------------------
+class gemaSetName(sublime_plugin.ApplicationCommand):
+	def run(self):
+		try:
+			with open(gemaFILE, 'r') as f:
+				info = json.loads(f.read())
+		except:
+			info = dict()
+		if 'Name' not in info:
+			info['Name'] = ''
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
+		sublime.active_window().show_input_panel("Set assgined username.  Press Enter:",
+			info['Name'],
+			self.set,
+			None,
+			None)
+
+	def set(self, name):
+		name = name.strip()
+		if len(name) > 0:
+			try:
+				with open(gemaFILE, 'r') as f:
+					info = json.loads(f.read())
+			except:
+				info = dict()
+			info['Name'] = name
+			with open(gemaFILE, 'w') as f:
+				f.write(json.dumps(info, indent=4))
+			sublime.message_dialog('Assigned name is set to ' + name)
+		else:
+			sublime.message_dialog("Name cannot be empty.")
 
 # ------------------------------------------------------------------
 class gemaUpdate(sublime_plugin.WindowCommand):
