@@ -37,7 +37,7 @@ class gemtStatistics(sublime_plugin.WindowCommand):
 		passcode = gemtRequest('teacher_gets_passcode', {})
 		with open(gemtFILE, 'r') as f:
 			info = json.loads(f.read())
-		data = urllib.parse.urlencode({'pc' : passcode, 'problem': 'latest'})
+		data = urllib.parse.urlencode({'pc' : passcode, 'pid': 0})
 		webbrowser.open(gemtSERVER + '/statistics?' + data)
 
 # ------------------------------------------------------------------

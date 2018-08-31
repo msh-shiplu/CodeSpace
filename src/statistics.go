@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"math"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -16,50 +17,87 @@ type StatsData struct {
 	Performance        map[string]int
 	ProblemDescription string
 	Durations          map[string]float64
+	NextPid            int
+	PrevPid            int
+	PC                 string
 }
 
 //-----------------------------------------------------------------------------------
 func statisticsHandler(w http.ResponseWriter, r *http.Request) {
-	if r.FormValue("pc") != Passcode {
-		fmt.Fprintf(w, "Unauthorized")
+	// if r.FormValue("pc") != Passcode {
+	// 	fmt.Fprintf(w, "Unauthorized")
+	// 	return
+	// }
+	pid, err := strconv.Atoi(r.FormValue("pid"))
+	if err != nil {
+		fmt.Println("Unknown problem")
+		fmt.Fprintf(w, "Unknown problem")
 		return
 	}
-	if r.FormValue("problem") != "latest" {
-		fmt.Fprintf(w, "Unsupported")
-		return
-	}
-	max_pid := 0
-	for _, p := range ActiveProblems {
-		if max_pid < p.Info.Pid {
-			max_pid = p.Info.Pid
+	if pid <= 0 { // select the last problem (max id)
+		// for _, p := range ActiveProblems {
+		// 	if pid < p.Info.Pid {
+		// 		pid = p.Info.Pid
+		// 	}
+		// }
+		row, err := Database.Query("select id from problem order by id desc limit 1")
+		if err != nil {
+			fmt.Println("Error retrieving latest problem", err)
+			return
 		}
+		for row.Next() {
+			row.Scan(&pid)
+		}
+		row.Close()
 	}
 	data := &StatsData{
 		Performance: make(map[string]int),
 		Durations:   make(map[string]float64),
+		PC:          Passcode,
+		NextPid:     pid + 1,
+		PrevPid:     pid - 1,
 	}
-	rows, err := Database.Query("select score.stid, score.points, score.attempts, problem.at, problem.content, submission.at, submission.completed from score join problem on score.pid=problem.id join submission on score.pid=submission.pid and score.stid=submission.sid where problem.id=?", max_pid)
-	var stid, score, attempts int
-	var prob_at, sub_at, sub_completed time.Time
-	var prob_content string
-	var prob_duration float64
-	count := 0
-	for rows.Next() {
-		rows.Scan(&stid, &score, &attempts, &prob_at, &prob_content, &sub_at, &sub_completed)
-		prob_duration = math.Ceil(sub_at.Sub(prob_at).Minutes())
-		data.Performance[fmt.Sprintf("%d points", score)]++
-		data.Durations[fmt.Sprintf("STID %d", stid)] = prob_duration
-		count++
-		// fmt.Printf("stid %d, score %d, attempts %d, duration %f\n", stid, score, attempts, prob_duration)
+	if pid > 0 {
+		rows, err := Database.Query("select score.stid, score.points, score.attempts, problem.at, problem.content, submission.at, submission.completed from score join problem on score.pid=problem.id join submission on score.pid=submission.pid and score.stid=submission.sid where problem.id=?", pid)
+		if err != nil {
+			fmt.Println("Error retrieving problem statistics", pid, err)
+			return
+		}
+		var stid, score, attempts int
+		var prob_at, sub_at, sub_completed time.Time
+		var prob_content string
+		var prob_duration float64
+		count := 0
+		for rows.Next() {
+			rows.Scan(&stid, &score, &attempts, &prob_at, &prob_content, &sub_at, &sub_completed)
+			prob_duration = math.Ceil(sub_at.Sub(prob_at).Minutes())
+			data.Performance[fmt.Sprintf("%d points", score)]++
+			data.Durations[fmt.Sprintf("STID %d", stid)] = prob_duration
+			count++
+			// fmt.Printf("stid %d, score %d, attempts %d, duration %f\n", stid, score, attempts, prob_duration)
+		}
+		rows.Close()
+
+		data.ProblemDescription = prob_content
+
+		the_date := prob_at.Format("2006-01-02")
+		rows, err = Database.Query("select stid, at from attendance where DATE(at) = ?", the_date)
+		var at time.Time
+		attendance := make(map[int]int)
+		for rows.Next() {
+			rows.Scan(&stid, &at)
+			attendance[stid] = 0
+		}
+		rows.Close()
+
+		data.Performance["Inactive"] = len(attendance) - count
+		// data.Performance["Inactive"] = len(Students) - count - 1
+		// if data.Performance["Inactive"] < 0 {
+		// 	// something is wrong.
+		// 	data.Performance["Inactive"] = 0
+		// }
 	}
-	rows.Close()
-	data.Performance["Not submitted"] = len(Students) - count - 1
-	if data.Performance["Not submitted"] < 0 {
-		// something is wrong.
-		data.Performance["Not submitted"] = 0
-	}
-	data.ProblemDescription = prob_content
-	// fmt.Println(data.Performance, len(Students))
+
 	w.Header().Set("Content-Type", "text/html")
 	t, err := template.New("").Parse(STATS_TEMPLATE)
 	if err != nil {
@@ -84,20 +122,21 @@ var STATS_TEMPLATE = `
       google.charts.setOnLoadCallback(durationHistogram);
 
       function performancePieChart() {
-        var data = google.visualization.arrayToDataTable([
-          	['Category', 'Count'],
-			{{ range $key, $val := .Performance }}
-				[  {{$key}}, {{$val}} ],
-			{{ end }}
-        ]);
-
+      	var perf = [];
+		{{ range $key, $val := .Performance }}
+			perf.push([{{$key}}, {{$val}}]);
+		{{ end }}
+		perf.sort();
+	    perf.unshift(['Category', 'Count']);
+	    console.log(perf);
+        var data = google.visualization.arrayToDataTable(perf);
         var options = {
           title: 'Performance'
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('performance'));
         chart.draw(data, options);
-      }     
+      }
 
       function durationHistogram() {
         var data = google.visualization.arrayToDataTable([
@@ -114,19 +153,39 @@ var STATS_TEMPLATE = `
 
         var chart = new google.visualization.Histogram(document.getElementById('durations'));
         chart.draw(data, options);
-       }      
+       }
     </script>
+    <style>
+    #main { width:1000px; margin: 0 auto;}
+    #performance {
+      width: 500px;
+      height: 500px;
+      float: left;
+    }
+    #durations {
+      width: 500px;
+      height: 500px;
+      margin-left: 400px;
+    }
+    #pre{ width:100%; display:block;}
+    .spacer{ width:100%; height:40px; margin: 0 auto;}
+    .pager{ font-size:120%; text-align: center; }
+    .pager a{padding:25px; text-decoration: none;}
+    .pager a:visited{color:blue}
+    </style>
   </head>
   <body>
-    <div id="performance" style="width: 900px; height: 500px;"></div>
-    <div class="spacer" style="width: 100%; height: 40px;"></div>
-
-    <div id="durations" style="width: 900px; height: 500px;"></div>
-    <div class="spacer" style="width: 100%; height: 40px;"></div>
-    
-    <pre style="padding-left:100px;">
-    {{.ProblemDescription}}
-    </pre>
+    <div id="main">
+    <div id="performance"></div>
+    <div id="durations"></div>
+    <div class="spacer"></div>
+    <pre style="padding-left:100px;">{{.ProblemDescription}}</pre>
+    <div class="spacer"></div>
+    <div class="pager">
+    <a href="statistics?pc={{.PC}}&pid={{.PrevPid}}">Previous</a>
+    <a href="statistics?pc={{.PC}}&pid={{.NextPid}}">Next</a>
+    </div>
+    </div>
   </body>
 </html>
 `

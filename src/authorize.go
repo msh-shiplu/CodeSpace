@@ -25,8 +25,6 @@ func AuthorizeLocalhost(fn func(http.ResponseWriter, *http.Request)) http.Handle
 }
 
 //-----------------------------------------------------------------
-// Authorize teachers
-//-----------------------------------------------------------------
 func Authorize(fn func(http.ResponseWriter, *http.Request, string, int)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		uid, err := strconv.Atoi(r.FormValue("uid"))
