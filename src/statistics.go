@@ -131,14 +131,14 @@ var STATS_TEMPLATE = `
     <style>
     #main { width:1000px; margin: 0 auto;}
     #performance {
-      width: 400px;
-      height: 400px;
+      width: 500px;
+      height: 500px;
       float: left;
     }
     #durations {
-      width: 400px;
-      height: 400px;
-      margin-left: 400px;
+      width: 500px;
+      height: 500px;
+      margin-left: 500px;
     }
     #pre{ width:100%; display:block;}
     .spacer{ width:100%; height:40px; margin: 0 auto;}
@@ -172,9 +172,19 @@ var STATS_TEMPLATE = `
 
 	var data2 = [];
 	{{ range $key, $val := .Durations }}
-		data2.push({ 'type':'box', 'name': {{$key}}, 'y': {{$val}} });
+		data2.push({
+			type:'violin',
+			name: {{$key}},
+			y: {{$val}},
+			box: { visible: true },
+			line: { color: 'blue' },
+			meanline: { visible: true }
+		});
 	{{ end }}
-	Plotly.newPlot('durations', data2, {'title':'Time (min)'});
+	Plotly.newPlot('durations', data2, {
+		title:'Time (min)',
+		yaxis: {zeroline: false},
+	});
     </script>
 
     <div class="spacer"></div>
