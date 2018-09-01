@@ -7,7 +7,7 @@ import (
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"html/template"
-	"math"
+	// "math"
 	"net/http"
 	"strconv"
 	"time"
@@ -16,11 +16,12 @@ import (
 type StatsData struct {
 	Performance        map[string]int
 	ProblemDescription string
-	Durations          map[string]float64
+	Durations          map[string][]float64
 	NextPid            int
 	PrevPid            int
 	Date               string
 	PC                 string
+	// Durations          map[string]float64
 }
 
 //-----------------------------------------------------------------------------------
@@ -53,7 +54,7 @@ func statisticsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	data := &StatsData{
 		Performance: make(map[string]int),
-		Durations:   make(map[string]float64),
+		Durations:   make(map[string][]float64),
 		PC:          Passcode,
 		NextPid:     pid + 1,
 		PrevPid:     pid - 1,
@@ -71,9 +72,14 @@ func statisticsHandler(w http.ResponseWriter, r *http.Request) {
 		count := 0
 		for rows.Next() {
 			rows.Scan(&stid, &score, &attempts, &prob_at, &prob_content, &sub_at, &sub_completed)
-			prob_duration = math.Ceil(sub_at.Sub(prob_at).Minutes())
-			data.Performance[fmt.Sprintf("%d points", score)]++
-			data.Durations[fmt.Sprintf("STID %d", stid)] = prob_duration
+			prob_duration = sub_at.Sub(prob_at).Minutes()
+			key := fmt.Sprintf("%d points", score)
+			data.Performance[key]++
+			if _, ok := data.Durations[key]; !ok {
+				data.Durations[key] = make([]float64, 0)
+			}
+			data.Durations[key] = append(data.Durations[key], prob_duration)
+			// data.Durations[fmt.Sprintf("STID %d", stid)] = prob_duration
 			count++
 			// fmt.Printf("stid %d, score %d, attempts %d, duration %f\n", stid, score, attempts, prob_duration)
 		}
@@ -114,6 +120,73 @@ func statisticsHandler(w http.ResponseWriter, r *http.Request) {
 
 //-----------------------------------------------------------------------------------
 var STATS_TEMPLATE = `
+<html>
+  <head>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
+    <style>
+    #main { width:1000px; margin: 0 auto;}
+    #performance {
+      width: 400px;
+      height: 400px;
+      float: left;
+    }
+    #durations {
+      width: 400px;
+      height: 400px;
+      margin-left: 400px;
+    }
+    #pre{ width:100%; display:block;}
+    .spacer{ width:100%; height:40px; margin: 0 auto;}
+    .pager{ font-size:120%; text-align: center; }
+    .pager a{padding:25px; text-decoration: none;}
+    .pager a:visited{color:blue}
+    </style>
+  </head>
+  <body>
+    <div id="main">
+    <div id="performance"></div>
+	<div id="durations"></div>
+	<script>
+  	var perf = [];
+	{{ range $key, $val := .Performance }}
+		perf.push([{{$key}}, {{$val}}]);
+	{{ end }}
+	perf.sort();
+	var values = [];
+	var labels = [];
+	for (i=0; i<perf.length; i++ ){
+		values.push(perf[i][1]);
+		labels.push(perf[i][0]);
+	}
+	var data = [{
+	  values: values,
+	  labels: labels,
+	  type: 'pie'
+	}];
+	Plotly.newPlot('performance', data, {'title':'Points'});
+
+	var data2 = [];
+	{{ range $key, $val := .Durations }}
+		data2.push({ 'type':'box', 'name': {{$key}}, 'y': {{$val}} });
+	{{ end }}
+	Plotly.newPlot('durations', data2, {'title':'Time (min)'});
+    </script>
+
+    <div class="spacer"></div>
+    <pre style="padding-left:100px;">{{.Date}}
+{{.ProblemDescription}}</pre>
+    <div class="spacer"></div>
+    <div class="pager">
+    <a href="statistics?pc={{.PC}}&pid={{.PrevPid}}">Previous</a>
+    <a href="statistics?pc={{.PC}}&pid={{.NextPid}}">Next</a>
+    </div>
+    </div>
+  </body>
+</html>
+`
+
+var STATS_TEMPLATE_OLD = `
 <html>
   <head>
     <!--Load the AJAX API-->
