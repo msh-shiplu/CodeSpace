@@ -60,28 +60,32 @@ func statisticsHandler(w http.ResponseWriter, r *http.Request) {
 		PrevPid:     pid - 1,
 	}
 	if pid > 0 {
-		rows, err := Database.Query("select score.stid, score.points, score.attempts, problem.at, problem.content, submission.at, submission.completed from score join problem on score.pid=problem.id join submission on score.pid=submission.pid and score.stid=submission.sid where problem.id=?", pid)
+		rows, err := Database.Query("select score.stid, score.points, score.attempts, problem.at, problem.content, submission.id, submission.at, submission.completed from score join problem on score.pid=problem.id join submission on score.pid=submission.pid and score.stid=submission.sid where problem.id=? order by submission.id desc", pid)
 		if err != nil {
 			fmt.Println("Error retrieving problem statistics", pid, err)
 			return
 		}
-		var stid, score, attempts int
+		var stid, score, attempts, sub_id int
 		var prob_at, sub_at, sub_completed time.Time
 		var prob_content string
 		var prob_duration float64
-		count := 0
+		participants := make(map[int]int)
 		for rows.Next() {
-			rows.Scan(&stid, &score, &attempts, &prob_at, &prob_content, &sub_at, &sub_completed)
-			prob_duration = sub_at.Sub(prob_at).Minutes()
-			key := fmt.Sprintf("%d points", score)
-			data.Performance[key]++
-			if _, ok := data.Durations[key]; !ok {
-				data.Durations[key] = make([]float64, 0)
+			rows.Scan(&stid, &score, &attempts, &prob_at, &prob_content, &sub_id, &sub_at, &sub_completed)
+			// Submission id is ordered descendingly.
+			// Therefore, only the last submission of student is looked at.
+			if _, ok := participants[stid]; !ok {
+				participants[stid] = sub_id
+				prob_duration = sub_at.Sub(prob_at).Minutes()
+				key := fmt.Sprintf("%d points", score)
+				data.Performance[key]++
+				if _, ok := data.Durations[key]; !ok {
+					data.Durations[key] = make([]float64, 0)
+				}
+				data.Durations[key] = append(data.Durations[key], prob_duration)
+				// fmt.Println(data.Performance)
+				// fmt.Println(data.Durations)
 			}
-			data.Durations[key] = append(data.Durations[key], prob_duration)
-			// data.Durations[fmt.Sprintf("STID %d", stid)] = prob_duration
-			count++
-			// fmt.Printf("stid %d, score %d, attempts %d, duration %f\n", stid, score, attempts, prob_duration)
 		}
 		rows.Close()
 
@@ -90,14 +94,14 @@ func statisticsHandler(w http.ResponseWriter, r *http.Request) {
 		the_date := prob_at.Format("2006-01-02")
 		rows, err = Database.Query("select stid, at from attendance where DATE(at) = ?", the_date)
 		var at time.Time
-		attendance := make(map[int]int)
+		attendants := make(map[int]int)
 		for rows.Next() {
 			rows.Scan(&stid, &at)
-			attendance[stid] = 0
+			attendants[stid] = 0
 		}
 		rows.Close()
 
-		data.Performance["Inactive"] = len(attendance) - count
+		data.Performance["Inactive"] = len(attendants) - len(participants)
 		data.Date = the_date
 		// data.Performance["Inactive"] = len(Students) - count - 1
 		// if data.Performance["Inactive"] < 0 {
