@@ -26,10 +26,10 @@ type StatsData struct {
 
 //-----------------------------------------------------------------------------------
 func statisticsHandler(w http.ResponseWriter, r *http.Request) {
-	// if r.FormValue("pc") != Passcode {
-	// 	fmt.Fprintf(w, "Unauthorized")
-	// 	return
-	// }
+	if r.FormValue("pc") != Passcode {
+		fmt.Fprintf(w, "Unauthorized")
+		return
+	}
 	pid, err := strconv.Atoi(r.FormValue("pid"))
 	if err != nil {
 		fmt.Println("Unknown problem")
