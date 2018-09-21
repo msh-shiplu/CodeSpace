@@ -20,6 +20,7 @@ gemsTIMEOUT = 7
 gemsAnswerTag = 'ANSWER:'
 gemsTracking = False
 gemsSERVER = ''
+gemsSERVER_TIME = 0
 gemsConnected = False
 gemsUpdateMessage = {
 	1 : "Your submission is being looked at.",
@@ -199,7 +200,7 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 def gemsRequest(path, data, authenticated=True, method='POST', verbal=True):
-	global gemsFOLDER, gemsSERVER
+	global gemsFOLDER, gemsSERVER, gemsSERVER_TIME
 
 	try:
 		with open(gemsFILE, 'r') as f:
@@ -221,7 +222,7 @@ def gemsRequest(path, data, authenticated=True, method='POST', verbal=True):
 			sublime.message_dialog("Please connect to the server first.")
 		return None
 
-	if gemsSERVER == '':
+	if gemsSERVER == '' or time.time() - gemsSERVER_TIME > 5400:
 		sublime.run_command('gems_connect')
 		if gemsSERVER == '':
 			sublime.message_dialog('Unable to connect. Check server address or course id.')
@@ -310,7 +311,7 @@ class gemsConnect(sublime_plugin.ApplicationCommand):
 			sublime.message_dialog("Please set server address.")
 			return None
 
-		global gemsSERVER
+		global gemsSERVER, gemsSERVER_TIME
 		url = urllib.parse.urljoin(info['Server'], 'ask')
 		load = urllib.parse.urlencode({'who':info['CourseId']}).encode('utf-8')
 		req = urllib.request.Request(url, load)
@@ -326,6 +327,7 @@ class gemsConnect(sublime_plugin.ApplicationCommand):
 					sublime.message_dialog('Unable to get address.')
 					return
 				gemsSERVER = server
+				gemsSERVER_TIME = time.time()
 				sublime.status_message('Connected')
 		except urllib.error.HTTPError as err:
 			sublime.message_dialog("{0}".format(err))
