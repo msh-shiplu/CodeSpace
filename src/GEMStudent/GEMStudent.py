@@ -499,6 +499,6 @@ class gemsUpdate(sublime_plugin.WindowCommand):
 			os.remove(version_file)
 			with open(os.path.join(package_path, "VERSION"), 'w') as f:
 				f.write(version)
-			sublime.message_dialog("GEM has been updated to version %s." % version)
+			sublime.message_dialog("GEM has been updated to version {}.".format(version))
 
 # ------------------------------------------------------------------
