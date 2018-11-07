@@ -111,7 +111,6 @@ def gemt_get_problem_info(fname):
 		with open(fname + '.answer', 'r', encoding='utf-8') as fp:
 			answer = fp.read().strip()
 
-
 	# items = body.split(gemtAnswerTag)
 	# if len(items) > 2:
 	# 	sublime.message_dialog('This problem has {} answers. There should be at most 1.'.format(len(items)-1))

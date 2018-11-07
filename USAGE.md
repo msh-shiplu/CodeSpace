@@ -18,9 +18,12 @@ This means the problem has 5 points for merit (for correct solution), 2 points f
 
 For Java/C++/Go files, we should use "//" instead of "#" to by syntatically correct.
 
-### Automatic grading
+### Multiple-choice questions and automatic grading
 
-If a problem has an answer (i.e. the last line has the "ANSWER:" tag followed by a 1-line answer), student submissions will be graded automatically.  If a student's answer matches the specified answer exactly, the solution is automatically marked correct. If they don't match, the solution is marked incorrect.
+A multiple choice question is automatically graded by default. The last line of the file should be "ANSWER: ", where students can give their answer. There must be an answer file associated with each question.
+
+Example: Suppose the file *exercise1.txt* has this content:
+
 
 ```
 # 5 2 1 Cardinality
@@ -32,8 +35,17 @@ B. 2
 C. 3
 D. 4
 
-ANSWER: D
+ANSWER: 
 ```
+
+There should be another file called *exercise1.txt.answer* with the following content:
+
+```
+D
+```
+
+In this case student submissions are automatically submitted. Answers are case sensitive. 
+
 
 There are cases where teachers want to look at solutions whose answers do not exactly match the specified one.  If such is the case, the teacher can specify the keyword *_manual_* that comes after the set of 3 numbers (specifying merit, effort, attempt).  This keyword indicates that students' answers that are not exactly matched will be looked at by the instructor, instead of being marked "incorrect" automatically.
 
@@ -49,7 +61,7 @@ B. 2
 C. 3
 D. 4
 
-ANSWER: D
+ANSWER:
 ```
 
 ### Getting a student's submission and Grading

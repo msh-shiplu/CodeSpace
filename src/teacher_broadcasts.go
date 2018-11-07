@@ -86,6 +86,8 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 		Tag:         tag,
 		ExactAnswer: exact_answer == "True",
 	}
+	// fmt.Println("answer:", problem.Answer, problem.ExactAnswer)
+
 	insert_problem(uid, problem)
 	BoardsSem.Lock()
 	defer BoardsSem.Unlock()
