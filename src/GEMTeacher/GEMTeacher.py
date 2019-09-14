@@ -317,6 +317,10 @@ def gemt_grade(self, edit, decision):
 		self.view.window().run_command('close')
 
 # ------------------------------------------------------------------
+class gemtUngrade(sublime_plugin.TextCommand):
+	def run(self, edit):
+		gemt_grade(self, edit, "ungraded")
+
 class gemtGradeCorrect(sublime_plugin.TextCommand):
 	def run(self, edit):
 		gemt_grade(self, edit, "correct")
@@ -348,13 +352,15 @@ def gemt_gets(self, index, priority):
 			if sublime.active_window().id() == 0:
 				sublime.run_command('new_window')
 			sublime.active_window().open_file(local_file)
+			if sub['Priority'] == 2:
+				sublime.message_dialog('This student asked for help.')
 		elif priority == 0:
 			sublime.message_dialog('There are no submissions.')
 		elif priority > 0:
 			sublime.message_dialog('There are no submissions with priority {}.'.format(priority))
 		elif index >= 0:
 			sublime.message_dialog('There are no submission with index {}.'.format(index))
-
+		
 # ------------------------------------------------------------------
 class gemtSeeQueue(sublime_plugin.ApplicationCommand):
 	def run(self):

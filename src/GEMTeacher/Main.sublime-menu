@@ -19,34 +19,29 @@
                 "id": "gemtSeeQueue",
                 "command": "gemt_see_queue",
             },
-            // {
-            //     "caption": "Get 😎 submission",
-            //     "id": "gemtGetFromOk",
-            //     "command": "gemt_get_from_ok",
-            // },
-            // {
-            //     "caption": "Get 😥 submission",
-            //     "id": "gemtGetFromNeedHelp",
-            //     "command": "gemt_get_from_need_help",
-            // },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "✔  Mark correct",
+                "caption": "Mark correct 👍",
                 "id": "gemtGradeCorrect",
                 "command": "gemt_grade_correct",
             },
             {
-                "caption": "✘  Mark incorrect",
+                "caption": "Mark incorrect 👎",
                 "id": "gemtGradeIncorrect",
                 "command": "gemt_grade_incorrect",
             },
             {
-                "caption": "✂ Mark dismissed",
+                "caption": "Return ungraded ✋",
+                "id": "gemtUngrade",
+                "command": "gemt_ungrade",
+            },
+            {
+                "caption": "Dismiss",
                 "id": "gemtDismissed",
                 "command": "gemt_dismissed",
             },
             {
-                "caption": "⏎ Put back",
+                "caption": "Put back",
                 "id": "gemtPutBack",
                 "command": "gemt_put_back",
             },

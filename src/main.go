@@ -124,7 +124,11 @@ func main() {
 	load_teachers()
 	fmt.Println("**************************************************")
 	fmt.Printf("*   Course id:      %s\n", Config.CourseId)
-	fmt.Printf("*   Server address: %s\n", Config.NameServer)
+	if Config.NameServer != "" {
+		fmt.Printf("*   Server address: %s\n", Config.NameServer)
+	} else {
+		fmt.Printf("*   Serving at:     %s\n", Config.Address)
+	}
 	fmt.Printf("*   GEM %s\n", VERSION)
 	fmt.Println("**************************************************\n")
 	err := http.ListenAndServe(Config.Address, nil)

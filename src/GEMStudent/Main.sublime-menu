@@ -4,18 +4,17 @@
         "id": "GEMStudent",
         "children": [
             {
-                "caption": "White board",
+                "caption": "See white board",
                 "id": "gemsGetBoardContent",
                 "command": "gems_get_board_content",
             },
-            {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Share code 😥",
+                "caption": "Ask for help 😥",
                 "id": "gemsNeedHelp",
                 "command": "gems_need_help",
             },
             {
-                "caption": "Share code 😎",
+                "caption": "Submit code 😎",
                 "id": "gemsGotIt",
                 "command": "gems_got_it",
             },

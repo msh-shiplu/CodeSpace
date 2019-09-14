@@ -38,10 +38,12 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 				return
 			}
 
-			// Decrement attempts
-			ActiveProblems[filename].Attempts[uid] -= 1
-			if ActiveProblems[filename].Attempts[uid] <= 3 {
-				msg += fmt.Sprintf(" You have %d attempt(s) left.", ActiveProblems[filename].Attempts[uid])
+			// Decrement attempts **only if students are not asking for help**
+			if priority < 2 {
+				ActiveProblems[filename].Attempts[uid] -= 1
+				if ActiveProblems[filename].Attempts[uid] <= 3 {
+					msg += fmt.Sprintf(" You have %d attempt(s) left.", ActiveProblems[filename].Attempts[uid])
+				}
 			}
 
 			// Autograding if possible

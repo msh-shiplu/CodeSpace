@@ -15,22 +15,27 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "✔  Mark correct",
+                "caption": "👍 Mark correct",
                 "id": "gemaGradeCorrect",
                 "command": "gema_grade_correct",
             },
             {
-                "caption": "✘  Mark incorrect",
+                "caption": "👎 Mark incorrect",
                 "id": "gemaGradeIncorrect",
                 "command": "gema_grade_incorrect",
             },
             {
-                "caption": "✂ Mark dismissed",
+                "caption": "✋ Return ungraded",
+                "id": "gemaUngrade",
+                "command": "gema_ungrade",
+            },
+            {
+                "caption": " ✂  Dismiss",
                 "id": "gemaDismissed",
                 "command": "gema_dismissed",
             },
             {
-                "caption": "⏎ Put back",
+                "caption": " ⏎  Put back",
                 "id": "gemaPutBack",
                 "command": "gema_put_back",
             },

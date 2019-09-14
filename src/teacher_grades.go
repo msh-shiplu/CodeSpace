@@ -18,7 +18,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	changed := r.FormValue("changed")
 	// stid, _ := strconv.Atoi(r.FormValue("stid"))
 	// pid, _ := strconv.Atoi(r.FormValue("pid"))
-	mesg, student_mesg := "", ""
+	mesg := ""
 
 	sub, ok := Submissions[sid]
 	if !ok {
@@ -31,7 +31,6 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 		if prob, ok := ActiveProblems[sub.Filename]; ok {
 			AddFeedbackSQL.Exec(uid, stid, content, time.Now())
 			mesg = "Feedback saved to student's board."
-			student_mesg += "You've got feedback."
 			BoardsSem.Lock()
 			defer BoardsSem.Unlock()
 			b := &Board{
@@ -52,11 +51,13 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 		Students[stid].SubmissionStatus = 2
 		ActiveProblems[sub.Filename].Attempts[stid] += 1
 		fmt.Fprintf(w, "Submission dismissed.")
+	} else if decision == "ungraded" {
+		Students[stid].SubmissionStatus = 5
+		fmt.Fprintf(w, mesg)
 	} else {
 		// Update score based on the grading decision
 		scoring_mesg := add_or_update_score(decision, sub.Pid, sub.Uid, uid)
 		mesg = scoring_mesg + "\n" + mesg
-		student_mesg += scoring_mesg
 		if decision == "correct" {
 			Students[sub.Uid].SubmissionStatus = 4
 			ActiveProblems[sub.Filename].Attempts[stid] = 0 // This prevents further submission.
