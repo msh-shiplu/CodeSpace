@@ -1,0 +1,6 @@
+[
+    { "keys": ["ctrl+1"], "command": "gemt_get_from_need_help" },
+    { "keys": ["ctrl+2"], "command": "gemt_get_from_ok" },
+    { "keys": ["ctrl+3"], "command": "gemt_grade_correct" },
+    { "keys": ["ctrl+4"], "command": "gemt_grade_incorrect" },
+]

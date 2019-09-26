@@ -4,9 +4,14 @@
         "id": "GEMA",
         "children": [
             {
-                "caption": "Get a submission",
-                "id": "gemaGetPrioritized",
-                "command": "gema_get_prioritized",
+                "caption": "Get a need-help entry",
+                "id": "gemaGetFromNeedHelp",
+                "command": "gema_get_from_need_help",
+            },
+            {
+                "caption": "Get a submission entry",
+                "id": "gemaGetFromOk",
+                "command": "gema_get_from_ok",
             },
             {
                 "caption": "Check submission queue",
@@ -15,22 +20,22 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "👍 Mark correct",
+                "caption": "Mark correct 👍",
                 "id": "gemaGradeCorrect",
                 "command": "gema_grade_correct",
             },
             {
-                "caption": "👎 Mark incorrect",
+                "caption": "Mark incorrect ✋",
                 "id": "gemaGradeIncorrect",
                 "command": "gema_grade_incorrect",
             },
             {
-                "caption": "✋ Return ungraded",
+                "caption": "Return ungraded",
                 "id": "gemaUngrade",
                 "command": "gema_ungrade",
             },
             {
-                "caption": " ✂  Dismiss",
+                "caption": "Dismiss",
                 "id": "gemaDismissed",
                 "command": "gema_dismissed",
             },

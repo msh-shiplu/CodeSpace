@@ -4,12 +4,12 @@
         "id": "GEMStudent",
         "children": [
             {
-                "caption": "See white board",
+                "caption": "Check white board",
                 "id": "gemsGetBoardContent",
                 "command": "gems_get_board_content",
             },
             {
-                "caption": "Ask for help 😥",
+                "caption": "Ask for help 🤔",
                 "id": "gemsNeedHelp",
                 "command": "gems_need_help",
             },

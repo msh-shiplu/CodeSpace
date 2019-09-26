@@ -10,9 +10,14 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Get a submission",
-                "id": "gemtGetPrioritized",
-                "command": "gemt_get_prioritized",
+                "caption": "Get a need-help entry",
+                "id": "gemtGetFromNeedHelp",
+                "command": "gemt_get_from_need_help",
+            },
+            {
+                "caption": "Get a submission entry",
+                "id": "gemtGetFromOk",
+                "command": "gemt_get_from_ok",
             },
             {
                 "caption": "Check submission queue",
@@ -26,12 +31,12 @@
                 "command": "gemt_grade_correct",
             },
             {
-                "caption": "Mark incorrect 👎",
+                "caption": "Mark incorrect ✋",
                 "id": "gemtGradeIncorrect",
                 "command": "gemt_grade_incorrect",
             },
             {
-                "caption": "Return ungraded ✋",
+                "caption": "Return ungraded",
                 "id": "gemtUngrade",
                 "command": "gemt_ungrade",
             },
