@@ -471,9 +471,11 @@ class gemaUpdate(sublime_plugin.WindowCommand):
 				os.mkdir(package_path)
 			module_file = os.path.join(package_path, "GEMAssistant.py")
 			menu_file = os.path.join(package_path, "Main.sublime-menu")
+			keymap_file = os.path.join(package_path, "Default.sublime-keymap")
 			version_file = os.path.join(package_path, "version.go")
 			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMAssistant/GEMAssistant.py", module_file)
 			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMAssistant/Main.sublime-menu", menu_file)
+			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMAssistant/Default.sublime-keymap", keymap_file)
 			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/version.go", version_file)
 			with open(version_file) as f:
 				lines = f.readlines()
