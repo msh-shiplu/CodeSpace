@@ -30,7 +30,7 @@ import os; package_path = os.path.join(sublime.packages_path(), "GEMTeacher"); o
 ```
 (4) Paste copied code to Console and hit enter.
 
-(5) Download the latest server ([Windows](http://umdrive.memphis.edu/vphan/public/GEM/gem.exe), [MacOS](http://umdrive.memphis.edu/vphan/public/GEM/gem)) and make them *executable* on teacher's computer.  This command-line server needs to be run on the teacher's computer every time GEM is used in class.
+(5) Download the latest server ([Windows](https://www.dropbox.com/s/yuo3wgw5qsc6s3k/gem.exe?dl=0), [MacOS](https://www.dropbox.com/s/1e4v0scoqx5u8mr/gem?dl=0)) and make them *executable* on teacher's computer.  This command-line server needs to be run on the teacher's computer every time GEM is used in class.
 
 (6) First-time configuration:
 Add teachers
