@@ -18,6 +18,27 @@ This means the problem has 5 points for merit (for correct solution), 2 points f
 
 For Java/C++/Go files, we should use "//" instead of "#" to by syntatically correct.
 
+### Grading and Partial Credits
+
+When a submission is marked correct, 5 points are automatically recorded for the submission.
+
+When a submission is marked inccorect, 2 points are automatically recorded for the submission.
+
+The instructor/TA can revise points for effort by modyfing graded submission.  Specifically, the first
+line of a submission looks like this:
+
+```
+# 5 points, 2 for effort. Maximum attempts: 3.
+```
+
+If the instructor/TA wishes to give, for instance, 4 points for effort (or partial credits), then he/she can
+modify the first line of the submission to this:
+
+```
+# 5 points, 4 for effort. Maximum attempts: 3.
+```
+
+
 ### Multiple-choice questions and automatic grading
 
 A multiple choice question is automatically graded by default. The last line of the file should be "ANSWER: ", where students can give their answer. There must be an answer file associated with each question.

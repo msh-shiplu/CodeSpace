@@ -68,7 +68,7 @@ func init_database(db_name string) {
 // Add or update score based on a decision. If decision is "correct"
 // a new problem, if there's one, is added to student's board.
 //-----------------------------------------------------------------
-func add_or_update_score(decision string, pid, stid, tid int) string {
+func add_or_update_score(decision string, pid, stid, tid, partial_credits int) string {
 	mesg := ""
 
 	// Find score information for this student (stid) for this problem (pid)
@@ -95,7 +95,12 @@ func add_or_update_score(decision string, pid, stid, tid int) string {
 		points = merit
 		mesg = "Answer is correct."
 	} else {
-		points = effort
+		if partial_credits < merit {
+			points = partial_credits
+		} else {
+			points = effort
+		}
+
 		// If the problem was previously graded correct, this submission
 		// does not reduce it.  Grading is asynchronous.
 		if points < current_points {

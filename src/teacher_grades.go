@@ -7,9 +7,22 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 	"time"
 )
+
+//-----------------------------------------------------------------------------------
+func extract_partial_credits(content string) int {
+	re := regexp.MustCompile(`(\d)+ for effort`)
+	result := re.FindSubmatch([]byte(content))
+	if len(result) >= 2 {
+		points, _ := strconv.Atoi(string(result[1]))
+		return points
+	} else {
+		return -1
+	}
+}
 
 //-----------------------------------------------------------------------------------
 func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
@@ -56,7 +69,11 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 		fmt.Fprintf(w, mesg)
 	} else {
 		// Update score based on the grading decision
-		scoring_mesg := add_or_update_score(decision, sub.Pid, sub.Uid, uid)
+		partial_credits := -1
+		if decision != "correct" {
+			partial_credits = extract_partial_credits(content)
+		}
+		scoring_mesg := add_or_update_score(decision, sub.Pid, sub.Uid, uid, partial_credits)
 		mesg = scoring_mesg + "\n" + mesg
 		if decision == "correct" {
 			Students[sub.Uid].SubmissionStatus = 4

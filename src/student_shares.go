@@ -51,11 +51,11 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			if answer != "" {
 				scoring_mesg := ""
 				if correct_answer == answer {
-					scoring_mesg = add_or_update_score("correct", pid, uid, 0)
+					scoring_mesg = add_or_update_score("correct", pid, uid, 0, -1)
 					ActiveProblems[filename].Attempts[uid] = 0 // This prevents further submission
 					complete = true
 				} else if ActiveProblems[filename].Info.ExactAnswer {
-					scoring_mesg = add_or_update_score("incorrect", pid, uid, 0)
+					scoring_mesg = add_or_update_score("incorrect", pid, uid, 0, -1)
 					complete = true
 				} else {
 					scoring_mesg = "Answer appears to be incorrect. It will be looked at."

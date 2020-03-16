@@ -279,6 +279,14 @@ class gemtPutBack(sublime_plugin.TextCommand):
 			self.view.window().run_command('close')
 
 # ------------------------------------------------------------------
+def remove_first_line(content):
+	lines = content.split('\n')
+	if len(lines) > 0:
+		return '\n'.join(lines[1:])
+	else:
+		return content
+
+# ------------------------------------------------------------------
 def gemt_grade(self, edit, decision):
 	fname = self.view.file_name()
 	changed = False
@@ -288,7 +296,9 @@ def gemt_grade(self, edit, decision):
 	else:
 		content = self.view.substr(sublime.Region(0, self.view.size())).strip()
 		if sid in gemtStudentSubmissions:
-			if gemtStudentSubmissions[sid].strip() != content.strip():
+			v1 = gemtStudentSubmissions[sid].strip()
+			v2 = content.strip()
+			if remove_first_line(v1) != remove_first_line(v2):
 				changed = True
 
 	stop = False

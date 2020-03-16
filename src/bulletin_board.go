@@ -9,7 +9,10 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
+	"strings"
+	"time"
 )
 
 //-----------------------------------------------------------------------------------
@@ -21,12 +24,13 @@ type BulletinBoardMessage struct {
 	PC             string
 	P1             int
 	P2             int
-	ActiveProblems int
-	BulletinItems  int
-	AnswerCount    int
-	Attendance     int
-	Address        string
-	Authenticated  bool
+	ActiveProblems string
+	// ActiveProblems int
+	BulletinItems int
+	AnswerCount   int
+	Attendance    int
+	Address       string
+	Authenticated bool
 }
 
 //-----------------------------------------------------------------------------------
@@ -76,11 +80,42 @@ func get_bulletin_board_data(i int, passcode string) *BulletinBoardMessage {
 		prev_i = (i - 1 + len(BulletinBoard)) % len(BulletinBoard)
 	}
 	answers := 0
-	for _, p := range ActiveProblems {
+	keys := make([]string, 0)
+	for key := range ActiveProblems {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	submissions := make([]string, 0)
+	for i, key := range keys {
+		p := ActiveProblems[key]
 		if p.Active {
+			rows, err := Database.Query("select at from problem where id = ?", p.Info.Pid)
+			if err != nil {
+				fmt.Println("Error retrieving problem starting time", err)
+				return &BulletinBoardMessage{}
+			}
+			var starting_time time.Time
+			for rows.Next() {
+				rows.Scan(&starting_time)
+			}
+			duration := time.Since(starting_time).Minutes()
+			subs := len(p.Attempts)
+			label := fmt.Sprintf("P%d: %d subs after %.0fm", i+1, subs, duration)
+			submissions = append(submissions, label)
 			answers += len(p.Answers)
 		}
 	}
+	active_problems := strings.Join(submissions, ". ")
+	fmt.Println(">", active_problems)
+
+	// for pid, p := range ActiveProblems {
+	// 	if p.Active {
+	// 		answers += len(p.Answers)
+	// 	}
+	// 	fmt.Println(">", pid, p)
+	// 	cur_submissions = append(cur_submissions, len(p.Attempts))
+	// }
+
 	data := &BulletinBoardMessage{
 		Code:           code,
 		I:              i,
@@ -89,12 +124,13 @@ func get_bulletin_board_data(i int, passcode string) *BulletinBoardMessage {
 		PC:             passcode,
 		P1:             priority[1],
 		P2:             priority[2],
-		ActiveProblems: len(ActiveProblems),
-		BulletinItems:  len(BulletinBoard),
-		AnswerCount:    answers,
-		Attendance:     len(Students),
-		Address:        Config.Address,
-		Authenticated:  passcode == Passcode,
+		ActiveProblems: active_problems,
+		// ActiveProblems: len(ActiveProblems),
+		BulletinItems: len(BulletinBoard),
+		AnswerCount:   answers,
+		Attendance:    len(Students),
+		Address:       Config.Address,
+		Authenticated: passcode == Passcode,
 	}
 	return data
 }
