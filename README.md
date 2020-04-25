@@ -35,20 +35,21 @@ import os; package_path = os.path.join(sublime.packages_path(), "GEMTeacher"); o
 (6) First-time configuration:
 Add teachers
 ```
-    ./gem -c [config.json](Examples/gem_config.json) -add_teacher [teachers.txt](Examples/teachers.txt)
+    ./gem -c config.json -add_teacher teachers.txt
 ```
 
 Add students
 ```
-    ./gem -c [config.json](Examples/gem_config.json) -add_student [students.txt](Examples/students.txt)
+    ./gem -c config.json -add_student students.txt
 ```
 
 Run the server
 ```
-    ./gem -c [config.json](Examples/gem_config.json)
+    ./gem -c config.json
 ```
 
-Examples of files containing configurations, teachers and students are given in the links above.
+Examples of files containing configurations, teachers and students: [config.json](Examples/gem_config.json), 
+[teachers.txt](Examples/teachers.txt), [students.txt](Examples/students.txt)
 
 (7) When the server is run for the first time after teachers and students are added, teachers and students must configure their Sublime Text modules by going through 3 steps in Sublime Text: (i) specify a folder on their computers to store local files, (ii) set the server address, which is shown when the server is run, and (iii) complete the registration by simply entering their usernames, as specify in *teachers.txt* and *students.txt*.
 
