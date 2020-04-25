@@ -64,7 +64,7 @@ D. 4
 ANSWER: 
 ```
 
-There should be another file called [exercise1.txt.answer](Examples/exercise2.txt.answer) with the following content:
+There should be another file called [exercise2.txt.answer](Examples/exercise2.txt.answer) with the following content:
 
 ```
 D

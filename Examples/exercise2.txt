@@ -1,4 +1,13 @@
 # 5 2 1 multiple_choice cardinality of a set
+#
+# An example of an automatically graded exercise.
+# Notes:
+# (a) The last line should be as provided in this example: "ANSWER:"
+#     Students will provide an answer in this space: A or B or C or D
+# (b) If this file is named exercise2.txt, then there must be a file named exercise2.txt.answer
+# (c) As specified correct solution is worth 5 points; an incorrect sollution is worth 2 points,
+#     and students have 1 attempt to submit solutions. 
+#
 
 What is the cardinality of this set {1, 2, 3, 0}
 
