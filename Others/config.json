@@ -1,8 +1,0 @@
-{
-	"CourseId": "dev",
-	"LogFile": "dev.log",
-	"IP": "",
-	"Port": 8083,
-	"Database": "gem.sqlite3",
-	"NameServer": "http://gem.memphis.edu:8080"
-}
