@@ -35,8 +35,7 @@ line of a submission looks like this:
 # 5 points, 1 for effort. Maximum attempts: 2.
 ```
 
-If the instructor/TA wishes to give, for instance, 3 points for effort (or partial credits), then he/she can
-modify the first line of the submission to this:
+If instructors and TAs can revise points for effort if they see fit. For example, for instance, to give 3 points for effort (or partial credits), instructors and TA can replace 1 with 3 the first line of the submission as follows:
 
 ```
 # 5 points, 3 for effort. Maximum attempts: 2.
