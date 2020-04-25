@@ -11,39 +11,44 @@ If the file is not *gradable*, students can get it from their white board, but t
 If the file is gradable, students can submit their work on it.  To make a file *gradable*, the first line of the file must satisfy a specific syntax. Here's an example:
 
 ```
-# 5 2 3 Loop and iteration
+# 5 1 2 simple recursion
 ```
 
-This means the problem has 5 points for merit (for correct solution), 2 points for effort (for trying at least once), and students have 3 attempts to try.  Further, the learning objective for this problem is "Loop and iteration".
+This means the problem has 5 points for a correct grade, 1 point an incorrect grade, and students have 2 attempts to try.  Further, the learning objective for this problem is "simple recursion".
 
-For Java/C++/Go files, we should use "//" instead of "#" to by syntatically correct.
+For Java/C++/Go files, we should use "//" instead of "#" to by syntatically correct:
+
+```
+// 5 1 2 simple recursion
+```
 
 ### Grading and Partial Credits
 
 When a submission is marked correct, 5 points are automatically recorded for the submission.
 
-When a submission is marked inccorect, 2 points are automatically recorded for the submission.
+When a submission is marked inccorect, 1 points are automatically recorded for the submission.
 
 The instructor/TA can revise points for effort by modyfing graded submission.  Specifically, the first
 line of a submission looks like this:
 
 ```
-# 5 points, 2 for effort. Maximum attempts: 3.
+# 5 points, 1 for effort. Maximum attempts: 2.
 ```
 
-If the instructor/TA wishes to give, for instance, 4 points for effort (or partial credits), then he/she can
+If the instructor/TA wishes to give, for instance, 3 points for effort (or partial credits), then he/she can
 modify the first line of the submission to this:
 
 ```
-# 5 points, 4 for effort. Maximum attempts: 3.
+# 5 points, 3 for effort. Maximum attempts: 2.
 ```
 
+Here is a concrete example: [exercise1.py](Examples/exercise1.py)
 
 ### Multiple-choice questions and automatic grading
 
 A multiple choice question is automatically graded by default. The last line of the file should be "ANSWER: ", where students can give their answer. There must be an answer file associated with each question.
 
-Example: Suppose the file *exercise1.txt* has this content:
+Example: Suppose the file [exercise2.txt](Examples/exercise2.txt) has this content:
 
 
 ```
@@ -59,7 +64,7 @@ D. 4
 ANSWER: 
 ```
 
-There should be another file called *exercise1.txt.answer* with the following content:
+There should be another file called [exercise1.txt.answer](Examples/exercise2.txt.answer) with the following content:
 
 ```
 D
