@@ -2,6 +2,8 @@ To use this software to share code in class, you will need to (1) install [Subli
 
 To install Sublime Text 3, [go here.](https://www.sublimetext.com/3)
 
+Test.
+
 ### Student's installation
 
 (1) Open Sublime Text
