@@ -89,7 +89,7 @@ func get_bulletin_board_data(i int, passcode string) *BulletinBoardMessage {
 	for i, key := range keys {
 		p := ActiveProblems[key]
 		if p.Active {
-			rows, err := Database.Query("select at from problem where id = ?", p.Info.Pid)
+			rows, err := Database.Query("select problem_uploaded_at from problem where id = ?", p.Info.Pid)
 			if err != nil {
 				fmt.Println("Error retrieving problem starting time", err)
 				return &BulletinBoardMessage{}
