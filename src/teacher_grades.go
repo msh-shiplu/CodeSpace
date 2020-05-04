@@ -29,7 +29,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	content, decision := r.FormValue("content"), r.FormValue("decision")
 	sid, _ := strconv.Atoi(r.FormValue("sid"))
 	changed := r.FormValue("changed")
-	// stid, _ := strconv.Atoi(r.FormValue("stid"))
+	// student_id, _ := strconv.Atoi(r.FormValue("student_id"))
 	// pid, _ := strconv.Atoi(r.FormValue("pid"))
 	mesg := ""
 
@@ -38,11 +38,11 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 		fmt.Fprintf(w, "Unknown submission cannot be graded.")
 		return
 	}
-	stid := sub.Uid
+	student_id := sub.Uid
 	if changed == "True" {
 		// If the original file is changed, there's feedback.  Copy it to whiteboard.
 		if prob, ok := ActiveProblems[sub.Filename]; ok {
-			AddFeedbackSQL.Exec(uid, stid, content, time.Now())
+			AddFeedbackSQL.Exec(uid, student_id, content, time.Now())
 			mesg = "Feedback saved to student's board."
 			BoardsSem.Lock()
 			defer BoardsSem.Unlock()
@@ -55,17 +55,17 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 				StartingTime: time.Now(),
 				Type:         "feedback",
 			}
-			Students[stid].Boards = append(Students[stid].Boards, b)
+			Students[student_id].Boards = append(Students[student_id].Boards, b)
 		}
 	}
 
 	// If submission is dismissed, do not take that attempt away from the student.
 	if decision == "dismissed" {
-		Students[stid].SubmissionStatus = 2
-		ActiveProblems[sub.Filename].Attempts[stid] += 1
+		Students[student_id].SubmissionStatus = 2
+		ActiveProblems[sub.Filename].Attempts[student_id] += 1
 		fmt.Fprintf(w, "Submission dismissed.")
 	} else if decision == "ungraded" {
-		Students[stid].SubmissionStatus = 5
+		Students[student_id].SubmissionStatus = 5
 		fmt.Fprintf(w, mesg)
 	} else {
 		// Update score based on the grading decision
@@ -77,9 +77,9 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 		mesg = scoring_mesg + "\n" + mesg
 		if decision == "correct" {
 			Students[sub.Uid].SubmissionStatus = 4
-			ActiveProblems[sub.Filename].Attempts[stid] = 0 // This prevents further submission.
+			ActiveProblems[sub.Filename].Attempts[student_id] = 0 // This prevents further submission.
 		} else {
-			Students[stid].SubmissionStatus = 3
+			Students[student_id].SubmissionStatus = 3
 		}
 
 		// Update submission complete time

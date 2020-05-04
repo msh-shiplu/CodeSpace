@@ -16,7 +16,7 @@ import (
 func student_checks_inHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	// attendance is taken automatically by authorization when this handler is called.
 	// Next: return student attendance report
-	rows, err := Database.Query("select at from attendance where stid=?", uid)
+	rows, err := Database.Query("select attendance_at from attendance where student_id=?", uid)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
