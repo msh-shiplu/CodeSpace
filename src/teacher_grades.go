@@ -42,7 +42,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	if changed == "True" {
 		// If the original file is changed, there's feedback.  Copy it to whiteboard.
 		if prob, ok := ActiveProblems[sub.Filename]; ok {
-			AddFeedbackSQL.Exec(uid, student_id, content, time.Now(), sub.pid)
+			AddFeedbackSQL.Exec(uid, student_id, content, time.Now(), sub.id)
 			mesg = "Feedback saved to student's board."
 			BoardsSem.Lock()
 			defer BoardsSem.Unlock()
@@ -83,7 +83,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 		}
 
 		// Update submission complete time
-		_, err := CompleteSubmissionSQL.Exec(time.Now(), sid)
+		_, err := CompleteSubmissionSQL.Exec(time.Now(), decision, sid)
 		if err != nil {
 			log.Fatal(err)
 		}
