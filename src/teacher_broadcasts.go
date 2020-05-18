@@ -44,6 +44,7 @@ func insert_problem(uid int, problem *ProblemInfo) {
 			problem.Merit,
 			problem.Effort,
 			problem.Attempts,
+			problem.Topic_id,
 			int(tagID),
 			time.Now(),
 		)
@@ -70,6 +71,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 	merit, _ := strconv.Atoi(r.FormValue("merit"))
 	effort, _ := strconv.Atoi(r.FormValue("effort"))
 	attempts, _ := strconv.Atoi(r.FormValue("attempts"))
+	topic_id, _ := strconv.Atoi(r.FormValue("topic_id"))
 	tag := r.FormValue("tag")
 	filename := r.FormValue("filename")
 	exact_answer := r.FormValue("exact_answer")
@@ -83,6 +85,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 		Merit:       merit,
 		Effort:      effort,
 		Attempts:    attempts,
+		Topic_id:	topic_id,
 		Tag:         tag,
 		ExactAnswer: exact_answer == "True",
 	}
