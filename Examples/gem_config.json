@@ -1,8 +1,8 @@
 {
-        "CourseId": "COMP1900_001",
-        "LogFile": "COMP1900_001.log",
+        "CourseId": "MyCourse",
+        "Database": "MyCourse.sqlite3",
+        "LogFile": "MyCourse.log",
         "IP": "",
         "Port": 8080,
-        "Database": "COMP1900_001.sqlite3",
-        "NameServer": "http://gem.memphis.edu:8080"
+        "NameServer": "http://gem.uom.memphis.edu:8080"
 }

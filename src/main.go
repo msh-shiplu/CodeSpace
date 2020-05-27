@@ -7,7 +7,9 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+
 	_ "github.com/mattn/go-sqlite3"
+
 	// "io/ioutil"
 	"log"
 	"math/rand"
@@ -93,6 +95,7 @@ func inform_name_server() {
 	nameserver := fmt.Sprintf("%s/tell?who=%s&address=%s", Config.NameServer, Config.CourseId, Config.Address)
 	_, err := http.Get(nameserver)
 	if err != nil {
+		fmt.Println("Error", err)
 		log.Fatal("Unable to contact with name server.")
 	}
 }
