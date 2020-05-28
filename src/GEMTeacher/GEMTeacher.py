@@ -79,7 +79,7 @@ def gemt_get_problem_info(fname):
 		content = fp.read()
 	items = content.split('\n',1)
 	if len(items)==0 or (not items[0].startswith('#') and not items[0].startswith('//')):
-		return content, '', 0, 0, 0, -1, '', basename, False
+		return content, '', 0, 0, 0, 0, '', basename, False
 
 	merit, effort, attempts, topic_id, tag, exact_answer = 0, 0, 0, 0, '', True
 	first_line, body = items[0], items[1]
@@ -99,10 +99,10 @@ def gemt_get_problem_info(fname):
 			exact_answer = False
 			tag = tag.split('_manual_')[1].strip()
 	except:
-		return content, '', 0, 0, 0,topic_id, '', basename, False
+		return content, '', 0, 0, 0, 0, '', basename, False
 
 	if merit < effort:
-		return content, '', 0, 0, 0, topic_id, '', basename, False
+		return content, '', 0, 0, 0, 0, '', basename, False
 
 	body = '{} {} points, {} for effort. Maximum attempts: {}.\n{}'.format(
 		prefix, merit, effort, attempts, body)
