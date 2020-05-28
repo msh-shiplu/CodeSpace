@@ -32,7 +32,6 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	// student_id, _ := strconv.Atoi(r.FormValue("student_id"))
 	// pid, _ := strconv.Atoi(r.FormValue("pid"))
 	mesg := ""
-
 	sub, ok := Submissions[sid]
 	if !ok {
 		fmt.Fprintf(w, "Unknown submission cannot be graded.")
@@ -42,7 +41,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	if changed == "True" {
 		// If the original file is changed, there's feedback.  Copy it to whiteboard.
 		if prob, ok := ActiveProblems[sub.Filename]; ok {
-			AddFeedbackSQL.Exec(uid, student_id, content, time.Now(), sub.Pid)
+			AddFeedbackSQL.Exec(uid, student_id, content, time.Now(), sub.Sid)
 			mesg = "Feedback saved to student's board."
 			BoardsSem.Lock()
 			defer BoardsSem.Unlock()

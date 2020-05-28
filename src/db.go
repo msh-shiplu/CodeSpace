@@ -6,9 +6,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func create_tables() {
@@ -53,7 +54,7 @@ func init_database(db_name string) {
 	AddSubmissionCompleteSQL = prepare("insert into submission (problem_id, student_id, student_code, submission_category, code_submitted_at, completed) values (?, ?, ?, ?, ?, ?)")
 	CompleteSubmissionSQL = prepare("update submission set completed=?, verdict=? where id=?")
 	AddScoreSQL = prepare("insert into score (problem_id, student_id, teacher_id, score, graded_submission_number, score_given_at) values (?, ?, ?, ?, ?, ?)")
-	AddFeedbackSQL = prepare("insert into feedback (teacher_id, student_id, feedback, feedback_given_at, problem_id) values (?, ?, ?, ?, ?)")
+	AddFeedbackSQL = prepare("insert into feedback (teacher_id, student_id, feedback, feedback_given_at, submission_id) values (?, ?, ?, ?, ?)")
 	UpdateScoreSQL = prepare("update score set teacher_id=?, score=?, graded_submission_number=? where id=?")
 	AddAttendanceSQL = prepare("insert into attendance (student_id, attendance_at) values (?, ?)")
 	AddTagSQL = prepare("insert into tag (topic_description) values (?)")
@@ -72,8 +73,9 @@ func add_or_update_score(decision string, pid, student_id, teacher_id, partial_c
 	mesg := ""
 
 	// Find score information for this student (student_id) for this problem (pid)
+
 	score_id, current_points, current_attempts, current_tid := 0, 0, 0, 0
-	rows, _ := Database.Query("select id, score, attempts, teacher_id from score where problem_id=? and student_id=?", pid, student_id)
+	rows, _ := Database.Query("select id, score, graded_submission_number, teacher_id from score where problem_id=? and student_id=?", pid, student_id)
 	for rows.Next() {
 		rows.Scan(&score_id, &current_points, &current_attempts, &current_tid)
 		break
