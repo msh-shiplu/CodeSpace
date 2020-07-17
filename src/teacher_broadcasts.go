@@ -19,7 +19,7 @@ func insert_problem(uid int, problem *ProblemInfo) {
 	pid := int64(0)
 	if problem.Merit > 0 {
 		// Find Tag id
-		rows, _ := Database.Query("select id from tag where description=?", problem.Tag)
+		rows, _ := Database.Query("select id from tag where topic_description=?", problem.Tag)
 		tagID := int64(0)
 		for rows.Next() {
 			rows.Scan(&tagID)
@@ -44,6 +44,7 @@ func insert_problem(uid int, problem *ProblemInfo) {
 			problem.Merit,
 			problem.Effort,
 			problem.Attempts,
+			problem.Topic_id,
 			int(tagID),
 			time.Now(),
 		)
@@ -70,6 +71,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 	merit, _ := strconv.Atoi(r.FormValue("merit"))
 	effort, _ := strconv.Atoi(r.FormValue("effort"))
 	attempts, _ := strconv.Atoi(r.FormValue("attempts"))
+	topic_id, _ := strconv.Atoi(r.FormValue("topic_id"))
 	tag := r.FormValue("tag")
 	filename := r.FormValue("filename")
 	exact_answer := r.FormValue("exact_answer")
@@ -83,6 +85,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 		Merit:       merit,
 		Effort:      effort,
 		Attempts:    attempts,
+		Topic_id:	topic_id,
 		Tag:         tag,
 		ExactAnswer: exact_answer == "True",
 	}
@@ -91,7 +94,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 	insert_problem(uid, problem)
 	BoardsSem.Lock()
 	defer BoardsSem.Unlock()
-	for stid, _ := range Students {
+	for student_id, _ := range Students {
 		b := &Board{
 			Content:      problem.Description,
 			Answer:       problem.Answer,
@@ -101,7 +104,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 			StartingTime: time.Now(),
 			Type:         "new",
 		}
-		Students[stid].Boards = append(Students[stid].Boards, b)
+		Students[student_id].Boards = append(Students[student_id].Boards, b)
 	}
 	fmt.Fprintf(w, "Content copied to white boards.")
 }

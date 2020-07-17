@@ -32,7 +32,7 @@ func reportHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Unauthorized")
 		return
 	}
-	rows, _ := Database.Query("select id, description from tag")
+	rows, _ := Database.Query("select id, topic_description from tag")
 	record := &TagsViewData{
 		Tags:            make(map[int]string),
 		SubmissionCount: make(map[string]int),
@@ -48,7 +48,7 @@ func reportHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	rows.Close()
 
-	rows, _ = Database.Query("select at from submission")
+	rows, _ = Database.Query("select code_submitted_at from submission")
 	var at time.Time
 	for rows.Next() {
 		rows.Scan(&at)
@@ -57,21 +57,21 @@ func reportHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	rows.Close()
 
-	rows, err := Database.Query("select score.points, score.attempts, score.stid, student.name from score join student on score.stid=student.id")
+	rows, err := Database.Query("select score.score, score.graded_submission_number, score.student_id, student.name from score join student on score.student_id=student.id")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	var points, attempts, stid int
+	var points, attempts, student_id int
 	var stname string
 	for rows.Next() {
-		rows.Scan(&points, &attempts, &stid, &stname)
-		if _, ok := record.Scores[stid]; !ok {
-			record.Scores[stid] = &ScoreEntry{Name: stname}
+		rows.Scan(&points, &attempts, &student_id, &stname)
+		if _, ok := record.Scores[student_id]; !ok {
+			record.Scores[student_id] = &ScoreEntry{Name: stname}
 		}
-		record.Scores[stid].Points += points
-		record.Scores[stid].Attempts += attempts
-		record.Scores[stid].Count += 1
+		record.Scores[student_id].Points += points
+		record.Scores[student_id].Attempts += attempts
+		record.Scores[student_id].Count += 1
 	}
 	rows.Close()
 
@@ -116,7 +116,7 @@ var TAGS_VIEW_TEMPLATE = `
         data.addColumn('number', 'Points');
         data.addColumn('number', 'Attempts');
         data.addRows([
-			{{ range $stid, $entry := .Scores }}
+			{{ range $student_id, $entry := .Scores }}
 				[{{$entry.Name}},{{$entry.Points}},{{$entry.Attempts}}],
 			{{ end }}
         ]);
@@ -172,24 +172,24 @@ func report_tagHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	tag_id := r.FormValue("tag_id")
-	row, _ := Database.Query("select description from tag where id=? limit 1", tag_id)
+	row, _ := Database.Query("select topic_description from tag where id=? limit 1", tag_id)
 	tag_description := ""
 	for row.Next() {
 		row.Scan(&tag_description)
 	}
 	row.Close()
 
-	query := "select problem.id, problem.merit, problem.at, score.points, score.stid from problem join score on problem.id=score.pid join student where problem.tag=?"
+	query := "select problem.id, problem.merit, problem.at, score.points, score.student_id from problem join score on problem.id=score.problem_id join student where problem.tag=?"
 	rows, err := Database.Query(query, tag_id)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	var pid, merit, points, stid int
+	var pid, merit, points, student_id int
 	var at time.Time
 	record := make(map[int]*ProblemPerformance)
 	for rows.Next() {
-		rows.Scan(&pid, &merit, &at, &points, &stid)
+		rows.Scan(&pid, &merit, &at, &points, &student_id)
 		if _, ok := record[pid]; !ok {
 			record[pid] = &ProblemPerformance{
 				Pid:       pid,

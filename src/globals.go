@@ -112,6 +112,7 @@ type ProblemInfo struct {
 	Merit       int
 	Effort      int
 	Attempts    int
+	Topic_id	int
 	Tag         string
 	Pid         int
 	ExactAnswer bool

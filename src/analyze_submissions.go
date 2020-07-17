@@ -31,13 +31,13 @@ func analyze_submissionsHandler(w http.ResponseWriter, r *http.Request) {
 	var sid, priority int
 	var start, at, completed time.Time
 
-	row, _ := Database.Query("select at from problem where id=?", pid)
+	row, _ := Database.Query("select problem_uploaded_at from problem where id=?", pid)
 	for row.Next() {
 		row.Scan(&start)
 	}
 	row.Close()
 
-	rows, _ := Database.Query("select sid, priority, at, completed from submission where pid=?", pid)
+	rows, _ := Database.Query("select student_id, submission_category, code_submitted_at, completed from submission where problem_id=?", pid)
 	for rows.Next() {
 		rows.Scan(&sid, &priority, &at, &completed)
 		if _, ok := records[sid]; !ok {
