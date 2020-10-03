@@ -16,6 +16,7 @@ import (
 func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	content, filename := r.FormValue("content"), r.FormValue("filename")
 	answer := r.FormValue("answer")
+	test_cases := r.FormValue("testcases")
 	priority, _ := strconv.Atoi(r.FormValue("priority"))
 	sid := int64(0)
 	correct_answer := ""
@@ -70,9 +71,26 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 				result, err = AddSubmissionSQL.Exec(pid, uid, content, priority, time.Now())
 			}
 			if err != nil {
+				
 				log.Fatal(err)
 			}
 			sid, _ = result.LastInsertId()
+			
+			if test_cases != "" {
+				rows, _ := Database.Query("select id from test_case where student_id=? and problem_id=?", uid, pid)
+				tc_id := 0
+				for rows.Next() {
+					rows.Scan(&tc_id)
+					break
+				}
+				rows.Close()
+				if tc_id != 0{
+					UpdateTestCaseSQL.Exec(test_cases, time.Now(), tc_id)
+				} else {
+					AddTestCaseSQL.Exec(pid, uid, test_cases, time.Now())
+				}
+				
+			}
 		}
 	}
 	if !complete {

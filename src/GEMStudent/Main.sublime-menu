@@ -18,6 +18,11 @@
                 "id": "gemsGotIt",
                 "command": "gems_got_it",
             },
+            {
+                "caption": "Add a test case",
+                "id": "gemAddTestCase",
+                "command": "gem_add_test_case",
+            },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Attendance",

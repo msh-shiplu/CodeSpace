@@ -131,9 +131,17 @@ def gems_share(self, edit, priority):
 		answer = items[1].strip()
 	else:
 		answer = ''
+	
+	if priority==1 and os.path.exists(fname+'.test_cases'):
+		with open(fname+'.test_cases', 'r') as f:
+			testCases = f.read()
+	else:
+		testCases = ''
+
 	data = dict(
 		content=content,
 		answer=answer,
+		testcases=testCases,
 		filename=os.path.basename(fname),
 		priority=priority,
 	)
@@ -471,6 +479,49 @@ class gemsSetName(sublime_plugin.ApplicationCommand):
 			sublime.message_dialog('Assigned name is set to ' + name)
 		else:
 			sublime.message_dialog("Name cannot be empty.")
+# ------------------------------------------------------------------
+
+class gemAddTestCase(sublime_plugin.ApplicationCommand):
+	def run(self):
+		
+		sublime.active_window().show_input_panel("Input: ",
+			"",
+			self.set_input,
+			None,
+			None)
+
+	def set_input(self, test_input):
+		test_input = test_input.strip()
+		if len(test_input) > 0:
+			self.test_input = test_input
+			sublime.active_window().show_input_panel("Expected Output: ",
+			"",
+			self.set_output,
+			None,
+			None)
+		else:
+			sublime.message_dialog("Input cannot be empty.")
+	
+	def set_output(self, expected_output):
+		expected_output = expected_output.strip()
+		if len(expected_output) > 0:
+			test_cases = []
+			testCaseFile = sublime.active_window().active_view().file_name()+".test_cases"
+			testCaseFile = os.path.join(os.path.dirname(os.path.realpath(__file__)), testCaseFile)
+			try:
+				with open(testCaseFile, 'r') as f:
+					test_cases = json.loads(f.read())
+			except:
+				test_cases = []
+			test_cases.append({'input': self.test_input, 'output': expected_output})
+
+			# with open(testCaseFile, 'w') as f:
+			# 	f.write(json.dumps(test_cases, indent=4))
+			json.dump(test_cases, open(testCaseFile, 'w'))
+			sublime.message_dialog('Test case saved successfully.')
+		else:
+			sublime.message_dialog("Expected output cannot be empty.")
+
 
 # ------------------------------------------------------------------
 class gemsUpdate(sublime_plugin.WindowCommand):

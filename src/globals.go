@@ -41,6 +41,8 @@ var AddFeedbackSQL *sql.Stmt
 var AddScoreSQL *sql.Stmt
 var UpdateScoreSQL *sql.Stmt
 var AddTagSQL *sql.Stmt
+var AddTestCaseSQL *sql.Stmt
+var UpdateTestCaseSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication
