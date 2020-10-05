@@ -5,6 +5,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -42,3 +43,28 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //-----------------------------------------------------------------------------------
+
+func testcase_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	filename := r.FormValue("file_name")
+	rows, err := Database.Query("select id from problem where filename=?", filename)
+	problem_id := 0
+	for rows.Next() {
+		rows.Scan(&problem_id)
+		break
+	}
+	rows.Close()
+	rows, err = Database.Query("select test_cases from test_case where problem_id=?", problem_id)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var test_cases = ""
+	for rows.Next() {
+		var tc = ""
+		rows.Scan(&tc)
+		if tc != "" {
+			test_cases += tc[1 : len(tc)-1]
+		}
+	}
+	fmt.Fprintf(w, "["+test_cases+"]")
+}

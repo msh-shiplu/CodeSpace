@@ -55,6 +55,8 @@ func init_handlers() {
 	http.HandleFunc("/teacher_gets_passcode", Authorize(teacher_gets_passcodeHandler))
 
 	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "pong") })
+
+	http.HandleFunc("/get_testcase", Authorize(testcase_getsHandler))
 }
 
 //-----------------------------------------------------------------

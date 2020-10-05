@@ -481,7 +481,7 @@ class gemsSetName(sublime_plugin.ApplicationCommand):
 			sublime.message_dialog("Name cannot be empty.")
 # ------------------------------------------------------------------
 
-class gemAddTestCase(sublime_plugin.ApplicationCommand):
+class gemsAddTestCase(sublime_plugin.ApplicationCommand):
 	def run(self):
 		
 		sublime.active_window().show_input_panel("Input: ",
@@ -522,6 +522,37 @@ class gemAddTestCase(sublime_plugin.ApplicationCommand):
 		else:
 			sublime.message_dialog("Expected output cannot be empty.")
 
+
+
+class gemsGetTestCase(sublime_plugin.TextCommand):
+	def run(self, edit):
+		fname = self.view.file_name()
+		fname = os.path.basename(fname)
+		if fname is None:
+			sublime.message_dialog('Cannot share unsaved content.')
+			return
+
+		response = gemsRequest('get_testcase', {'file_name': fname})
+		if response is None:
+			return
+			
+		json_obj = json.loads(response)
+		if json_obj =="":
+			sublime.message_dialog("No test case found for this problem. Try again later.")
+			return
+
+		content = ""
+		for i, tc in enumerate(json_obj, 1):
+			input = tc['input']
+			output = tc['output']
+			content += "Input "+str(i)+"\n"+input+"\nExpected Output for Input "+str(i)+"\n"+output+"\n\n\n"
+		
+		local_file = os.path.join(gemsFOLDER, fname+".test_case.txt")
+		with open(local_file, 'w', encoding='utf-8') as fp:
+			fp.write(content)
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
+		sublime.active_window().open_file(local_file)
 
 # ------------------------------------------------------------------
 class gemsUpdate(sublime_plugin.WindowCommand):
