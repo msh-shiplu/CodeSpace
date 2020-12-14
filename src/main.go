@@ -44,6 +44,8 @@ func init_handlers() {
 	http.HandleFunc("/bulletin_board_data", bulletin_board_dataHandler)
 	http.HandleFunc("/complete_registration", complete_registrationHandler)
 
+	http.HandleFunc("/student_ask_help", Authorize(studentAskHelpHandler))
+
 	http.HandleFunc("/teacher_gets_queue", Authorize(teacher_gets_queueHandler))
 	http.HandleFunc("/teacher_adds_bulletin_page", Authorize(teacher_adds_bulletin_pageHandler))
 	http.HandleFunc("/teacher_clears_submissions", Authorize(teacher_clears_submissionsHandler))
@@ -67,7 +69,9 @@ func informIPAddress() string {
 	}
 	for _, a := range addrs {
 		if ipnet, ok := a.(*net.IPNet); ok && ipnet.IP.IsGlobalUnicast() {
-			return ipnet.IP.String()
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
 		}
 	}
 	return ""

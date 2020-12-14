@@ -43,6 +43,7 @@ var UpdateScoreSQL *sql.Stmt
 var AddTagSQL *sql.Stmt
 var AddTestCaseSQL *sql.Stmt
 var UpdateTestCaseSQL *sql.Stmt
+var AddHelpSubmissionSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication
@@ -58,6 +59,7 @@ var Passcode string
 var BoardsSem sync.Mutex
 var SubSem sync.Mutex
 var BulletinSem sync.Mutex
+var HelpSubSem sync.Mutex
 
 //---------------------------------------------------------
 // Virtual boards for students and student submissions
@@ -107,6 +109,20 @@ var WorkingSubs = make([]*Submission, 0)
 var Submissions = make(map[int]*Submission)
 
 //---------------------------------------------------------
+
+type HelpSubmission struct {
+	Sid      int // submission id
+	Uid      int // student id
+	Pid      int // problem id
+	Content  string
+	Filename string
+	At       time.Time
+}
+
+var WorkingHelpSubs = make([]*HelpSubmission, 0)
+var HelpSubmissions = make(map[int]*HelpSubmission)
+
+//---------------------------------------------------------
 type ProblemInfo struct {
 	Description string
 	Filename    string
@@ -114,7 +130,7 @@ type ProblemInfo struct {
 	Merit       int
 	Effort      int
 	Attempts    int
-	Topic_id	int
+	Topic_id    int
 	Tag         string
 	Pid         int
 	ExactAnswer bool

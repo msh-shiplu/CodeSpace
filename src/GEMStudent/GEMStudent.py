@@ -154,7 +154,23 @@ def gems_share(self, edit, priority):
 # ------------------------------------------------------------------
 class gemsNeedHelp(sublime_plugin.TextCommand):
 	def run(self, edit):
-		gems_share(self, edit, priority=2)
+		# gems_share(self, edit, priority=2)
+		global gemsTracking
+		fname = self.view.file_name()
+		if fname is None:
+			sublime.message_dialog('Cannot share unsaved content.')
+			return
+		content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
+
+		data = dict(
+			content=content,
+			filename=os.path.basename(fname),
+		)
+		response = gemsRequest('student_ask_help', data)
+		sublime.message_dialog(response)
+		if gemsTracking==False:
+			gemsTracking = True
+			sublime.set_timeout_async(gems_periodic_update, 5000)
 
 # ------------------------------------------------------------------
 class gemsGotIt(sublime_plugin.TextCommand):

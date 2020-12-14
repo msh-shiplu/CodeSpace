@@ -29,6 +29,7 @@ func create_tables() {
 	execSQL("create table if not exists score (id integer primary key, problem_id integer, student_id integer, teacher_id integer, score integer, graded_submission_number integer, score_given_at timestamp, unique(problem_id,student_id))")
 	execSQL("create table if not exists feedback (id integer primary key, teacher_id integer, student_id integer, feedback text, feedback_given_at timestamp, submission_id integer)")
 	execSQL("create table if not exists test_case (id integer primary key, problem_id integer, student_id integer, test_cases text, added_at timestamp)")
+	execSQL("create table if not exists help_submission (id integer primary key, problem_id integer, student_id integer, student_code blob, code_submitted_at timestamp)")
 	// foreign key example: http://www.sqlitetutorial.net/sqlite-foreign-key/
 }
 
@@ -61,6 +62,7 @@ func init_database(db_name string) {
 	AddTagSQL = prepare("insert into tag (topic_description) values (?)")
 	AddTestCaseSQL = prepare("insert into test_case (problem_id, student_id, test_cases, added_at) values (?, ?, ?, ?)")
 	UpdateTestCaseSQL = prepare("update test_case set test_cases=?, added_at=? where id=?")
+	AddHelpSubmissionSQL = prepare("insert into help_submission (problem_id, student_id, student_code, code_submitted_at) values(?, ?, ?, ?)")
 	// Initialize passcode for current session and default board
 	Passcode = RandStringRunes(12)
 	Students[0] = &StudenInfo{
