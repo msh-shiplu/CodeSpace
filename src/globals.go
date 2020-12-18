@@ -171,3 +171,5 @@ func writeLog(filename, message string) {
 }
 
 //---------------------------------------------------------
+
+var HelpEligibleStudents = map[int]map[int]bool{}

@@ -45,6 +45,7 @@ func init_handlers() {
 	http.HandleFunc("/complete_registration", complete_registrationHandler)
 
 	http.HandleFunc("/student_ask_help", Authorize(studentAskHelpHandler))
+	http.HandleFunc("/student_get_help_code", Authorize(studentGetHelpCode))
 
 	http.HandleFunc("/teacher_gets_queue", Authorize(teacher_gets_queueHandler))
 	http.HandleFunc("/teacher_adds_bulletin_page", Authorize(teacher_adds_bulletin_pageHandler))

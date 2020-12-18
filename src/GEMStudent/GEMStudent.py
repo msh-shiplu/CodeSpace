@@ -600,3 +600,18 @@ class gemsUpdate(sublime_plugin.WindowCommand):
 			sublime.message_dialog("GEM has been updated to version {}.".format(version))
 
 # ------------------------------------------------------------------
+
+class gemsGetFriendCode(sublime_plugin.TextCommand):
+	def run(self):
+		filename = self.view.filename()
+		data = {"filename": filename}
+		response = gemsRequest("student_get_help_code", data)
+		sublime.message_dialog(response)
+
+class gemsSendHelpMessage(sublime_plugin.ApplicationCommand):
+	def run(self):
+		pass
+
+class gemsReturnFriendCode(sublime_plugin.ApplicationCommand):
+	def run(self):
+		pass

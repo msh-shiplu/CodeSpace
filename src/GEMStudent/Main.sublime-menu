@@ -14,6 +14,27 @@
                 "command": "gems_need_help",
             },
             {
+                "caption": "Help Friends",
+                "id": "gemsHelpFriends",
+                "children": [
+                {
+                    "caption": "Get a code",
+                    "id": "gemsGetFriendCode",
+                    "command": "gems_get_friend_code"
+                },
+                {
+                    "caption": "Send help message",
+                    "id": "gemsSendHelpMessage",
+                    "command": "gems_send_help_message"
+                },
+                {
+                    "caption": "Return code",
+                    "id": "gemsReturnFriendCode",
+                    "command": "gems_return_friend_code"
+                }
+                ]
+            },
+            {
                 "caption": "Submit code 😎",
                 "id": "gemsGotIt",
                 "command": "gems_got_it",
