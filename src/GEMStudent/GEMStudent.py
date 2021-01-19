@@ -29,6 +29,9 @@ gemsUpdateMessage = {
 	4 : "Your solution was correct.",
 }
 
+gemsCurrentHelpSubId = None
+gemsHelpRequestMessage = ["You have fetched a help request entry.", "There is no pending help request.", "You are not yet elligible to help"]
+
 # ------------------------------------------------------------------
 class gemsAttendanceReport(sublime_plugin.ApplicationCommand):
 	def run(self):
@@ -99,6 +102,8 @@ def gems_periodic_update():
 			mesg = gemsUpdateMessage[submission_stat]
 		if board_stat == 1:
 			mesg += "\nTeacher placed new material on your board."
+		elif board_stat == 2:
+			mesg += "\nYou have got a feedback on your board."
 		mesg = mesg.strip()
 		if mesg != "":
 			sublime.message_dialog(mesg)
@@ -202,6 +207,9 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
 			if board['Type'] == 'feedback':
 				local_file = os.path.join(feedback_dir, filename)
 				mesg = 'Teacher has some feedback for you.'
+			elif board['Type'] == 'peer_feedback':
+				local_file = os.path.join(feedback_dir, filename)
+				mesg = 'You have got a feedback'
 			else:
 				local_file = os.path.join(gemsFOLDER, filename)
 				if os.path.exists(local_file):
@@ -215,6 +223,8 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
 			if sublime.active_window().id() == 0:
 				sublime.run_command('new_window')
 			sublime.active_window().open_file(local_file)
+			if board['Type'] == 'peer_feedback':
+				sublime.active_window().active_view().set_read_only(True)
 			if mesg != '':
 				sublime.message_dialog(mesg)
 
@@ -411,7 +421,25 @@ class gemsSetServerAddress(sublime_plugin.ApplicationCommand):
 			info['Server'],
 			self.set,
 			None,
-			None)
+			self.on_cancel)
+
+	def  on_cancel(self):
+		print("line 417")
+		try:
+			with open(gemsFILE, 'r') as f:
+				info = json.loads(f.read())
+		except:
+			info = dict()
+
+		if 'Server' not in info:
+			info['Server'] = ''
+		sublime.active_window().show_input_panel("Set server address.  Press Enter:",
+			info['Server'],
+			self.set,
+			None,
+			self.on_cancel)
+
+
 
 	def set(self, addr):
 		addr = addr.strip()
@@ -600,18 +628,89 @@ class gemsUpdate(sublime_plugin.WindowCommand):
 			sublime.message_dialog("GEM has been updated to version {}.".format(version))
 
 # ------------------------------------------------------------------
-
 class gemsGetFriendCode(sublime_plugin.TextCommand):
-	def run(self):
-		filename = self.view.filename()
+
+	def is_enabled(self):
+		global gemsCurrentHelpSubId
+		if gemsCurrentHelpSubId is not None:
+			return False
+		return True
+
+	def run(self, edit):
+		global gemsCurrentHelpSubId
+		global gemsHelpRequestMessage
+		if gemsCurrentHelpSubId is not None:
+			sublime.message_dialog("You already have a submission to help")
+			return
+
+		filename = self.view.file_name()
+		# print(filename)
+		filename = os.path.basename(filename)
+		
 		data = {"filename": filename}
 		response = gemsRequest("student_get_help_code", data)
+		if response is None:
+			sublime.message_dialog("Could not load any help submission")
+			return
+		response = json.loads(response)
+		content = response['Content']
+		filename = response['Filename']
+		status = response['Status']
+		sublime.message_dialog(gemsHelpRequestMessage[status])
+		if status>0:
+			return
+		
+		gemsCurrentHelpSubId = response['Sid']
+		# print("Submission ID", gemsCurrentHelpSubId)
+		helpFolder = os.path.join(gemsFOLDER, "HelpSubmissions/")
+		if not os.path.exists(helpFolder):
+			os.mkdir(helpFolder)
+		
+		local_file = os.path.join(helpFolder, filename)
+		# print(helpFolder, local_file, filename)
+		with open(local_file, 'w', encoding='utf-8') as f:
+			f.write(content)
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
+		sublime.active_window().open_file(local_file)
+		# sublime.message_dialog("")
+		sublime.active_window().active_view().set_read_only(True)
+		sublime.active_window().show_input_panel("Write Help Message: ",
+			"",
+			self.send_help_message,
+			None,
+			None)
+
+	def send_help_message(self, message):
+		global gemsCurrentHelpSubId
+
+		if message is None or message == "":
+			sublime.message_dialog("Help message can not be empty!")
+			return
+		data = {"submission_id": gemsCurrentHelpSubId, "message": message}
+		response = gemsRequest("student_send_help_message", data)
+		gemsCurrentHelpSubId = None
 		sublime.message_dialog(response)
+		self.window.run_command("close")
 
-class gemsSendHelpMessage(sublime_plugin.ApplicationCommand):
-	def run(self):
-		pass
+class gemsReturnWithoutFeedback(sublime_plugin.WindowCommand):
 
-class gemsReturnFriendCode(sublime_plugin.ApplicationCommand):
+	def is_enabled(self):
+		global gemsCurrentHelpSubId
+		if gemsCurrentHelpSubId is None:
+			return False
+		return True
+
 	def run(self):
-		pass
+		global gemsCurrentHelpSubId
+		# print("Sub id in return", gemsCurrentHelpSubId)
+		if gemsCurrentHelpSubId is None:
+			sublime.message_dialog("You don't have any submission to return")
+			return
+
+		data = {"submission_id": gemsCurrentHelpSubId}
+		response = gemsRequest("student_return_without_feedback", data)
+		gemsCurrentHelpSubId = None
+		sublime.message_dialog(response)
+		self.window.run_command("close")
+

@@ -18,19 +18,14 @@
                 "id": "gemsHelpFriends",
                 "children": [
                 {
-                    "caption": "Get a code",
+                    "caption": "View help request",
                     "id": "gemsGetFriendCode",
                     "command": "gems_get_friend_code"
                 },
                 {
-                    "caption": "Send help message",
-                    "id": "gemsSendHelpMessage",
-                    "command": "gems_send_help_message"
-                },
-                {
-                    "caption": "Return code",
-                    "id": "gemsReturnFriendCode",
-                    "command": "gems_return_friend_code"
+                    "caption": "Return without feedback",
+                    "id": "gemsReturnWithoutFeedback",
+                    "command": "gems_return_without_feedback"
                 }
                 ]
             },
@@ -38,16 +33,6 @@
                 "caption": "Submit code 😎",
                 "id": "gemsGotIt",
                 "command": "gems_got_it",
-            },
-            {
-                "caption": "Add a test case",
-                "id": "gemsAddTestCase",
-                "command": "gems_add_test_case",
-            },
-			{
-                "caption": "Get test cases",
-                "id": "gemsGetTestCase",
-                "command": "gems_get_test_case",
             },
             {"caption":"-", "id":"side-bar-separator"},
             {

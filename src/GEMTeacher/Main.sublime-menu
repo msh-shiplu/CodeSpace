@@ -10,9 +10,20 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Get a need-help entry",
-                "id": "gemtGetFromNeedHelp",
-                "command": "gemt_get_from_need_help",
+                "caption": "Help Students",
+                "id": "gemsHelpFriends",
+                "children": [
+                {
+                    "caption": "View help request",
+                    "id": "gemsGetFriendCode",
+                    "command": "gems_get_friend_code"
+                },
+                {
+                    "caption": "Return without feedback",
+                    "id": "gemsReturnWithoutFeedback",
+                    "command": "gems_return_without_feedback"
+                }
+                ]
             },
             {
                 "caption": "Get a submission entry",

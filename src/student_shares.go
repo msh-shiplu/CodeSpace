@@ -94,6 +94,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			if ActiveProblems[filename].Attempts[uid] == 0 {
 				if _, ok := HelpEligibleStudents[pid][uid]; !ok {
 					HelpEligibleStudents[pid][uid] = true
+					SeenHelpSubmissions[uid] = map[int]bool{}
 					// fmt.Fprintf(w, "You are now elligible to help you friends. To help please click on 'Help Friends' button.")
 					msg = msg + "\nYou are now elligible to help you friends. To help please click on 'Help Friends' button."
 				}

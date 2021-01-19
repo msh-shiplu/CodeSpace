@@ -106,6 +106,9 @@ func complete_registrationHandler(w http.ResponseWriter, r *http.Request) {
 		// 	msg = fmt.Sprintf("%d,%s,%s", id, password, Config.CourseId)
 		// }
 		fmt.Fprintf(w, msg)
+		if role == "teacher" {
+			SeenHelpSubmissions[id] = map[int]bool{}
+		}
 		return
 	}
 	fmt.Fprintf(w, "Failed")

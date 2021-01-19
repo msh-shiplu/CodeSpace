@@ -44,6 +44,7 @@ var AddTagSQL *sql.Stmt
 var AddTestCaseSQL *sql.Stmt
 var UpdateTestCaseSQL *sql.Stmt
 var AddHelpSubmissionSQL *sql.Stmt
+var AddHelpMessageSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication
@@ -114,6 +115,7 @@ type HelpSubmission struct {
 	Sid      int // submission id
 	Uid      int // student id
 	Pid      int // problem id
+	Status   int // 0=ok, 1=queue empty, 2=not elligible
 	Content  string
 	Filename string
 	At       time.Time
@@ -173,3 +175,4 @@ func writeLog(filename, message string) {
 //---------------------------------------------------------
 
 var HelpEligibleStudents = map[int]map[int]bool{}
+var SeenHelpSubmissions = map[int]map[int]bool{}

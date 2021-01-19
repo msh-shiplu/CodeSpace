@@ -78,9 +78,9 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			Students[sub.Uid].SubmissionStatus = 4
 			ActiveProblems[sub.Filename].Attempts[student_id] = 0 // This prevents further submission.
 			pid := sub.Pid
-			if _, ok := HelpEligibleStudents[pid][uid]; !ok {
-				HelpEligibleStudents[pid][uid] = true
-
+			if _, ok := HelpEligibleStudents[pid][sub.Uid]; !ok {
+				HelpEligibleStudents[pid][sub.Uid] = true
+				SeenHelpSubmissions[sub.Uid] = map[int]bool{}
 				mesg = mesg + "\nYou are now elligible to help you friends. To help please click on 'Help Friends' button."
 			}
 		} else {

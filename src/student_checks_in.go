@@ -38,6 +38,12 @@ func student_periodic_updateHandler(w http.ResponseWriter, r *http.Request, who 
 	board_stat := 0
 	if len(Students[uid].Boards) > 0 {
 		board_stat = 1
+		for _, b := range Students[uid].Boards {
+			if b.Type == "peer_feedback" {
+				board_stat = 2
+				break
+			}
+		}
 	}
 	Students[uid].SubmissionStatus = 0 // reset status after notifying student
 	fmt.Fprintf(w, "%d;%d", submission_stat, board_stat)
