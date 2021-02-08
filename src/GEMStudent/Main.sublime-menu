@@ -14,25 +14,15 @@
                 "command": "gems_need_help",
             },
             {
-                "caption": "Help Friends",
-                "id": "gemsHelpFriends",
-                "children": [
-                {
-                    "caption": "View help request",
-                    "id": "gemsGetFriendCode",
-                    "command": "gems_get_friend_code"
-                },
-                {
-                    "caption": "Return without feedback",
-                    "id": "gemsReturnWithoutFeedback",
-                    "command": "gems_return_without_feedback"
-                }
-                ]
-            },
-            {
                 "caption": "Submit code 😎",
                 "id": "gemsGotIt",
                 "command": "gems_got_it",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
+                "caption": "Help Friends",
+                "id": "gemsGetFriendCode",
+                "command": "gems_get_friend_code",
             },
             {"caption":"-", "id":"side-bar-separator"},
             {

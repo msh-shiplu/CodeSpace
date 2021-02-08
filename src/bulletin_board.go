@@ -123,7 +123,7 @@ func get_bulletin_board_data(i int, passcode string) *BulletinBoardMessage {
 		PrevI:          prev_i,
 		PC:             passcode,
 		P1:             priority[1],
-		P2:             priority[2],
+		P2:             len(WorkingHelpSubs),
 		ActiveProblems: active_problems,
 		// ActiveProblems: len(ActiveProblems),
 		BulletinItems: len(BulletinBoard),

@@ -23,13 +23,13 @@ func teacherGetHelpCode(w http.ResponseWriter, r *http.Request, who string, uid 
 	// fmt.Fprint(w, "This problem is not active.")
 
 	for idx, sub := range WorkingHelpSubs {
-		if _, ok := SeenHelpSubmissions[uid][sub.Sid]; !ok {
-			selected = sub
-			WorkingHelpSubs = append(WorkingHelpSubs[:idx], WorkingHelpSubs[idx+1:]...)
-			SeenHelpSubmissions[uid][sub.Sid] = true
-			selected.Status = 0
-			break
-		}
+		// if _, ok := SeenHelpSubmissions[uid][sub.Sid]; !ok {
+		selected = sub
+		WorkingHelpSubs = append(WorkingHelpSubs[:idx], WorkingHelpSubs[idx+1:]...)
+		SeenHelpSubmissions[uid][sub.Sid] = true
+		selected.Status = 0
+		break
+		// }
 	}
 
 	// fmt.Fprintf(w, "You are elligible to help in this problem.")
@@ -53,7 +53,7 @@ func teacher_return_without_feedbackHandler(w http.ResponseWriter, r *http.Reque
 	submissionID, _ := strconv.Atoi(tmp)
 	submission := HelpSubmissions[submissionID]
 	WorkingHelpSubs = append(WorkingHelpSubs, submission)
-	fmt.Fprint(w, "Submission returned successfully!")
+	fmt.Fprint(w, "No feedback is given. This request is returned to the help queue.")
 }
 
 func teacher_send_help_messageHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
@@ -72,7 +72,7 @@ func teacher_send_help_messageHandler(w http.ResponseWriter, r *http.Request, wh
 	// rows.Close()
 	helpSub := HelpSubmissions[submission_id]
 	student_id := helpSub.Uid
-	message = "Feedback: " + message + "\n\n" + "Your Code:\n" + helpSub.Content
+	message = helpSub.Content + "\n\nFeedback: " + message
 	b := &Board{
 		Content:      message,
 		Answer:       "",
@@ -83,6 +83,6 @@ func teacher_send_help_messageHandler(w http.ResponseWriter, r *http.Request, wh
 		Type:         "peer_feedback",
 	}
 	Students[student_id].Boards = append(Students[student_id].Boards, b)
-	fmt.Fprint(w, "Message send successfully!")
+	fmt.Fprint(w, "Your feedback has been sent.")
 
 }

@@ -10,21 +10,11 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Help Students",
-                "id": "gemsHelpFriends",
-                "children": [
-                {
-                    "caption": "View help request",
-                    "id": "gemsGetFriendCode",
-                    "command": "gems_get_friend_code"
-                },
-                {
-                    "caption": "Return without feedback",
-                    "id": "gemsReturnWithoutFeedback",
-                    "command": "gems_return_without_feedback"
-                }
-                ]
+                "caption": "Get help request",
+                "id": "gemtGetHelpCode",
+                "command": "gemt_get_help_code"
             },
+            {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Get a submission entry",
                 "id": "gemtGetFromOk",

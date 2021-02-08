@@ -48,6 +48,7 @@ func init_handlers() {
 	http.HandleFunc("/student_get_help_code", Authorize(studentGetHelpCode))
 	http.HandleFunc("/student_return_without_feedback", Authorize(student_return_without_feedbackHandler))
 	http.HandleFunc("/student_send_help_message", Authorize(student_send_help_messageHandler))
+	http.HandleFunc("/student_send_thank_you", Authorize(sendThankYouHandler))
 
 	http.HandleFunc("/teacher_get_help_code", Authorize(teacherGetHelpCode))
 	http.HandleFunc("/teacher_return_without_feedback", Authorize(teacher_return_without_feedbackHandler))

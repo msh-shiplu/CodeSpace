@@ -17,7 +17,7 @@ func studentAskHelpHandler(w http.ResponseWriter, r *http.Request, who string, u
 	sid := int64(0)
 
 	var err error
-	msg := "Your help request will be looked at soon."
+	msg := "your help message has been sent"
 
 	pid := 0
 	prob, ok := ActiveProblems[filename]

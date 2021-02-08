@@ -668,7 +668,7 @@ class gemtUpdate(sublime_plugin.WindowCommand):
 
 # ------------------------------------------------------------------
 
-class gemsGetFriendCode(sublime_plugin.TextCommand):
+class gemtGetHelpCode(sublime_plugin.TextCommand):
 
 	def is_enabled(self):
 		global gemsCurrentHelpSubId
@@ -679,10 +679,7 @@ class gemsGetFriendCode(sublime_plugin.TextCommand):
 	def run(self, edit):
 		global gemsCurrentHelpSubId
 		global gemsHelpRequestMessage
-		if gemsCurrentHelpSubId is not None:
-			sublime.message_dialog("You already have a submission to help")
-			return
-
+		
 		# filename = self.view.file_name()
 		# # print(filename)
 		# filename = os.path.basename(filename)
@@ -696,8 +693,9 @@ class gemsGetFriendCode(sublime_plugin.TextCommand):
 		content = response['Content']
 		filename = response['Filename']
 		status = response['Status']
-		sublime.message_dialog(gemsHelpRequestMessage[status])
+		
 		if status>0:
+			sublime.message_dialog(gemsHelpRequestMessage[status])
 			return
 		
 		gemsCurrentHelpSubId = response['Sid']
@@ -713,44 +711,65 @@ class gemsGetFriendCode(sublime_plugin.TextCommand):
 		if sublime.active_window().id() == 0:
 			sublime.run_command('new_window')
 		sublime.active_window().open_file(local_file)
-		# sublime.message_dialog("")
+		# sublime.message_dialog("sublime.message_dialog("Press Enter to send feedback. Press Esc to return without feedback.")")
 		sublime.active_window().active_view().set_read_only(True)
-		sublime.active_window().show_input_panel("Write Help Message: ",
+		sublime.message_dialog("Press Enter to send feedback. Press Esc to return without feedback.")
+		sublime.active_window().show_input_panel("Feedback: ",
 			"",
 			self.send_help_message,
 			None,
-			None)
+			self.return_without_feedback)
+
+	# def force_on_cancel(self):
+	# 	sublime.active_window().show_input_panel("Write Help Message: ",
+	# 		"",
+	# 		self.send_help_message,
+	# 		None,
+	# 		self.force_on_cancel)
 
 	def send_help_message(self, message):
 		global gemsCurrentHelpSubId
 
 		if message is None or message == "":
-			sublime.message_dialog("Help message can not be empty!")
-			return
-		data = {"submission_id": gemsCurrentHelpSubId, "message": message}
-		response = gemtRequest("teacher_send_help_message", data)
-		gemsCurrentHelpSubId = None
-		sublime.message_dialog(response)
-		self.window.run_command("close")
+			self.return_without_feedback()
+			# sublime.message_dialog("This entry is returned without feedback!")
+		else:
+			data = {"submission_id": gemsCurrentHelpSubId, "message": message}
+			response = gemtRequest("teacher_send_help_message", data)
+			gemsCurrentHelpSubId = None
+			sublime.active_window().run_command("close")
+			sublime.message_dialog(response)
+			
 
-class gemsReturnWithoutFeedback(sublime_plugin.WindowCommand):
-
-	def is_enabled(self):
+	def return_without_feedback(self):
 		global gemsCurrentHelpSubId
-		if gemsCurrentHelpSubId is None:
-			return False
-		return True
-
-	def run(self):
-		global gemsCurrentHelpSubId
-		# print("Sub id in return", gemsCurrentHelpSubId)
-		if gemsCurrentHelpSubId is None:
-			sublime.message_dialog("You don't have any submission to return")
-			return
-
 		data = {"submission_id": gemsCurrentHelpSubId}
 		response = gemtRequest("teacher_return_without_feedback", data)
 		gemsCurrentHelpSubId = None
+		sublime.active_window().run_command("close")
 		sublime.message_dialog(response)
-		self.window.run_command("close")
+		
+
+
+# class gemsReturnWithoutFeedback(sublime_plugin.WindowCommand):
+
+# 	def is_enabled(self):
+# 		global gemsCurrentHelpSubId
+# 		if gemsCurrentHelpSubId is None:
+# 			return False
+# 		return True
+
+# 	def run(self):
+# 		global gemsCurrentHelpSubId
+# 		# print("Sub id in return", gemsCurrentHelpSubId)
+# 		if gemsCurrentHelpSubId is None:
+# 			sublime.message_dialog("You don't have any submission to return")
+# 			return
+
+# 		data = {"submission_id": gemsCurrentHelpSubId}
+# 		response = gemtRequest("teacher_return_without_feedback", data)
+# 		gemsCurrentHelpSubId = None
+# 		sublime.message_dialog(response)
+# 		self.window.run_command("close")
+# 		self.window.run_command("hide_panel", {"cancel": False})
 

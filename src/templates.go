@@ -115,8 +115,8 @@ var TEACHER_MESSAGING_TEMPLATE = `
 	<pre class="prettyprint linenums">{{.Code}}</pre>
 
 	<div class="bottom">
-	<div class="label">&#128546;</div><div id="p2">{{.P2}}</div>
-	<div class="label">&#128526;</div><div id="p1">{{.P1}}</div>
+	<div class="label">Help Requests:</div><div id="p2">{{.P2}}</div>
+	<div class="label">Submissions:</div><div id="p1">{{.P1}}</div>
 	<div class="label">Answers:</div><div id="ans">{{.AnswerCount}}</div>
 	<div class="label"></div><div id="ap">{{.ActiveProblems}}</div>
 	<div class="label">Bulletin:</div><div id="bu">{{.BulletinItems}}</div>

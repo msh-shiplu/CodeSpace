@@ -15,7 +15,6 @@ import (
 //-----------------------------------------------------------------------------------
 func studentGetHelpCode(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	filename := r.FormValue("filename")
-
 	pid := 0
 	prob, ok := ActiveProblems[filename]
 	HelpSubSem.Lock()
@@ -67,16 +66,17 @@ func student_return_without_feedbackHandler(w http.ResponseWriter, r *http.Reque
 	submissionID, _ := strconv.Atoi(tmp)
 	submission := HelpSubmissions[submissionID]
 	WorkingHelpSubs = append(WorkingHelpSubs, submission)
-	fmt.Fprint(w, "Submission returned successfully!")
+	fmt.Fprint(w, "No feedback is given. This request is returned to the help queue.")
 }
 
 func student_send_help_messageHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	submission_id, _ := strconv.Atoi(r.FormValue("submission_id"))
 	message := r.FormValue("message")
-	_, err := AddHelpMessageSQL.Exec(submission_id, uid, message, time.Now())
+	res, err := AddHelpMessageSQL.Exec(submission_id, uid, message, time.Now())
 	if err != nil {
 		log.Fatal(err)
 	}
+	message_id, _ := res.LastInsertId()
 	// student_id := 0
 	// rows, _ := Database.Query("select student_id from help_submission where id=?", submission_id)
 	// for rows.Next() {
@@ -86,17 +86,35 @@ func student_send_help_messageHandler(w http.ResponseWriter, r *http.Request, wh
 	// rows.Close()
 	helpSub := HelpSubmissions[submission_id]
 	student_id := helpSub.Uid
-	message = "Feedback: " + message + "\n\n" + "Your Code:\n" + helpSub.Content
+	message = helpSub.Content + "\n\nFeedback: " + message
 	b := &Board{
 		Content:      message,
 		Answer:       "",
 		Attempts:     0,
 		Filename:     "peer_feedback.txt",
-		Pid:          0,
+		Pid:          int(message_id),
 		StartingTime: time.Now(),
 		Type:         "peer_feedback",
 	}
 	Students[student_id].Boards = append(Students[student_id].Boards, b)
-	fmt.Fprint(w, "Dear "+who+" Message send successfully!")
+	fmt.Fprint(w, "Dear "+who+", Your feedback has been sent.")
+
+}
+func sendThankYouHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	message_id, _ := strconv.Atoi(r.FormValue("message_id"))
+	useful := r.FormValue("useful")
+	_, err := UpdateHelpMessageSQL.Exec(useful, time.Now(), message_id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if useful == "yes" {
+		studentID := 0
+		rows, _ := Database.Query("select student_id from help_message where id=?", message_id)
+		for rows.Next() {
+			rows.Scan(&studentID)
+			break
+		}
+		Students[studentID].ThankStatus = 1
+	}
 
 }
