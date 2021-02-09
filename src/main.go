@@ -75,10 +75,24 @@ func informIPAddress() string {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// for _, a := range addrs {
+	// if ipnet, ok := a.(*net.IPNet); ok && ipnet.IP.IsGlobalUnicast() {
+	// if ipnet.IP.To4() != nil {
+	// return ipnet.IP.String()
+	// }
+	// }
+	// }
 	for _, a := range addrs {
 		if ipnet, ok := a.(*net.IPNet); ok && ipnet.IP.IsGlobalUnicast() {
-			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String()
+			ip4 := ipnet.IP.To4()
+			if ip4 != nil {
+				switch {
+				// case ip4[0] == 10:
+				case ip4[0] == 172 && ip4[1] >= 16 && ip4[1] <= 31:
+				case ip4[0] == 192 && ip4[1] == 168:
+				default:
+					return ip4.String()
+				}
 			}
 		}
 	}

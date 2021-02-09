@@ -114,6 +114,7 @@ func sendThankYouHandler(w http.ResponseWriter, r *http.Request, who string, uid
 			rows.Scan(&studentID)
 			break
 		}
+		rows.Close()
 		Students[studentID].ThankStatus = 1
 	}
 
