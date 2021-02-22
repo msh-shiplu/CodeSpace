@@ -24,6 +24,10 @@ type BulletinBoardMessage struct {
 	PC             string
 	P1             int
 	P2             int
+	P1Graded       int
+	P1Ungraded     int
+	P2Answered     int
+	P2Unanswered   int
 	ActiveProblems string
 	// ActiveProblems int
 	BulletinItems int
@@ -122,8 +126,12 @@ func get_bulletin_board_data(i int, passcode string) *BulletinBoardMessage {
 		NextI:          next_i,
 		PrevI:          prev_i,
 		PC:             passcode,
-		P1:             priority[1],
-		P2:             len(WorkingHelpSubs),
+		P1:             len(Submissions),
+		P1Graded:       len(Submissions) - len(WorkingSubs),
+		P1Ungraded:     len(WorkingSubs),
+		P2:             len(HelpSubmissions),
+		P2Answered:     len(HelpSubmissions) - len(WorkingHelpSubs),
+		P2Unanswered:   len(WorkingHelpSubs),
 		ActiveProblems: active_problems,
 		// ActiveProblems: len(ActiveProblems),
 		BulletinItems: len(BulletinBoard),
@@ -132,6 +140,7 @@ func get_bulletin_board_data(i int, passcode string) *BulletinBoardMessage {
 		Address:       Config.Address,
 		Authenticated: passcode == Passcode,
 	}
+	// log.Println("bulletin: ", len(WorkingHelpSubs), len(HelpSubmissions))
 	return data
 }
 

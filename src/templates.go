@@ -39,10 +39,10 @@ var TEACHER_MESSAGING_TEMPLATE = `
 					console.log(data);
 					$("#p1").html(data["P1"]);
 					$("#p2").html(data["P2"]);
-					$("#ans").html(data["AnswerCount"]);
-					$("#ap").html(data["ActiveProblems"]);
-					$("#bu").html(data["BulletinItems"]);
-					$("#at").html(data["Attendance"]);
+					$("#p1u").html(data["P1Ungraded"]);
+					$("#p1g").html(data["P1Graded"]);
+					$("#p2u").html(data["P2Unanswered"]);
+					$("#p2a").html(data["P2Answered"]);
 				});
 			}
 			$(document).ready(function(){
@@ -58,13 +58,26 @@ var TEACHER_MESSAGING_TEMPLATE = `
 			text-align: center;
 			width: 100%;
 		}
+		.bottom_left {
+			position: fixed;
+			bottom: 0;
+			text-align: left,
+			width: 50%;
+		}
+		.bottom_right {
+			position: fixed;
+			bottom: 0;
+			right: 50px;
+			text-align: right,
+			width: 50%;
+		}
 		.label{ display: inline; }
-		#p1, #p2, #ans, #ap, #bu, #at {
+		#p1, #p2, #p1g, #p1u, #p2a, #p2u, #ans, #ap, #bu, #at {
 			padding: 0.75em;
 			display: inline;
 		}
-		#p1 { color: green; }
-		#p2 { color: red; }
+		#p1g, #p2a { color: green; }
+		#p1u, #p2u { color: red; }
 		pre {
 			font-family: monospace;
 			font-size:120%;
@@ -114,13 +127,15 @@ var TEACHER_MESSAGING_TEMPLATE = `
 	</div>
 	<pre class="prettyprint linenums">{{.Code}}</pre>
 
-	<div class="bottom">
-	<div class="label">Help Requests:</div><div id="p2">{{.P2}}</div>
-	<div class="label">Submissions:</div><div id="p1">{{.P1}}</div>
-	<div class="label">Answers:</div><div id="ans">{{.AnswerCount}}</div>
-	<div class="label"></div><div id="ap">{{.ActiveProblems}}</div>
-	<div class="label">Bulletin:</div><div id="bu">{{.BulletinItems}}</div>
-	<div class="label">Attendance:</div><div id="at">{{.Attendance}}</div>
+	<div class="bottom_left">
+		<div id="p2">{{.P2}}</div> <div class="label">Help Requests:</div>
+		<div id="p2u">{{.P2Unanswered}}</div> <div class="label">Pending,</div>
+		<div id="p2a">{{.P2Answered}}</div> <div class="label">Answered</div>
+	</div>
+	<div class="bottom_right">
+		<div id="p1">{{.P1}}</div> <div class="label">Submissions:</div>
+		<div id="p1u">{{.P1Ungraded}}</div> <div class="label">Pending,</div>
+		<div id="p1g">{{.P1Graded}}</div> <div class="label">Graded</div>
 	</div>
 	</body>
 </html>
