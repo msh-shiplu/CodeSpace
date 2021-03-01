@@ -14,7 +14,7 @@ import (
 //-----------------------------------------------------------------------------------
 func studentAskHelpHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	content, filename := r.FormValue("content"), r.FormValue("filename")
-	trying_what, need_help_with := r.FormValue("trying_what"), r.FormValue("need_help_with")
+	need_help_with := r.FormValue("need_help_with")
 	sid := int64(0)
 
 	var err error
@@ -32,7 +32,7 @@ func studentAskHelpHandler(w http.ResponseWriter, r *http.Request, who string, u
 				ActiveProblems[filename].Attempts[uid] = prob.Info.Attempts
 			}
 			var result sql.Result
-			result, err = AddHelpSubmissionSQL.Exec(pid, uid, content, trying_what, need_help_with, time.Now())
+			result, err = AddHelpSubmissionSQL.Exec(pid, uid, content, "", need_help_with, time.Now())
 
 			if err != nil {
 				log.Fatal(err)

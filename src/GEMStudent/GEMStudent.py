@@ -179,26 +179,26 @@ class gemsNeedHelp(sublime_plugin.TextCommand):
 		if fname is None:
 			sublime.message_dialog('Cannot share unsaved content.')
 			return
-		sublime.message_dialog("Answer these two questions below to get the best help on this problem.")
-		sublime.active_window().show_input_panel("Explain what you are trying to do:", "", self.get_trying_what, None, self.get_trying_what)
+		sublime.message_dialog("Walk me through your thought process for what you are trying to accomplish.")
+		sublime.active_window().show_input_panel("Click Enter to send help request:", "", self.get_need_help_with, None, self.get_need_help_with)
 		
 
-	def get_trying_what(self, trying_what_message=""):
-		self.trying_what_message = trying_what_message
-		sublime.active_window().show_input_panel("Explain what you need help with:", "", self.get_need_help_with, None, self.get_need_help_with)
+	# def get_trying_what(self, trying_what_message=""):
+	# 	self.trying_what_message = trying_what_message
+	# 	sublime.active_window().show_input_panel("Explain what you need help with:", "", self.get_need_help_with, None, self.get_need_help_with)
 
 	def get_need_help_with(self, need_help_with_message=""):
 		global gemsTracking
 		fname = self.view.file_name()
 		content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
 
-		content += "\n\n# Explain what you are trying to do: "+self.trying_what_message
+		# content += "\n\n# Explain what you are trying to do: "+self.trying_what_message
 		content += "\n\n# Explain what you need help with: "+need_help_with_message
 
 		data = dict(
 			content=content,
 			filename=os.path.basename(fname),
-			trying_what=self.trying_what_message,
+			# trying_what=self.trying_what_message,
 			need_help_with=need_help_with_message,
 		)
 		response = gemsRequest('student_ask_help', data)
