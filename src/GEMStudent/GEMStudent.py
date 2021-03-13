@@ -237,7 +237,7 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
 			if board['Type'] in ['feedback','peer_feedback']:
 				local_file = os.path.join(feedback_dir, filename)
 				mesg = 'You have feedback'
-				sublime.active_window().active_view().set_read_only(True)
+				
 				if board['Type'] == "peer_feedback":
 					self.message_id = board['Pid']
 					sublime.active_window().show_input_panel("Was this feedback useful?", "Type 'yes' or 'no', then hit Enter",
@@ -258,8 +258,8 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
 			if sublime.active_window().id() == 0:
 				sublime.run_command('new_window')
 			sublime.active_window().open_file(local_file)
-			# if board['Type'] == 'peer_feedback':
-			# 	sublime.active_window().active_view().set_read_only(True)
+			if board['Type'] == 'peer_feedback':
+				sublime.active_window().active_view().set_read_only(True)
 			# if mesg != '':
 			# 	sublime.message_dialog(mesg)
 	def send_thank_you(self, message):
