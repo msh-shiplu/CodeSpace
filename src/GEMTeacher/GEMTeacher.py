@@ -18,8 +18,8 @@ gemtTIMEOUT = 7
 gemtStudentSubmissions = {}
 gemtFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemtSERVER = ''
-gemsCurrentHelpSubId = None
-gemsHelpRequestMessage = ["You have fetched a help request entry.", "There is no pending help request."]
+gemtCurrentHelpSubId = None
+gemtHelpRequestMessage = ["You have fetched a help request entry.", "There is no pending help request."]
 
 # ------------------------------------------------------------------
 # ------------------------------------------------------------------
@@ -671,14 +671,14 @@ class gemtUpdate(sublime_plugin.WindowCommand):
 class gemtGetHelpCode(sublime_plugin.TextCommand):
 
 	def is_enabled(self):
-		global gemsCurrentHelpSubId
-		if gemsCurrentHelpSubId is not None:
+		global gemtCurrentHelpSubId
+		if gemtCurrentHelpSubId is not None:
 			return False
 		return True
 
 	def run(self, edit):
-		global gemsCurrentHelpSubId
-		global gemsHelpRequestMessage
+		global gemtCurrentHelpSubId
+		global gemtHelpRequestMessage
 		
 		# filename = self.view.file_name()
 		# # print(filename)
@@ -695,11 +695,11 @@ class gemtGetHelpCode(sublime_plugin.TextCommand):
 		status = response['Status']
 		
 		if status>0:
-			sublime.message_dialog(gemsHelpRequestMessage[status])
+			sublime.message_dialog(gemtHelpRequestMessage[status])
 			return
 		
-		gemsCurrentHelpSubId = response['Sid']
-		# print("Submission ID", gemsCurrentHelpSubId)
+		gemtCurrentHelpSubId = response['Sid']
+		# print("Submission ID", gemtCurrentHelpSubId)
 		helpFolder = os.path.join(gemtFOLDER, "HelpSubmissions/")
 		if not os.path.exists(helpFolder):
 			os.mkdir(helpFolder)
@@ -728,24 +728,24 @@ class gemtGetHelpCode(sublime_plugin.TextCommand):
 	# 		self.force_on_cancel)
 
 	def send_help_message(self, message):
-		global gemsCurrentHelpSubId
+		global gemtCurrentHelpSubId
 
 		if message is None or message == "":
 			self.return_without_feedback()
 			# sublime.message_dialog("This entry is returned without feedback!")
 		else:
-			data = {"submission_id": gemsCurrentHelpSubId, "message": message}
+			data = {"submission_id": gemtCurrentHelpSubId, "message": message}
 			response = gemtRequest("teacher_send_help_message", data)
-			gemsCurrentHelpSubId = None
+			gemtCurrentHelpSubId = None
 			sublime.active_window().run_command("close")
 			sublime.message_dialog(response)
 			
 
 	def return_without_feedback(self):
-		global gemsCurrentHelpSubId
-		data = {"submission_id": gemsCurrentHelpSubId}
+		global gemtCurrentHelpSubId
+		data = {"submission_id": gemtCurrentHelpSubId}
 		response = gemtRequest("teacher_return_without_feedback", data)
-		gemsCurrentHelpSubId = None
+		gemtCurrentHelpSubId = None
 		sublime.active_window().run_command("close")
 		sublime.message_dialog(response)
 		
@@ -754,21 +754,21 @@ class gemtGetHelpCode(sublime_plugin.TextCommand):
 # class gemsReturnWithoutFeedback(sublime_plugin.WindowCommand):
 
 # 	def is_enabled(self):
-# 		global gemsCurrentHelpSubId
-# 		if gemsCurrentHelpSubId is None:
+# 		global gemtCurrentHelpSubId
+# 		if gemtCurrentHelpSubId is None:
 # 			return False
 # 		return True
 
 # 	def run(self):
-# 		global gemsCurrentHelpSubId
-# 		# print("Sub id in return", gemsCurrentHelpSubId)
-# 		if gemsCurrentHelpSubId is None:
+# 		global gemtCurrentHelpSubId
+# 		# print("Sub id in return", gemtCurrentHelpSubId)
+# 		if gemtCurrentHelpSubId is None:
 # 			sublime.message_dialog("You don't have any submission to return")
 # 			return
 
-# 		data = {"submission_id": gemsCurrentHelpSubId}
+# 		data = {"submission_id": gemtCurrentHelpSubId}
 # 		response = gemtRequest("teacher_return_without_feedback", data)
-# 		gemsCurrentHelpSubId = None
+# 		gemtCurrentHelpSubId = None
 # 		sublime.message_dialog(response)
 # 		self.window.run_command("close")
 # 		self.window.run_command("hide_panel", {"cancel": False})
