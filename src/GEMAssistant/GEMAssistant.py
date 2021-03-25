@@ -19,6 +19,9 @@ gemaStudentSubmissions = {}
 gemaConnected = False
 gemaFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemaSERVER = ''
+gemaCurrentHelpSubId = None
+gemaHelpRequestMessage = ["You have fetched a help request entry.", "There is no pending help request."]
+
 
 # ----------------------------------------------------------------------
 # ----------------------------------------------------------------------
@@ -492,3 +495,83 @@ class gemaUpdate(sublime_plugin.WindowCommand):
 # ------------------------------------------------------------------
 
 
+class gemaGetHelpCode(sublime_plugin.TextCommand):
+
+	def is_enabled(self):
+		global gemaCurrentHelpSubId
+		if gemaCurrentHelpSubId is not None:
+			return False
+		return True
+
+	def run(self, edit):
+		global gemaCurrentHelpSubId
+		global gemaHelpRequestMessage
+		
+		# filename = self.view.file_name()
+		# # print(filename)
+		# filename = os.path.basename(filename)
+		
+		# data = {"filename": filename}
+		response = gemaRequest("teacher_get_help_code", {})
+		if response is None:
+			sublime.message_dialog("Could not load any help submission")
+			return
+		response = json.loads(response)
+		content = response['Content']
+		filename = response['Filename']
+		status = response['Status']
+		
+		if status>0:
+			sublime.message_dialog(gemaHelpRequestMessage[status])
+			return
+		
+		gemaCurrentHelpSubId = response['Sid']
+		# print("Submission ID", gemaCurrentHelpSubId)
+		helpFolder = os.path.join(gemaFOLDER, "HelpSubmissions/")
+		if not os.path.exists(helpFolder):
+			os.mkdir(helpFolder)
+		
+		local_file = os.path.join(helpFolder, filename)
+		# print(helpFolder, local_file, filename)
+		with open(local_file, 'w', encoding='utf-8') as f:
+			f.write(content)
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
+		sublime.active_window().open_file(local_file)
+		# sublime.message_dialog("sublime.message_dialog("Press Enter to send feedback. Press Esc to return without feedback.")")
+		sublime.active_window().active_view().set_read_only(True)
+		sublime.message_dialog("Press Enter to send feedback. Press Esc to return without feedback.")
+		sublime.active_window().show_input_panel("Feedback: ",
+			"",
+			self.send_help_message,
+			None,
+			self.return_without_feedback)
+
+	# def force_on_cancel(self):
+	# 	sublime.active_window().show_input_panel("Write Help Message: ",
+	# 		"",
+	# 		self.send_help_message,
+	# 		None,
+	# 		self.force_on_cancel)
+
+	def send_help_message(self, message):
+		global gemaCurrentHelpSubId
+
+		if message is None or message == "":
+			self.return_without_feedback()
+			# sublime.message_dialog("This entry is returned without feedback!")
+		else:
+			data = {"submission_id": gemaCurrentHelpSubId, "message": message}
+			response = gemaRequest("teacher_send_help_message", data)
+			gemaCurrentHelpSubId = None
+			sublime.active_window().run_command("close")
+			sublime.message_dialog(response)
+			
+
+	def return_without_feedback(self):
+		global gemaCurrentHelpSubId
+		data = {"submission_id": gemaCurrentHelpSubId}
+		response = gemaRequest("teacher_return_without_feedback", data)
+		gemaCurrentHelpSubId = None
+		sublime.active_window().run_command("close")
+		sublime.message_dialog(response)
