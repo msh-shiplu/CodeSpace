@@ -39,20 +39,24 @@ func studentAskHelpHandler(w http.ResponseWriter, r *http.Request, who string, u
 			}
 			sid, _ = result.LastInsertId()
 		}
+	} else {
+		msg = "Invalid filename"
+	}
+	if ok && prob.Active {
+		HelpSubSem.Lock()
+		defer HelpSubSem.Unlock()
+		sub := &HelpSubmission{
+			Sid:      int(sid),
+			Uid:      uid,
+			Pid:      pid,
+			Content:  content,
+			Filename: filename,
+			At:       time.Now(),
+		}
+		WorkingHelpSubs = append(WorkingHelpSubs, sub)
+		HelpSubmissions[int(sid)] = sub
 	}
 
-	HelpSubSem.Lock()
-	defer HelpSubSem.Unlock()
-	sub := &HelpSubmission{
-		Sid:      int(sid),
-		Uid:      uid,
-		Pid:      pid,
-		Content:  content,
-		Filename: filename,
-		At:       time.Now(),
-	}
-	WorkingHelpSubs = append(WorkingHelpSubs, sub)
-	HelpSubmissions[int(sid)] = sub
 	fmt.Fprintf(w, msg)
 
 }
