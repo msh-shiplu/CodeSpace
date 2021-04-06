@@ -180,9 +180,9 @@ class gemsNeedHelp(sublime_plugin.TextCommand):
 		if fname is None:
 			sublime.message_dialog('Cannot share unsaved content.')
 			return
-		if os.path.basename(fname) not in gemsCurrentFiles:
-			sublime.message_dialog("Invalid file")
-			return 
+		# if os.path.basename(fname) not in gemsCurrentFiles:
+		# 	sublime.message_dialog("Invalid file")
+		# 	return 
 		sublime.message_dialog("Walk me through your thought process for what you are trying to accomplish.")
 		sublime.active_window().show_input_panel("Click Enter to send help request:", "", self.get_need_help_with, None, self.get_need_help_with)
 		
@@ -264,8 +264,8 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
 			sublime.active_window().open_file(local_file)
 			if board['Type'] == 'peer_feedback':
 				sublime.active_window().active_view().set_read_only(True)
-			elif board['Type'] == 'new':
-				gemsCurrentFiles.add(filename)
+			# elif board['Type'] == 'new':
+			# 	gemsCurrentFiles.add(filename)
 			# if mesg != '':
 			# 	sublime.message_dialog(mesg)
 	def send_thank_you(self, message):
