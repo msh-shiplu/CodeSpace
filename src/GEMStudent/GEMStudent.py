@@ -244,8 +244,7 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
 				
 				if board['Type'] == "peer_feedback":
 					self.message_id = board['Pid']
-					sublime.active_window().show_input_panel("Was this feedback useful?", "Type 'yes' or 'no', then hit Enter",
-						self.send_thank_you, None, self.force_for_thank_you)
+					sublime.set_timeout_async(self.force_for_thank_you, 1000*10)
 			# elif board['Type'] == 'peer_feedback':
 			# 	local_file = os.path.join(feedback_dir, filename)
 			# 	mesg = 'You have feedback'
@@ -269,9 +268,10 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
 			# if mesg != '':
 			# 	sublime.message_dialog(mesg)
 	def send_thank_you(self, message):
-		message = message.lower()
+		message = message.lower().strip()
 		if message != "yes" and message != "no":
 			self.force_for_thank_you()
+			return
 
 		data = {"useful": message, "message_id": self.message_id}
 		gemsRequest("student_send_thank_you", data)
@@ -285,6 +285,9 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
 			message = "no"
 		elif decision == sublime.DIALOG_CANCEL:
 			message = "cancel"
+		else:
+			self.force_for_thank_you()
+			return
 
 		data = {"useful": message, "message_id": self.message_id}
 		gemsRequest("student_send_thank_you", data)
