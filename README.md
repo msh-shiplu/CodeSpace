@@ -1,6 +1,6 @@
 To use this software to share code in class, you will need to (1) install [Sublime Text 3](https://www.sublimetext.com/3) and (2) install a specific plug in for Sublime Text.
 
-To install Sublime Text 3, [go here.](https://www.sublimetext.com/3)
+To install Sublime Text, [go here.](https://www.sublimetext.com/download)
 
 ### Student's installation
 
@@ -30,7 +30,11 @@ import os; package_path = os.path.join(sublime.packages_path(), "GEMTeacher"); o
 ```
 (4) Paste copied code to Console and hit enter.
 
-(5) Download the latest server ([Windows](https://www.dropbox.com/s/bjb8fvikjze20bu/gem.exe?dl=0), [MacOS](https://www.dropbox.com/s/vo3zn6pz8mhp083/gem?dl=0)) and make them *executable* on teacher's computer.  This command-line server needs to be run on the teacher's computer every time GEM is used in class.
+#### Running the GEM server
+
+The instructor must run the GEM server.  The server can be run permanently or each time class starts.
+
+Method 2 (deployment mode): Download the latest server ([Windows](https://www.dropbox.com/s/bjb8fvikjze20bu/gem.exe?dl=0), [MacOS](https://www.dropbox.com/s/vo3zn6pz8mhp083/gem?dl=0)) and make them *executable* on teacher's computer.  This command-line server needs to be run on the teacher's computer every time GEM is used in class.
 
 (6) First-time configuration:
 Add teachers
@@ -54,6 +58,30 @@ Examples of files containing configurations, teachers and students: [config.json
 (7) When the server is run for the first time after teachers and students are added, teachers and students must configure their Sublime Text modules by going through 3 steps in Sublime Text: (i) specify a folder on their computers to store local files, (ii) set the server address, which is shown when the server is run, and (iii) complete the registration by simply entering their usernames, as specify in *teachers.txt* and *students.txt*.
 
 These steps are done only once.  In subsequent usage, there is no need to go through these steps (even though the teacher's computer has a new IP address.)
+
+#### Development mode
+
+Install latest version of [Go](https://golang.org/dl/). Do this on the command line.
+* go get github.com/mattn/go-sqlite3
+* go mod init github.com/mattn/go-sqlite3@v1.14.6
+* go mod tidy
+
+
+(6) First-time configuration:
+Add teachers
+```
+    ./go run *.go -c config.json -add_teachers teachers.txt
+```
+
+Add students
+```
+    ./go run *.go -c config.json -add_students students.txt
+```
+
+Run the server
+```
+    ./go run *.go -c config.json
+```
 
 ### TA's installation
 
