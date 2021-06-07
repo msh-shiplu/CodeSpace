@@ -1,3 +1,3 @@
 package main
 
-const VERSION = "alina_0.93"
+const VERSION = "0.94"
