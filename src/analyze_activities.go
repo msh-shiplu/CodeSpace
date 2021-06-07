@@ -26,7 +26,7 @@ func view_activitiesHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Unauthorized")
 		return
 	}
-	rows, _ := Database.Query("select pid, sid, at from submission")
+	rows, _ := Database.Query("select problem_id, student_id, code_submitted_at from submission")
 	var at time.Time
 	var pid, sid int
 	data := make(map[int64]*DailyActivityData)

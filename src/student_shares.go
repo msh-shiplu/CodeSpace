@@ -16,6 +16,7 @@ import (
 func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	content, filename := r.FormValue("content"), r.FormValue("filename")
 	answer := r.FormValue("answer")
+	test_cases := r.FormValue("testcases")
 	priority, _ := strconv.Atoi(r.FormValue("priority"))
 	sid := int64(0)
 	correct_answer := ""
@@ -23,6 +24,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	var err error
 	msg := "Your submission will be looked at soon."
 
+	attempt_number := -1
 	pid := 0
 	prob, ok := ActiveProblems[filename]
 	if ok {
@@ -45,7 +47,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 					msg += fmt.Sprintf(" You have %d attempt(s) left.", ActiveProblems[filename].Attempts[uid])
 				}
 			}
-
+			attempt_number = prob.Info.Attempts - ActiveProblems[filename].Attempts[uid]
 			// Autograding if possible
 			correct_answer = ActiveProblems[filename].Info.Answer
 			if answer != "" {
@@ -65,28 +67,55 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			}
 			var result sql.Result
 			if complete {
-				result, err = AddSubmissionCompleteSQL.Exec(pid, uid, content, priority, time.Now(), time.Now())
+				result, err = AddSubmissionCompleteSQL.Exec(pid, uid, content, priority, attempt_number, time.Now(), time.Now())
 			} else {
-				result, err = AddSubmissionSQL.Exec(pid, uid, content, priority, time.Now())
+				result, err = AddSubmissionSQL.Exec(pid, uid, content, priority, attempt_number, time.Now())
 			}
 			if err != nil {
+
 				log.Fatal(err)
 			}
 			sid, _ = result.LastInsertId()
+
+			if test_cases != "" {
+				rows, _ := Database.Query("select id from test_case where student_id=? and problem_id=?", uid, pid)
+				tc_id := 0
+				for rows.Next() {
+					rows.Scan(&tc_id)
+					break
+				}
+				rows.Close()
+				if tc_id != 0 {
+					UpdateTestCaseSQL.Exec(test_cases, time.Now(), tc_id)
+				} else {
+					AddTestCaseSQL.Exec(pid, uid, test_cases, time.Now())
+				}
+
+			}
+			if ActiveProblems[filename].Attempts[uid] == 0 {
+				if _, ok := HelpEligibleStudents[pid][uid]; !ok {
+					HelpEligibleStudents[pid][uid] = true
+					SeenHelpSubmissions[uid] = map[int]bool{}
+					// fmt.Fprintf(w, "You are now elligible to help you friends. To help please click on 'Help Friends' button.")
+					msg = msg + "\nYou are now elligible to help you friends. To help please click on 'Help Friends' button."
+				}
+			}
+
 		}
 	}
 	if !complete {
 		SubSem.Lock()
 		defer SubSem.Unlock()
 		sub := &Submission{
-			Sid:      int(sid),
-			Uid:      uid,
-			Pid:      pid,
-			Content:  content,
-			Filename: filename,
-			Priority: priority,
-			At:       time.Now(),
-			Name:     r.FormValue("name"),
+			Sid:           int(sid),
+			Uid:           uid,
+			Pid:           pid,
+			Content:       content,
+			Filename:      filename,
+			Priority:      priority,
+			AttemptNumber: attempt_number,
+			At:            time.Now(),
+			Name:          r.FormValue("name"),
 		}
 		WorkingSubs = append(WorkingSubs, sub)
 		Submissions[int(sid)] = sub
