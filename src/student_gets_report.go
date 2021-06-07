@@ -18,7 +18,7 @@ type StudentReport struct {
 
 //-----------------------------------------------------------------------------------
 func student_gets_reportHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	rows, err := Database.Query("select score.score, score.at, problem.filename from score join problem on problem.id == score.problem_id where student_id=?", uid)
+	rows, err := Database.Query("select score.score, score.score_given_at, problem.filename from score join problem on problem.id == score.problem_id where student_id=?", uid)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)

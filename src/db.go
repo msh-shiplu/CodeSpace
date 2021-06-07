@@ -25,9 +25,12 @@ func create_tables() {
 	execSQL("create table if not exists attendance (id integer primary key, student_id integer, attendance_at timestamp)")
 	execSQL("create table if not exists tag (id integer primary key, topic_description text unique)")
 	execSQL("create table if not exists problem (id integer primary key, teacher_id integer, problem_description blob, answer text, filename text, merit integer, effort integer, attempts integer, topic_id integer, tag integer, problem_uploaded_at timestamp)")
-	execSQL("create table if not exists submission (id integer primary key, problem_id integer, student_id integer, student_code blob, submission_category integer, code_submitted_at timestamp, completed timestamp, verdict text)")
+	execSQL("create table if not exists submission (id integer primary key, problem_id integer, student_id integer, student_code blob, submission_category integer, code_submitted_at timestamp, completed timestamp, verdict text, attempt_number integer)")
 	execSQL("create table if not exists score (id integer primary key, problem_id integer, student_id integer, teacher_id integer, score integer, graded_submission_number integer, score_given_at timestamp, unique(problem_id,student_id))")
 	execSQL("create table if not exists feedback (id integer primary key, teacher_id integer, student_id integer, feedback text, feedback_given_at timestamp, submission_id integer)")
+	execSQL("create table if not exists test_case (id integer primary key, problem_id integer, student_id integer, test_cases text, added_at timestamp)")
+	execSQL("create table if not exists help_submission (id integer primary key, problem_id integer, student_id integer, student_code blob, trying_what text, need_help_with text, code_submitted_at timestamp)")
+	execSQL("create table if not exists help_message (id integer primary key, help_submission_id integer, student_id integer, message text, given_at timestamp, useful text, updated_at timestamp)")
 	// foreign key example: http://www.sqlitetutorial.net/sqlite-foreign-key/
 }
 
@@ -50,14 +53,19 @@ func init_database(db_name string) {
 	AddStudentSQL = prepare("insert into student (name, password) values (?, ?)")
 	AddTeacherSQL = prepare("insert into teacher (name, password) values (?, ?)")
 	AddProblemSQL = prepare("insert into problem (teacher_id, problem_description, answer, filename, merit, effort, attempts, topic_id, tag, problem_uploaded_at) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-	AddSubmissionSQL = prepare("insert into submission (problem_id, student_id, student_code, submission_category, code_submitted_at) values (?, ?, ?, ?, ?)")
-	AddSubmissionCompleteSQL = prepare("insert into submission (problem_id, student_id, student_code, submission_category, code_submitted_at, completed) values (?, ?, ?, ?, ?, ?)")
+	AddSubmissionSQL = prepare("insert into submission (problem_id, student_id, student_code, submission_category, attempt_number, code_submitted_at) values (?, ?, ?, ?, ?, ?)")
+	AddSubmissionCompleteSQL = prepare("insert into submission (problem_id, student_id, student_code, submission_category, attempt_number, code_submitted_at, completed) values (?, ?, ?, ?, ?, ?, ?)")
 	CompleteSubmissionSQL = prepare("update submission set completed=?, verdict=? where id=?")
 	AddScoreSQL = prepare("insert into score (problem_id, student_id, teacher_id, score, graded_submission_number, score_given_at) values (?, ?, ?, ?, ?, ?)")
 	AddFeedbackSQL = prepare("insert into feedback (teacher_id, student_id, feedback, feedback_given_at, submission_id) values (?, ?, ?, ?, ?)")
 	UpdateScoreSQL = prepare("update score set teacher_id=?, score=?, graded_submission_number=? where id=?")
 	AddAttendanceSQL = prepare("insert into attendance (student_id, attendance_at) values (?, ?)")
 	AddTagSQL = prepare("insert into tag (topic_description) values (?)")
+	AddTestCaseSQL = prepare("insert into test_case (problem_id, student_id, test_cases, added_at) values (?, ?, ?, ?)")
+	UpdateTestCaseSQL = prepare("update test_case set test_cases=?, added_at=? where id=?")
+	AddHelpSubmissionSQL = prepare("insert into help_submission (problem_id, student_id, student_code, trying_what, need_help_with, code_submitted_at) values(?, ?, ?, ?, ?, ?)")
+	AddHelpMessageSQL = prepare("insert into help_message (help_submission_id, student_id, message, given_at) values (?, ?, ?, ?)")
+	UpdateHelpMessageSQL = prepare("update help_message set useful=?, updated_at=? where id=?")
 	// Initialize passcode for current session and default board
 	Passcode = RandStringRunes(12)
 	Students[0] = &StudenInfo{
@@ -150,7 +158,8 @@ func init_student(student_id int, password string) {
 	Students[student_id] = &StudenInfo{
 		Password:         password,
 		Boards:           make([]*Board, 0),
-		SubmissionStatus: 0,
+		SubmissionStatus: make([]*StudentSubmissionStatus, 0),
+		ThankStatus:      0,
 	}
 
 	// Student[student_id] = password

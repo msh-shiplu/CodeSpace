@@ -18,6 +18,8 @@ gemtTIMEOUT = 7
 gemtStudentSubmissions = {}
 gemtFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemtSERVER = ''
+gemtCurrentHelpSubId = None
+gemtHelpRequestMessage = ["You have fetched a help request entry.", "There is no pending help request."]
 
 # ------------------------------------------------------------------
 # ------------------------------------------------------------------
@@ -79,9 +81,9 @@ def gemt_get_problem_info(fname):
 		content = fp.read()
 	items = content.split('\n',1)
 	if len(items)==0 or (not items[0].startswith('#') and not items[0].startswith('//')):
-		return content, '', 0, 0, 0, 0, '', basename, False
+		return content, '', 0, 0, 0, '', basename, False
 
-	merit, effort, attempts, topic_id, tag, exact_answer = 0, 0, 0, 0, '', True
+	merit, effort, attempts, tag, exact_answer = 0, 0, 0, '', True
 	first_line, body = items[0], items[1]
 	if first_line.startswith('#'):
 		prefix = '#'
@@ -90,8 +92,8 @@ def gemt_get_problem_info(fname):
 		prefix = '//'
 		first_line = first_line.strip('/ ')
 	try:
-		items = re.match('(\d+)\s+(\d+)\s+(\d+)\s+(\d+)(\s+(\w.*))?', first_line).groups()
-		merit, effort, attempts, topic_id, tag = int(items[0]), int(items[1]), int(items[2]), int(items[3]), items[5]
+		items = re.match('(\d+)\s+(\d+)\s+(\d+)(\s+(\w.*))?', first_line).groups()
+		merit, effort, attempts, tag = int(items[0]), int(items[1]), int(items[2]), items[4]
 		if tag is None:
 			tag = ''
 		tag = tag.strip()
@@ -99,10 +101,10 @@ def gemt_get_problem_info(fname):
 			exact_answer = False
 			tag = tag.split('_manual_')[1].strip()
 	except:
-		return content, '', 0, 0, 0, 0, '', basename, False
+		return content, '', 0, 0, 0, '', basename, False
 
 	if merit < effort:
-		return content, '', 0, 0, 0, 0, '', basename, False
+		return content, '', 0, 0, 0, '', basename, False
 
 	body = '{} {} points, {} for effort. Maximum attempts: {}.\n{}'.format(
 		prefix, merit, effort, attempts, body)
@@ -123,7 +125,7 @@ def gemt_get_problem_info(fname):
 	# 	body += '\n{} '.format(gemtAnswerTag)
 	# 	answer = items[1].strip()
 
-	return body, answer, merit, effort, attempts, topic_id, tag, basename, exact_answer
+	return body, answer, merit, effort, attempts, tag, basename, exact_answer
 
 
 # ------------------------------------------------------------------
@@ -133,14 +135,13 @@ class gemtShare(sublime_plugin.TextCommand):
 		if fname is None:
 			sublime.message_dialog('Content must be saved first.')
 			return
-		content, answer, merit, effort, attempts, topic_id, tag, name, exact_answer = gemt_get_problem_info(fname)
+		content, answer, merit, effort, attempts, tag, name, exact_answer = gemt_get_problem_info(fname)
 		data = {
 			'content': 		content,
 			'answer':		answer,
 			'merit':		merit,
 			'effort':		effort,
 			'attempts':		attempts,
-			'topic_id':		topic_id,
 			'tag':			tag,
 			'filename':		name,
 			'exact_answer':	exact_answer,
@@ -225,7 +226,7 @@ def gemtRequest(path, data, authenticated=True, method='POST'):
 		data['uid'] = info['Uid']
 		data['role'] = 'teacher'
 		gemtFOLDER = info['Folder']
-
+	print(data)
 	url = urllib.parse.urljoin(gemtSERVER, path)
 	load = urllib.parse.urlencode(data).encode('utf-8')
 	req = urllib.request.Request(url, load, method=method)
@@ -649,10 +650,10 @@ class gemtUpdate(sublime_plugin.WindowCommand):
 			menu_file = os.path.join(package_path, "Main.sublime-menu")
 			keymap_file = os.path.join(package_path, "Default.sublime-keymap")
 			version_file = os.path.join(package_path, "version.go")
-			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMTeacher/GEMTeacher.py", module_file)
-			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMTeacher/Main.sublime-menu", menu_file)
-			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMTeacher/Default.sublime-keymap", keymap_file)
-			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/version.go", version_file)
+			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/alina/src/GEMTeacher/GEMTeacher.py", module_file)
+			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/alina/src/GEMTeacher/Main.sublime-menu", menu_file)
+			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/alina/src/GEMTeacher/Default.sublime-keymap", keymap_file)
+			urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/alina/src/version.go", version_file)
 			with open(version_file) as f:
 				lines = f.readlines()
 			for line in lines:
@@ -667,4 +668,108 @@ class gemtUpdate(sublime_plugin.WindowCommand):
 
 # ------------------------------------------------------------------
 
+class gemtGetHelpCode(sublime_plugin.TextCommand):
+
+	def is_enabled(self):
+		global gemtCurrentHelpSubId
+		if gemtCurrentHelpSubId is not None:
+			return False
+		return True
+
+	def run(self, edit):
+		global gemtCurrentHelpSubId
+		global gemtHelpRequestMessage
+		
+		# filename = self.view.file_name()
+		# # print(filename)
+		# filename = os.path.basename(filename)
+		
+		# data = {"filename": filename}
+		response = gemtRequest("teacher_get_help_code", {})
+		if response is None:
+			sublime.message_dialog("Could not load any help submission")
+			return
+		response = json.loads(response)
+		content = response['Content']
+		filename = response['Filename']
+		status = response['Status']
+		
+		if status>0:
+			sublime.message_dialog(gemtHelpRequestMessage[status])
+			return
+		
+		gemtCurrentHelpSubId = response['Sid']
+		# print("Submission ID", gemtCurrentHelpSubId)
+		helpFolder = os.path.join(gemtFOLDER, "HelpSubmissions/")
+		if not os.path.exists(helpFolder):
+			os.mkdir(helpFolder)
+		
+		local_file = os.path.join(helpFolder, filename)
+		# print(helpFolder, local_file, filename)
+		with open(local_file, 'w', encoding='utf-8') as f:
+			f.write(content)
+		if sublime.active_window().id() == 0:
+			sublime.run_command('new_window')
+		sublime.active_window().open_file(local_file)
+		# sublime.message_dialog("sublime.message_dialog("Press Enter to send feedback. Press Esc to return without feedback.")")
+		sublime.active_window().active_view().set_read_only(True)
+		sublime.message_dialog("Press Enter to send feedback. Press Esc to return without feedback.")
+		sublime.active_window().show_input_panel("Feedback: ",
+			"",
+			self.send_help_message,
+			None,
+			self.return_without_feedback)
+
+	# def force_on_cancel(self):
+	# 	sublime.active_window().show_input_panel("Write Help Message: ",
+	# 		"",
+	# 		self.send_help_message,
+	# 		None,
+	# 		self.force_on_cancel)
+
+	def send_help_message(self, message):
+		global gemtCurrentHelpSubId
+
+		if message is None or message == "":
+			self.return_without_feedback()
+			# sublime.message_dialog("This entry is returned without feedback!")
+		else:
+			data = {"submission_id": gemtCurrentHelpSubId, "message": message}
+			response = gemtRequest("teacher_send_help_message", data)
+			gemtCurrentHelpSubId = None
+			sublime.active_window().run_command("close")
+			sublime.message_dialog(response)
+			
+
+	def return_without_feedback(self):
+		global gemtCurrentHelpSubId
+		data = {"submission_id": gemtCurrentHelpSubId}
+		response = gemtRequest("teacher_return_without_feedback", data)
+		gemtCurrentHelpSubId = None
+		sublime.active_window().run_command("close")
+		sublime.message_dialog(response)
+		
+
+
+# class gemsReturnWithoutFeedback(sublime_plugin.WindowCommand):
+
+# 	def is_enabled(self):
+# 		global gemtCurrentHelpSubId
+# 		if gemtCurrentHelpSubId is None:
+# 			return False
+# 		return True
+
+# 	def run(self):
+# 		global gemtCurrentHelpSubId
+# 		# print("Sub id in return", gemtCurrentHelpSubId)
+# 		if gemtCurrentHelpSubId is None:
+# 			sublime.message_dialog("You don't have any submission to return")
+# 			return
+
+# 		data = {"submission_id": gemtCurrentHelpSubId}
+# 		response = gemtRequest("teacher_return_without_feedback", data)
+# 		gemtCurrentHelpSubId = None
+# 		sublime.message_dialog(response)
+# 		self.window.run_command("close")
+# 		self.window.run_command("hide_panel", {"cancel": False})
 

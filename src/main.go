@@ -44,6 +44,16 @@ func init_handlers() {
 	http.HandleFunc("/bulletin_board_data", bulletin_board_dataHandler)
 	http.HandleFunc("/complete_registration", complete_registrationHandler)
 
+	http.HandleFunc("/student_ask_help", Authorize(studentAskHelpHandler))
+	http.HandleFunc("/student_get_help_code", Authorize(studentGetHelpCode))
+	http.HandleFunc("/student_return_without_feedback", Authorize(student_return_without_feedbackHandler))
+	http.HandleFunc("/student_send_help_message", Authorize(student_send_help_messageHandler))
+	http.HandleFunc("/student_send_thank_you", Authorize(sendThankYouHandler))
+
+	http.HandleFunc("/teacher_get_help_code", Authorize(teacherGetHelpCode))
+	http.HandleFunc("/teacher_return_without_feedback", Authorize(teacher_return_without_feedbackHandler))
+	http.HandleFunc("/teacher_send_help_message", Authorize(teacher_send_help_messageHandler))
+
 	http.HandleFunc("/teacher_gets_queue", Authorize(teacher_gets_queueHandler))
 	http.HandleFunc("/teacher_adds_bulletin_page", Authorize(teacher_adds_bulletin_pageHandler))
 	http.HandleFunc("/teacher_clears_submissions", Authorize(teacher_clears_submissionsHandler))
@@ -55,6 +65,8 @@ func init_handlers() {
 	http.HandleFunc("/teacher_gets_passcode", Authorize(teacher_gets_passcodeHandler))
 
 	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "pong") })
+
+	http.HandleFunc("/get_testcase", Authorize(testcase_getsHandler))
 }
 
 //-----------------------------------------------------------------
@@ -63,9 +75,25 @@ func informIPAddress() string {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// for _, a := range addrs {
+	// if ipnet, ok := a.(*net.IPNet); ok && ipnet.IP.IsGlobalUnicast() {
+	// if ipnet.IP.To4() != nil {
+	// return ipnet.IP.String()
+	// }
+	// }
+	// }
 	for _, a := range addrs {
 		if ipnet, ok := a.(*net.IPNet); ok && ipnet.IP.IsGlobalUnicast() {
-			return ipnet.IP.String()
+			ip4 := ipnet.IP.To4()
+			if ip4 != nil {
+				switch {
+				// case ip4[0] == 10:
+				case ip4[0] == 172 && ip4[1] >= 16 && ip4[1] <= 31:
+				case ip4[0] == 192 && ip4[1] == 168:
+				default:
+					return ip4.String()
+				}
+			}
 		}
 	}
 	return ""

@@ -59,6 +59,7 @@ func insert_problem(uid int, problem *ProblemInfo) {
 			Active:   true,
 			Attempts: make(map[int]int),
 		}
+		HelpEligibleStudents[int(pid)] = map[int]bool{}
 	}
 }
 
@@ -85,7 +86,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 		Merit:       merit,
 		Effort:      effort,
 		Attempts:    attempts,
-		Topic_id:	topic_id,
+		Topic_id:    topic_id,
 		Tag:         tag,
 		ExactAnswer: exact_answer == "True",
 	}

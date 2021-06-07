@@ -60,11 +60,25 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 
 	// If submission is dismissed, do not take that attempt away from the student.
 	if decision == "dismissed" {
-		Students[student_id].SubmissionStatus = 2
+		// Students[student_id].SubmissionStatus = 2
+		subStat := &StudentSubmissionStatus{
+			Filename:      sub.Filename,
+			AttemptNumber: sub.AttemptNumber,
+			Status:        2,
+		}
+		Students[sub.Uid].SubmissionStatus = append(Students[sub.Uid].SubmissionStatus, subStat)
+
 		ActiveProblems[sub.Filename].Attempts[student_id] += 1
 		fmt.Fprintf(w, "Submission dismissed.")
 	} else if decision == "ungraded" {
-		Students[student_id].SubmissionStatus = 5
+		// Students[student_id].SubmissionStatus = 5
+		subStat := &StudentSubmissionStatus{
+			Filename:      sub.Filename,
+			AttemptNumber: sub.AttemptNumber,
+			Status:        2,
+		}
+		Students[sub.Uid].SubmissionStatus = append(Students[sub.Uid].SubmissionStatus, subStat)
+
 		fmt.Fprintf(w, mesg)
 	} else {
 		// Update score based on the grading decision
@@ -75,10 +89,28 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 		scoring_mesg := add_or_update_score(decision, sub.Pid, sub.Uid, uid, partial_credits)
 		mesg = scoring_mesg + "\n" + mesg
 		if decision == "correct" {
-			Students[sub.Uid].SubmissionStatus = 4
+			// Students[sub.Uid].SubmissionStatus = 4
+			subStat := &StudentSubmissionStatus{
+				Filename:      sub.Filename,
+				AttemptNumber: sub.AttemptNumber,
+				Status:        4,
+			}
+			Students[sub.Uid].SubmissionStatus = append(Students[sub.Uid].SubmissionStatus, subStat)
+
 			ActiveProblems[sub.Filename].Attempts[student_id] = 0 // This prevents further submission.
+			pid := sub.Pid
+			if _, ok := HelpEligibleStudents[pid][sub.Uid]; !ok {
+				HelpEligibleStudents[pid][sub.Uid] = true
+				SeenHelpSubmissions[sub.Uid] = map[int]bool{}
+			}
 		} else {
-			Students[student_id].SubmissionStatus = 3
+			// Students[student_id].SubmissionStatus = 3
+			subStat := &StudentSubmissionStatus{
+				Filename:      sub.Filename,
+				AttemptNumber: sub.AttemptNumber,
+				Status:        3,
+			}
+			Students[sub.Uid].SubmissionStatus = append(Students[sub.Uid].SubmissionStatus, subStat)
 		}
 
 		// Update submission complete time

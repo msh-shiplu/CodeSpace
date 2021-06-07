@@ -41,6 +41,11 @@ var AddFeedbackSQL *sql.Stmt
 var AddScoreSQL *sql.Stmt
 var UpdateScoreSQL *sql.Stmt
 var AddTagSQL *sql.Stmt
+var AddTestCaseSQL *sql.Stmt
+var UpdateTestCaseSQL *sql.Stmt
+var AddHelpSubmissionSQL *sql.Stmt
+var AddHelpMessageSQL *sql.Stmt
+var UpdateHelpMessageSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication
@@ -56,6 +61,7 @@ var Passcode string
 var BoardsSem sync.Mutex
 var SubSem sync.Mutex
 var BulletinSem sync.Mutex
+var HelpSubSem sync.Mutex
 
 //---------------------------------------------------------
 // Virtual boards for students and student submissions
@@ -70,16 +76,26 @@ type Board struct {
 	StartingTime time.Time
 	Type         string
 }
-
-type StudenInfo struct {
-	Password         string
-	Boards           []*Board
-	SubmissionStatus int
+type StudentSubmissionStatus struct {
+	Filename      string
+	AttemptNumber int
+	Status        int
 	/*
 		1 submission being looked at.
 		2 teacher did not grade your submission (dismissed).
 		3 your submission was not correct.
 		4 your submission was correct.
+	*/
+}
+type StudenInfo struct {
+	Password         string
+	Boards           []*Board
+	SubmissionStatus []*StudentSubmissionStatus
+
+	ThankStatus int
+	/*
+		0 Nothing
+		1 Got a new thanks for feedback
 	*/
 }
 
@@ -91,18 +107,34 @@ var BulletinBoard = make([]string, 0)
 
 //---------------------------------------------------------
 type Submission struct {
-	Sid      int // submission id
-	Uid      int // student id
-	Pid      int // problem id
-	Content  string
-	Filename string
-	Priority int
-	At       time.Time
-	Name     string
+	Sid           int // submission id
+	Uid           int // student id
+	Pid           int // problem id
+	Content       string
+	Filename      string
+	Priority      int
+	AttemptNumber int
+	At            time.Time
+	Name          string
 }
 
 var WorkingSubs = make([]*Submission, 0)
 var Submissions = make(map[int]*Submission)
+
+//---------------------------------------------------------
+
+type HelpSubmission struct {
+	Sid      int // submission id
+	Uid      int // student id
+	Pid      int // problem id
+	Status   int // 0=ok, 1=queue empty, 2=not elligible
+	Content  string
+	Filename string
+	At       time.Time
+}
+
+var WorkingHelpSubs = make([]*HelpSubmission, 0)
+var HelpSubmissions = make(map[int]*HelpSubmission)
 
 //---------------------------------------------------------
 type ProblemInfo struct {
@@ -112,7 +144,7 @@ type ProblemInfo struct {
 	Merit       int
 	Effort      int
 	Attempts    int
-	Topic_id	int
+	Topic_id    int
 	Tag         string
 	Pid         int
 	ExactAnswer bool
@@ -153,3 +185,6 @@ func writeLog(filename, message string) {
 }
 
 //---------------------------------------------------------
+
+var HelpEligibleStudents = map[int]map[int]bool{}
+var SeenHelpSubmissions = map[int]map[int]bool{}

@@ -10,10 +10,11 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Get a need-help entry",
-                "id": "gemtGetFromNeedHelp",
-                "command": "gemt_get_from_need_help",
+                "caption": "Get help request",
+                "id": "gemtGetHelpCode",
+                "command": "gemt_get_help_code"
             },
+            {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Get a submission entry",
                 "id": "gemtGetFromOk",

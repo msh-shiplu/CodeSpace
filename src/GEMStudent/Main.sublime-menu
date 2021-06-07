@@ -20,6 +20,12 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
+                "caption": "Help Friends",
+                "id": "gemsGetFriendCode",
+                "command": "gems_get_friend_code",
+            },
+            {"caption":"-", "id":"side-bar-separator"},
+            {
                 "caption": "Attendance",
                 "id": "gemsAttendanceReport",
                 "command": "gems_attendance_report",
