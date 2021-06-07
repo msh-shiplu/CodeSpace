@@ -1,6 +1,5 @@
-To use this software to share code in class, you will need to (1) install [Sublime Text 3](https://www.sublimetext.com/3) and (2) install a specific plug in for Sublime Text.
+To use this software to share code in class, you will need to (1) install [Sublime Text](https://www.sublimetext.com/download) and (2) install a specific plug in for Sublime Text.
 
-To install Sublime Text, [go here.](https://www.sublimetext.com/download)
 
 ### Student's installation
 
