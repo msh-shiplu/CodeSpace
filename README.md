@@ -60,10 +60,10 @@ These steps are done only once.  In subsequent usage, there is no need to go thr
 
 #### Development mode
 
-Install latest version of [Go](https://golang.org/dl/). Do this on the command line.
-* go get github.com/mattn/go-sqlite3
-* go mod init github.com/mattn/go-sqlite3@v1.14.7
+Install latest version of [Go](https://golang.org/dl/). Run these on the command line inside `src` folder.
+* go mod init GEM
 * go mod tidy
+* go get github.com/mattn/go-sqlite3
 
 
 (6) First-time configuration:
