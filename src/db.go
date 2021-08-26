@@ -31,6 +31,7 @@ func create_tables() {
 	execSQL("create table if not exists test_case (id integer primary key, problem_id integer, student_id integer, test_cases text, added_at timestamp)")
 	execSQL("create table if not exists help_submission (id integer primary key, problem_id integer, student_id integer, student_code blob, trying_what text, need_help_with text, code_submitted_at timestamp)")
 	execSQL("create table if not exists help_message (id integer primary key, help_submission_id integer, student_id integer, message text, given_at timestamp, useful text, updated_at timestamp)")
+	execSQL("create table if not exists code_snapshot (id integer primary key, student_id integer, problem_id integer, code blob, starting_time timestamp, last_updated_at timestamp, status int default 0)") // 0 = not submitted, 1 = submitted but not graded, 2 = submitted and incorrect, 3 = submitted and correct
 	// foreign key example: http://www.sqlitetutorial.net/sqlite-foreign-key/
 }
 
@@ -66,6 +67,8 @@ func init_database(db_name string) {
 	AddHelpSubmissionSQL = prepare("insert into help_submission (problem_id, student_id, student_code, trying_what, need_help_with, code_submitted_at) values(?, ?, ?, ?, ?, ?)")
 	AddHelpMessageSQL = prepare("insert into help_message (help_submission_id, student_id, message, given_at) values (?, ?, ?, ?)")
 	UpdateHelpMessageSQL = prepare("update help_message set useful=?, updated_at=? where id=?")
+	AddCodeSnapshotSQL = prepare("insert into code_snapshot (student_id, problem_id, code, starting_time, last_updated_at) values(?, ?, ?, ?, ?)")
+	UpdateCodeSnapshotSQL = prepare("update code_snapshot set code=?, last_updated_at=?, status=? where student_id=? and problem_id=?")
 	// Initialize passcode for current session and default board
 	Passcode = RandStringRunes(12)
 	Students[0] = &StudenInfo{
@@ -211,3 +214,31 @@ func load_teachers() {
 }
 
 //-----------------------------------------------------------------
+
+func addOrUpdateCodeSnapshot(studentID int, problemID int, status int, code string, snapshotTime time.Time) {
+	CodeSnapshotSem.Lock()
+	defer CodeSnapshotSem.Unlock()
+	rows, err := Database.Query("select status from code_snapshot where student_id=? and problem_id=?", studentID, problemID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	st := -1
+	for rows.Next() {
+		rows.Scan(&st)
+	}
+	if st == 4 {
+		return
+	}
+	if st == -1 {
+		_, err = AddCodeSnapshotSQL.Exec(studentID, problemID, code, snapshotTime, snapshotTime)
+	} else {
+		if st > status {
+			status = st
+		}
+		_, err = UpdateCodeSnapshotSQL.Exec(code, snapshotTime, status, studentID, problemID)
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+}

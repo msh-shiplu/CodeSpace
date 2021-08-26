@@ -46,6 +46,8 @@ var UpdateTestCaseSQL *sql.Stmt
 var AddHelpSubmissionSQL *sql.Stmt
 var AddHelpMessageSQL *sql.Stmt
 var UpdateHelpMessageSQL *sql.Stmt
+var AddCodeSnapshotSQL *sql.Stmt
+var UpdateCodeSnapshotSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication
@@ -62,6 +64,7 @@ var BoardsSem sync.Mutex
 var SubSem sync.Mutex
 var BulletinSem sync.Mutex
 var HelpSubSem sync.Mutex
+var CodeSnapshotSem sync.Mutex
 
 //---------------------------------------------------------
 // Virtual boards for students and student submissions
