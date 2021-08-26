@@ -69,6 +69,7 @@ func init_handlers() {
 	http.HandleFunc("/get_testcase", Authorize(testcase_getsHandler))
 
 	http.HandleFunc("/code_snapshot", Authorize(codeSnapshotHandler))
+	http.HandleFunc("/get_global_info", Authorize(globalInfoHandler))
 }
 
 //-----------------------------------------------------------------
