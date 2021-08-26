@@ -103,6 +103,10 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 				HelpEligibleStudents[pid][sub.Uid] = true
 				SeenHelpSubmissions[sub.Uid] = map[int]bool{}
 			}
+
+			// Add the correct submission to codesnapshot.
+			addOrUpdateCodeSnapshot(sub.Uid, pid, 3, content, time.Now())
+
 		} else {
 			// Students[student_id].SubmissionStatus = 3
 			subStat := &StudentSubmissionStatus{
@@ -111,6 +115,9 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 				Status:        3,
 			}
 			Students[sub.Uid].SubmissionStatus = append(Students[sub.Uid].SubmissionStatus, subStat)
+
+			// Add the incorrect submission to codesnapshot.
+			addOrUpdateCodeSnapshot(sub.Uid, sub.Pid, 2, content, time.Now())
 		}
 
 		// Update submission complete time
