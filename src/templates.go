@@ -140,3 +140,53 @@ var TEACHER_MESSAGING_TEMPLATE = `
 	</body>
 </html>
 `
+var CODESPACE_TEMPLATE = `
+	<!DOCTYPE html>
+	<html>
+	<head>
+	<title>CodeSpace</title>
+	</head>
+	<body>
+	<table border="1">
+		<thead>
+			<tr>
+				<th>Student</th>
+				<th>Problem</th>
+				<th>Last Updated</th>
+				<th>Time Spent</th>
+				<th>Number of Lines</th>
+				<th>Status</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+		{{ range . }}
+		<tr>
+			<td>{{ .StudentName }}</td>
+			<td>{{ .ProblemName }}</td>
+			<td>{{ .LastUpdated }}</td>
+			<td>{{ .TimeSpent }}</td>
+			<td>{{ .LinesOfCode }}</td>
+			<td>{{ .Status }}</td>
+			<td><a href="/get_snapshot?student_id={{ .StudentID }}&problem_id={{ .ProblemID }}">View</a></td>
+		</tr>
+		{{ end }}
+		</tbody>
+	</table>
+
+	</body>
+	</html>
+`
+var CODE_SNAPSHOT_TEMPLATE = `
+<!DOCTYPE html>
+	<html>
+	<head>
+	<title>CodeSpace</title>
+	</head>
+	<body>
+		<pre>
+			{{ .Code }}
+		</pre>
+	</body>
+	</html>
+`

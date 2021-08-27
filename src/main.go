@@ -70,6 +70,9 @@ func init_handlers() {
 
 	http.HandleFunc("/code_snapshot", Authorize(codeSnapshotHandler))
 	http.HandleFunc("/get_global_info", Authorize(globalInfoHandler))
+
+	http.HandleFunc("/get_codespace", codespaceHandler)
+	http.HandleFunc("/get_snapshot", getCodeSnapshotHandler)
 }
 
 //-----------------------------------------------------------------
