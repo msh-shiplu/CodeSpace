@@ -14,6 +14,11 @@
                 "id": "gemtGetHelpCode",
                 "command": "gemt_get_help_code"
             },
+            {
+                "caption": "View CodeSpace",
+                "id": "gemtGetCodeSpace",
+                "command": "gemt_get_code_space"
+            },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Get a submission entry",
