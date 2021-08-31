@@ -108,6 +108,8 @@ func complete_registrationHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, msg)
 		if role == "teacher" {
 			SeenHelpSubmissions[id] = map[int]bool{}
+		} else if role == "student" {
+			StudentSnapshot[id] = map[int]int{}
 		}
 		return
 	}

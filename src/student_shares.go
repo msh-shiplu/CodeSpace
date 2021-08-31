@@ -77,7 +77,8 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			}
 			sid, _ = result.LastInsertId()
 
-			addOrUpdateCodeSnapshot(uid, pid, 1, content, time.Now())
+			// Add submitted but not graded code to code snapshot.
+			addCodeSnapshot(uid, pid, content, 1, time.Now())
 
 			if test_cases != "" {
 				rows, _ := Database.Query("select id from test_case where student_id=? and problem_id=?", uid, pid)

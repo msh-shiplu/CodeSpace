@@ -4,10 +4,12 @@
 package main
 
 import (
+	"bufio"
 	"database/sql"
 	"log"
 	"math/rand"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
@@ -191,3 +193,45 @@ func writeLog(filename, message string) {
 
 var HelpEligibleStudents = map[int]map[int]bool{}
 var SeenHelpSubmissions = map[int]map[int]bool{}
+
+//---------------------------------------------------------
+
+// Snapshot contains information related to a code snapshot.
+type Snapshot struct {
+	StudentName string
+	StudentID   int
+	ProblemName string
+	ProblemID   int
+	Status      string
+	TimeSpent   time.Duration
+	LastUpdated time.Time
+	LinesOfCode int
+	Code        string
+}
+
+// Snapshots contains all the current snapshots from students.
+var Snapshots = make([]*Snapshot, 0)
+
+// StudentSnapshot is the mapping from (student id, problem id) -> snashpt index in `Snapshots` list.
+var StudentSnapshot = map[int]map[int]int{}
+
+// SnapshotStatus maps from integer status to string named status.
+var SnapshotStatus = []string{"Not submitted", "Submitted: not graded", "Submitted: incorrect", "Submitted: correct"}
+
+// SnapshotStatusMapping maps from string snapshot status to integer.
+var SnapshotStatusMapping = map[string]int{
+	"Not submitted":         0,
+	"Submitted: not graded": 1,
+	"Submitted: incorrect":  2,
+	"Submitted: correct":    3,
+}
+
+func getLinesOfCode(code string) int {
+	scanner := bufio.NewScanner(strings.NewReader(code))
+	scanner.Split(bufio.ScanLines)
+	count := 0
+	for scanner.Scan() {
+		count++
+	}
+	return count
+}

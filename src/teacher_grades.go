@@ -105,7 +105,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			}
 
 			// Add the correct submission to codesnapshot.
-			addOrUpdateCodeSnapshot(sub.Uid, pid, 3, content, time.Now())
+			addCodeSnapshot(sub.Uid, pid, content, 3, time.Now())
 
 		} else {
 			// Students[student_id].SubmissionStatus = 3
@@ -117,7 +117,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			Students[sub.Uid].SubmissionStatus = append(Students[sub.Uid].SubmissionStatus, subStat)
 
 			// Add the incorrect submission to codesnapshot.
-			addOrUpdateCodeSnapshot(sub.Uid, sub.Pid, 2, content, time.Now())
+			addCodeSnapshot(sub.Uid, sub.Pid, content, 2, time.Now())
 		}
 
 		// Update submission complete time
