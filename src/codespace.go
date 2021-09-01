@@ -5,8 +5,22 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
+func getEditorMode(filename string) string {
+	filename = strings.ToLower(filename)
+	if strings.HasSuffix(filename, ".py") {
+		return "python"
+	}
+	if strings.HasSuffix(filename, ".java") {
+		return "text/x-java"
+	}
+	if strings.HasSuffix(filename, ".cpp") || strings.HasSuffix(filename, ".c++") || strings.HasSuffix(filename, ".c") {
+		return "text/x-c++src"
+	}
+	return "text"
+}
 func codespaceHandler(w http.ResponseWriter, r *http.Request) {
 	temp := template.New("")
 	t, err := temp.Parse(CODESPACE_TEMPLATE)
@@ -21,7 +35,8 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request) {
 	studentID, _ := strconv.Atoi(r.FormValue("student_id"))
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
 	temp := template.New("")
-	t, err := temp.Parse(CODE_SNAPSHOT_TEMPLATE)
+	ownFuncs := template.FuncMap{"getEditorMode": getEditorMode}
+	t, err := temp.Funcs(ownFuncs).Parse(CODE_SNAPSHOT_TEMPLATE)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -145,34 +145,37 @@ var CODESPACE_TEMPLATE = `
 	<html>
 	<head>
 	<title>CodeSpace</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	</head>
 	<body>
-	<table border="1">
-		<thead>
+	<div class="container">
+		<table class="table is-striped is-fullwidth is-hoverable">
+			<thead>
+				<tr>
+					<th>Student</th>
+					<th>Problem</th>
+					<th>Last Updated</th>
+					<th>Time Spent</th>
+					<th>Number of Lines</th>
+					<th>Status</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+			{{ range . }}
 			<tr>
-				<th>Student</th>
-				<th>Problem</th>
-				<th>Last Updated</th>
-				<th>Time Spent</th>
-				<th>Number of Lines</th>
-				<th>Status</th>
-				<th></th>
+				<td>{{ .StudentName }}</td>
+				<td>{{ .ProblemName }}</td>
+				<td>{{ .LastUpdated }}</td>
+				<td>{{ .TimeSpent }}</td>
+				<td>{{ .LinesOfCode }}</td>
+				<td>{{ .Status }}</td>
+				<td><a href="/get_snapshot?student_id={{ .StudentID }}&problem_id={{ .ProblemID }}">View</a></td>
 			</tr>
-		</thead>
-		<tbody>
-		{{ range . }}
-		<tr>
-			<td>{{ .StudentName }}</td>
-			<td>{{ .ProblemName }}</td>
-			<td>{{ .LastUpdated }}</td>
-			<td>{{ .TimeSpent }}</td>
-			<td>{{ .LinesOfCode }}</td>
-			<td>{{ .Status }}</td>
-			<td><a href="/get_snapshot?student_id={{ .StudentID }}&problem_id={{ .ProblemID }}">View</a></td>
-		</tr>
-		{{ end }}
-		</tbody>
-	</table>
+			{{ end }}
+			</tbody>
+		</table>
+	</div>
 
 	</body>
 	</html>
@@ -182,11 +185,33 @@ var CODE_SNAPSHOT_TEMPLATE = `
 	<html>
 	<head>
 	<title>CodeSpace</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js" integrity="sha512-hGVnilhYD74EGnPbzyvje74/Urjrg5LSNGx0ARG1Ucqyiaz+lFvtsXk/1jCwT9/giXP0qoXSlVDjxNxjLvmqAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/python/python.min.js" integrity="sha512-/mavDpedrvPG/0Grj2Ughxte/fsm42ZmZWWpHz1jCbzd5ECv8CB7PomGtw0NAnhHmE/lkDFkRMupjoohbKNA1Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/clike/clike.min.js" integrity="sha512-GAled7oA9WlRkBaUQlUEgxm37hf43V2KEMaEiWlvBO/ueP2BLvBLKN5tIJu4VZOTwo6Z4XvrojYngoN9dJw2ug==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css" integrity="sha512-6sALqOPMrNSc+1p5xOhPwGIzs6kIlST+9oGWlI4Wwcbj1saaX9J3uzO3Vub016dmHV7hM+bMi/rfXLiF5DNIZg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/theme/monokai.min.css" integrity="sha512-R6PH4vSzF2Yxjdvb2p2FA06yWul+U0PDDav4b/od/oXf9Iw37zl10plvwOXelrjV2Ai7Eo3vyHeyFUjhXdBCVQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	</head>
 	<body>
-		<pre>
-			{{ .Code }}
-		</pre>
+		<div class="container">
+			<section class="section">
+				<h2 class="title is-2">Code Snapshot at {{.LastUpdated.Format "Jan 02, 2006 3:4:5 PM"}}</h2>
+				<h3 class="title is-3">Student: {{.StudentName}}, Problem: {{.ProblemName}}</h3>
+				<h3>
+				<textarea id="editor">{{ .Code }}</textarea>
+			</section>
+			<section class="section">
+				<form action="/save_snapshot_feedback" method="POST">
+					<textarea class="textarea" placeholder="Write your feedback!"></textarea>
+					<input class="button" type="submit" value="Send Feedback">
+				</form>
+			</section>
+		</div>
+		<script>
+			var editor = document.getElementById("editor");
+			var myCodeMirror = CodeMirror.fromTextArea(editor, {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
+			// myCodeMirror1.setSize("80%", 900)
+		</script>
 	</body>
 	</html>
 `
