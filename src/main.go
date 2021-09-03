@@ -73,6 +73,7 @@ func init_handlers() {
 
 	http.HandleFunc("/get_codespace", codespaceHandler)
 	http.HandleFunc("/get_snapshot", getCodeSnapshotHandler)
+	http.HandleFunc("/save_snapshot_feedback", codeSnapshotFeedbackHandler)
 }
 
 //-----------------------------------------------------------------

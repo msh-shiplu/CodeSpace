@@ -8,6 +8,11 @@ import (
 )
 
 func addCodeSnapshot(studentID int, problemID int, code string, status int, lastUpdate time.Time) {
+	result, err := AddCodeSnapshotSQL.Exec(studentID, problemID, code, status, lastUpdate)
+	if err != nil {
+		log.Fatal(err)
+	}
+	snapshotID, _ := result.LastInsertId()
 	idx, ok := StudentSnapshot[studentID][problemID]
 	if !ok {
 		idx = len(Snapshots)
@@ -31,6 +36,7 @@ func addCodeSnapshot(studentID int, problemID int, code string, status int, last
 			}
 		}
 		Snapshots = append(Snapshots, &Snapshot{
+			ID:          int(snapshotID),
 			StudentName: name,
 			StudentID:   studentID,
 			ProblemName: problemName,
@@ -47,6 +53,7 @@ func addCodeSnapshot(studentID int, problemID int, code string, status int, last
 			status = currentStatus
 		}
 		Snapshots[idx] = &Snapshot{
+			ID:          int(snapshotID),
 			StudentName: Snapshots[idx].StudentName,
 			StudentID:   studentID,
 			ProblemName: Snapshots[idx].ProblemName,
@@ -58,7 +65,7 @@ func addCodeSnapshot(studentID int, problemID int, code string, status int, last
 			Code:        code,
 		}
 	}
-	AddCodeSnapshotSQL.Exec(studentID, problemID, code, status, lastUpdate)
+
 }
 
 func codeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
@@ -66,4 +73,14 @@ func codeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
 	studentID, _ := strconv.Atoi(r.FormValue("uid"))
 	addCodeSnapshot(studentID, problemID, code, 0, time.Now())
+}
+
+func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request) {
+	snapshotID, _ := strconv.Atoi(r.FormValue("snapshot_id"))
+	feedback := r.FormValue("feedback")
+	authorID, _ := strconv.Atoi(r.FormValue("uid"))
+	authorRole := r.FormValue("role")
+	now := time.Now()
+	AddSnapShotFeedbackSQL.Exec(snapshotID, feedback, authorID, authorRole, now)
+
 }

@@ -49,7 +49,7 @@ var AddHelpSubmissionSQL *sql.Stmt
 var AddHelpMessageSQL *sql.Stmt
 var UpdateHelpMessageSQL *sql.Stmt
 var AddCodeSnapshotSQL *sql.Stmt
-var UpdateCodeSnapshotSQL *sql.Stmt
+var AddSnapShotFeedbackSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication
@@ -198,6 +198,7 @@ var SeenHelpSubmissions = map[int]map[int]bool{}
 
 // Snapshot contains information related to a code snapshot.
 type Snapshot struct {
+	ID          int
 	StudentName string
 	StudentID   int
 	ProblemName string

@@ -8,6 +8,19 @@ import (
 	"strings"
 )
 
+type CodeSpaceData struct {
+	Snapshots     []*Snapshot
+	UserID        int
+	UserRole      string
+	Authenticated bool
+}
+
+type SnapshotData struct {
+	Snapshot *Snapshot
+	UserID   int
+	UserRole string
+}
+
 func getEditorMode(filename string) string {
 	filename = strings.ToLower(filename)
 	if strings.HasSuffix(filename, ".py") {
@@ -22,18 +35,29 @@ func getEditorMode(filename string) string {
 	return "text"
 }
 func codespaceHandler(w http.ResponseWriter, r *http.Request) {
+	passcode := r.FormValue("pc")
+	uid, _ := strconv.Atoi(r.FormValue("uid"))
+	role := r.FormValue("role")
 	temp := template.New("")
 	t, err := temp.Parse(CODESPACE_TEMPLATE)
 	if err != nil {
 		log.Fatal(err)
 	}
+	data := &CodeSpaceData{
+		Snapshots:     Snapshots,
+		UserID:        uid,
+		UserRole:      role,
+		Authenticated: passcode == Passcode,
+	}
 	w.Header().Set("Content-Type", "text/html")
-	t.Execute(w, Snapshots)
+	t.Execute(w, data)
 }
 
 func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request) {
 	studentID, _ := strconv.Atoi(r.FormValue("student_id"))
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
+	uid, _ := strconv.Atoi(r.FormValue("uid"))
+	role := r.FormValue("role")
 	temp := template.New("")
 	ownFuncs := template.FuncMap{"getEditorMode": getEditorMode}
 	t, err := temp.Funcs(ownFuncs).Parse(CODE_SNAPSHOT_TEMPLATE)
@@ -41,6 +65,11 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	idx := StudentSnapshot[studentID][problemID]
+	data := &SnapshotData{
+		Snapshot: Snapshots[idx],
+		UserID:   uid,
+		UserRole: role,
+	}
 	w.Header().Set("Content-Type", "text/html")
-	t.Execute(w, Snapshots[idx])
+	t.Execute(w, data)
 }

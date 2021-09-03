@@ -32,6 +32,7 @@ func create_tables() {
 	execSQL("create table if not exists help_submission (id integer primary key, problem_id integer, student_id integer, student_code blob, trying_what text, need_help_with text, code_submitted_at timestamp)")
 	execSQL("create table if not exists help_message (id integer primary key, help_submission_id integer, student_id integer, message text, given_at timestamp, useful text, updated_at timestamp)")
 	execSQL("create table if not exists code_snapshot (id integer primary key, student_id integer, problem_id integer, code blob, last_updated_at timestamp, status int default 0)") // 0 = not submitted, 1 = submitted but not graded, 2 = submitted and incorrect, 3 = submitted and correct
+	execSQL("create table if not exists snapshot_feedback (id integer primary key, snapshot_id integer, feedback text, author_id integer, author_role string, given_at timestamp)")
 	// foreign key example: http://www.sqlitetutorial.net/sqlite-foreign-key/
 }
 
@@ -68,6 +69,7 @@ func init_database(db_name string) {
 	AddHelpMessageSQL = prepare("insert into help_message (help_submission_id, student_id, message, given_at) values (?, ?, ?, ?)")
 	UpdateHelpMessageSQL = prepare("update help_message set useful=?, updated_at=? where id=?")
 	AddCodeSnapshotSQL = prepare("insert into code_snapshot (student_id, problem_id, code, status, last_updated_at) values(?, ?, ?, ?, ?)")
+	AddSnapShotFeedbackSQL = prepare("insert into snapshot_feedback (snapshot_id, feedback, author_id, author_role, given_at) values(?, ?, ?, ?, ?)")
 	// Initialize passcode for current session and default board
 	Passcode = RandStringRunes(12)
 	Students[0] = &StudenInfo{

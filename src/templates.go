@@ -149,32 +149,36 @@ var CODESPACE_TEMPLATE = `
 	</head>
 	<body>
 	<div class="container">
-		<table class="table is-striped is-fullwidth is-hoverable">
-			<thead>
+		{{if .Authenticated }}
+			<table class="table is-striped is-fullwidth is-hoverable">
+				<thead>
+					<tr>
+						<th>Student</th>
+						<th>Problem</th>
+						<th>Last Updated</th>
+						<th>Time Spent</th>
+						<th>Number of Lines</th>
+						<th>Status</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+				{{ range .Snapshots }}
 				<tr>
-					<th>Student</th>
-					<th>Problem</th>
-					<th>Last Updated</th>
-					<th>Time Spent</th>
-					<th>Number of Lines</th>
-					<th>Status</th>
-					<th></th>
+					<td>{{ .StudentName }}</td>
+					<td>{{ .ProblemName }}</td>
+					<td>{{ .LastUpdated }}</td>
+					<td>{{ .TimeSpent }}</td>
+					<td>{{ .LinesOfCode }}</td>
+					<td>{{ .Status }}</td>
+					<td><a href="/get_snapshot?student_id={{ .StudentID }}&problem_id={{ .ProblemID }}&uid={{$.UserID}}&role={{$.UserRole}}">View</a></td>
 				</tr>
-			</thead>
-			<tbody>
-			{{ range . }}
-			<tr>
-				<td>{{ .StudentName }}</td>
-				<td>{{ .ProblemName }}</td>
-				<td>{{ .LastUpdated }}</td>
-				<td>{{ .TimeSpent }}</td>
-				<td>{{ .LinesOfCode }}</td>
-				<td>{{ .Status }}</td>
-				<td><a href="/get_snapshot?student_id={{ .StudentID }}&problem_id={{ .ProblemID }}">View</a></td>
-			</tr>
-			{{ end }}
-			</tbody>
-		</table>
+				{{ end }}
+				</tbody>
+			</table>
+		{{else}}
+			<h1 class="title">Unauthorized access!!!</h1>
+		{{end}}
 	</div>
 
 	</body>
@@ -195,21 +199,25 @@ var CODE_SNAPSHOT_TEMPLATE = `
 	<body>
 		<div class="container">
 			<section class="section">
-				<h2 class="title is-2">Code Snapshot at {{.LastUpdated.Format "Jan 02, 2006 3:4:5 PM"}}</h2>
-				<h3 class="title is-3">Student: {{.StudentName}}, Problem: {{.ProblemName}}</h3>
+				<h2 class="title is-2">Code Snapshot at {{.Snapshot.LastUpdated.Format "Jan 02, 2006 3:4:5 PM"}}</h2>
+				<h3 class="title is-3">Student: {{.Snapshot.StudentName}}, Problem: {{.Snapshot.ProblemName}}</h3>
 				<h3>
-				<textarea id="editor">{{ .Code }}</textarea>
+				<textarea id="editor">{{ .Snapshot.Code }}</textarea>
 			</section>
 			<section class="section">
 				<form action="/save_snapshot_feedback" method="POST">
-					<textarea class="textarea" placeholder="Write your feedback!"></textarea>
+					<textarea class="textarea" placeholder="Write your feedback!" name="feedback"></textarea>
 					<input class="button" type="submit" value="Send Feedback">
+					
+					<input type="hidden" name="snapshot_id" value="{{.Snapshot.ID}}">
+					<input type="hidden" name="uid" value="{{.UserID}}">
+					<input type="hidden" name="role" value="{{.UserRole}}">
 				</form>
 			</section>
 		</div>
 		<script>
 			var editor = document.getElementById("editor");
-			var myCodeMirror = CodeMirror.fromTextArea(editor, {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
+			var myCodeMirror = CodeMirror.fromTextArea(editor, {lineNumbers: true, mode: "{{getEditorMode .Snapshot.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
 			// myCodeMirror1.setSize("80%", 900)
 		</script>
 	</body>

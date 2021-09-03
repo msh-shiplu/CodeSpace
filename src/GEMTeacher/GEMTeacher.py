@@ -268,8 +268,16 @@ def gemtRequest(path, data, authenticated=True, method='POST'):
 
 class gemtGetCodeSpace(sublime_plugin.ApplicationCommand):
     def run(self):
-        global gemtSERVER
-        webbrowser.open(gemtSERVER + '/get_codespace')
+        response = gemtRequest('teacher_gets_passcode', {})
+        if response.startswith('Unauthorized'):
+            sublime.message_dialog('Unauthorized')
+        else:
+            global gemtSERVER
+            with open(gemtFILE, 'r') as f:
+                info = json.loads(f.read())
+            p = urllib.parse.urlencode(
+                {'pc': response, 'uid': info['Uid'], 'role': 'teacher'})
+            webbrowser.open(gemtSERVER + '/get_codespace?'+p)
 
 # ------------------------------------------------------------------
 
