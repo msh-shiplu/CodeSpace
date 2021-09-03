@@ -14,6 +14,10 @@ func teacher_gets_passcodeHandler(w http.ResponseWriter, r *http.Request, who st
 	fmt.Fprintf(w, Passcode)
 }
 
+func student_gets_passcodeHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	fmt.Fprintf(w, Passcode)
+}
+
 //-----------------------------------------------------------------------------------
 func testHandler(w http.ResponseWriter, r *http.Request) {
 	// Show content of boards

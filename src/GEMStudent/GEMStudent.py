@@ -96,6 +96,22 @@ def updateActiveProblems():
 # ------------------------------------------------------------------
 
 
+class gemsGetCodeSpace(sublime_plugin.ApplicationCommand):
+    def run(self):
+        response = gemsRequest('student_gets_passcode', {})
+        if response.startswith('Unauthorized'):
+            sublime.message_dialog('Unauthorized')
+        else:
+            global gemsSERVER
+            with open(gemsFILE, 'r') as f:
+                info = json.loads(f.read())
+            p = urllib.parse.urlencode(
+                {'pc': response, 'uid': info['Uid'], 'role': 'student'})
+            webbrowser.open(gemsSERVER + '/get_codespace?'+p)
+
+# ------------------------------------------------------------------
+
+
 class gemsAttendanceReport(sublime_plugin.ApplicationCommand):
     def run(self):
         response = gemsRequest('student_checks_in', {})

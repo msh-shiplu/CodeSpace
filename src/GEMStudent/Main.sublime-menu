@@ -24,6 +24,11 @@
                 "id": "gemsGetFriendCode",
                 "command": "gems_get_friend_code",
             },
+            {
+                "caption": "View CodeSpace",
+                "id": "gemsGetCodeSpace",
+                "command": "gems_get_code_space"
+            },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Attendance",

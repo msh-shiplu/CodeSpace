@@ -43,8 +43,18 @@ func codespaceHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	var snapshots []*Snapshot
+	if role == "student" {
+		for _, s := range Snapshots {
+			if _, ok := HelpEligibleStudents[s.ProblemID][uid]; ok {
+				snapshots = append(snapshots, s)
+			}
+		}
+	} else {
+		snapshots = Snapshots
+	}
 	data := &CodeSpaceData{
-		Snapshots:     Snapshots,
+		Snapshots:     snapshots,
 		UserID:        uid,
 		UserRole:      role,
 		Authenticated: passcode == Passcode,
