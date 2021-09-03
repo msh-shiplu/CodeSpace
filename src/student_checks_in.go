@@ -59,5 +59,9 @@ func student_periodic_updateHandler(w http.ResponseWriter, r *http.Request, who 
 	}
 	// Students[uid].SubmissionStatus = 0 // reset status after notifying student
 	Students[uid].ThankStatus = 0
-	fmt.Fprintf(w, "%d;%d;%d;%d;%s", submissionStat.Status, board_stat, thank_stat, submissionStat.AttemptNumber, submissionStat.Filename)
+	snapShotFeedbackStatus := 0
+	if len(Students[uid].SnapShotFeedbackQueue) > 0 {
+		snapShotFeedbackStatus = 1
+	}
+	fmt.Fprintf(w, "%d;%d;%d;%d;%d;%s", submissionStat.Status, board_stat, thank_stat, snapShotFeedbackStatus, submissionStat.AttemptNumber, submissionStat.Filename)
 }

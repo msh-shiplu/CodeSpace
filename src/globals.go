@@ -92,12 +92,18 @@ type StudentSubmissionStatus struct {
 		4 your submission was correct.
 	*/
 }
+type SnapShotFeedback struct {
+	Snapshot    string
+	Feedback    string
+	ProblemName string
+	GivenAt     time.Time
+}
 type StudenInfo struct {
-	Password         string
-	Boards           []*Board
-	SubmissionStatus []*StudentSubmissionStatus
-
-	ThankStatus int
+	Password              string
+	Boards                []*Board
+	SubmissionStatus      []*StudentSubmissionStatus
+	SnapShotFeedbackQueue []*SnapShotFeedback
+	ThankStatus           int
 	/*
 		0 Nothing
 		1 Got a new thanks for feedback

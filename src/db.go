@@ -160,10 +160,11 @@ func init_student(student_id int, password string) {
 	defer BoardsSem.Unlock()
 
 	Students[student_id] = &StudenInfo{
-		Password:         password,
-		Boards:           make([]*Board, 0),
-		SubmissionStatus: make([]*StudentSubmissionStatus, 0),
-		ThankStatus:      0,
+		Password:              password,
+		Boards:                make([]*Board, 0),
+		SubmissionStatus:      make([]*StudentSubmissionStatus, 0),
+		SnapShotFeedbackQueue: make([]*SnapShotFeedback, 0),
+		ThankStatus:           0,
 	}
 
 	// Student[student_id] = password

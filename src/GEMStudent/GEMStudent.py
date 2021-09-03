@@ -29,7 +29,7 @@ gemsUpdateMessage = {
     3: "Good effort!!!  However, the teacher did not think your {} solution for problem {} was correct.",
     4: "Your {} solution for problem {} was correct. You are now elligible to help your friends.",
 }
-
+gemsFeedbackFolder = 'FEEDBACKS'
 gemsCurrentHelpSubId = None
 gemsHelpRequestMessage = ["You have fetched a help request entry.",
                           "There is no pending help request.", "You are not yet elligible to help"]
@@ -50,6 +50,7 @@ def sendCodeSnapshot():
     global gemsSnapshotTracking
     global gemsActiveFiles
     global lastSentCodes
+    global gemsTracking
     try:
         for window in sublime.windows():
             for view in window.views():
@@ -65,6 +66,10 @@ def sendCodeSnapshot():
                     }
                     gemsRequest('code_snapshot', data)
                     lastSentCodes[problem_id] = code
+
+                    if gemsTracking == False:
+                        gemsTracking = True
+                        sublime.set_timeout_async(gems_periodic_update, 5000)
     except:
         gemsSnapshotTracking = False
         return
@@ -168,13 +173,13 @@ def gems_periodic_update():
         gemsTracking = False
         return
     try:
-        submission_stat, board_stat, thank_stat, attempt_number, filename = response.split(
+        submission_stat, board_stat, thank_stat, snapshot_feedback_stat, attempt_number, filename = response.split(
             ';')
         submission_stat = int(submission_stat)
         board_stat = int(board_stat)
         thank_stat = int(thank_stat)
         attempt_number = int(attempt_number)
-
+        snapshot_feedback_stat = int(snapshot_feedback_stat)
         # Display messages if necessary
         mesg = ""
         if submission_stat > 0 and submission_stat in gemsUpdateMessage:
@@ -189,6 +194,27 @@ def gems_periodic_update():
         mesg = mesg.strip()
         if mesg != "":
             sublime.message_dialog(mesg)
+
+        if snapshot_feedback_stat == 1:
+            sublime.message_dialog("You have got a feedback on your code.")
+            resp = gemsRequest("get_snapshot_feedback", {})
+            if resp is not None:
+                resp = json.loads(resp)
+                feedbackFolder = os.path.join(gemsFOLDER, gemsFeedbackFolder)
+                if not os.path.exists(feedbackFolder):
+                    os.makedirs(feedbackFolder)
+                filename = os.path.join(
+                    feedbackFolder, "feedback-"+resp['GivenAt']+"-"+resp['ProblemName'])
+                if resp['ProblemName'].endswith(".py"):
+                    comment = "#"
+                else:
+                    comment = "//"
+                with open(filename, 'w', encoding='utf-8') as f:
+                    f.write(resp['Snapshot']+"\n\n"+comment +
+                            "Feedback: "+resp['Feedback'])
+                if sublime.active_window().id() == 0:
+                    sublime.run_command('new_window')
+                sublime.active_window().open_file(filename)
 
         # Open board pages and feedback automatically
         # if board_stat == 1:

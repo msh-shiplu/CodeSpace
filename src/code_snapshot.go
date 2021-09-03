@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -83,4 +84,34 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	AddSnapShotFeedbackSQL.Exec(snapshotID, feedback, authorID, authorRole, now)
 
+	rows, err := Database.Query("select student_id, code, filename from code_snapshot cs, problem p where cs.problem_id=p.id and cs.id=?", snapshotID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	studentID := -1
+	code := ""
+	filename := ""
+	for rows.Next() {
+		rows.Scan(&studentID, &code, &filename)
+	}
+	Students[studentID].SnapShotFeedbackQueue = append(Students[studentID].SnapShotFeedbackQueue, &SnapShotFeedback{
+		Snapshot:    code,
+		Feedback:    feedback,
+		ProblemName: filename,
+		GivenAt:     now,
+	})
+
+}
+
+func getSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	feedfback := Students[uid].SnapShotFeedbackQueue[0]
+	Students[uid].SnapShotFeedbackQueue = Students[uid].SnapShotFeedbackQueue[1:]
+	js, err := json.Marshal(feedfback)
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	}
 }
