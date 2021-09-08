@@ -82,26 +82,29 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request) {
 	authorID, _ := strconv.Atoi(r.FormValue("uid"))
 	authorRole := r.FormValue("role")
 	now := time.Now()
-	AddSnapShotFeedbackSQL.Exec(snapshotID, feedback, authorID, authorRole, now)
-
 	rows, err := Database.Query("select student_id, code, filename from code_snapshot cs, problem p where cs.problem_id=p.id and cs.id=?", snapshotID)
-	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
+	// defer rows.Close()
 	studentID := -1
 	code := ""
 	filename := ""
 	for rows.Next() {
 		rows.Scan(&studentID, &code, &filename)
 	}
+	rows.Close()
+
 	Students[studentID].SnapShotFeedbackQueue = append(Students[studentID].SnapShotFeedbackQueue, &SnapShotFeedback{
 		Snapshot:    code,
 		Feedback:    feedback,
 		ProblemName: filename,
 		GivenAt:     now,
 	})
-
+	AddSnapShotFeedbackSQL.Exec(snapshotID, feedback, authorID, authorRole, now)
+	// fmt.Println("line 106")
+	http.Redirect(w, r, "/get_codespace?uid="+strconv.Itoa(authorID)+"&role="+authorRole+"&pc="+Passcode, http.StatusSeeOther)
+	// fmt.Println("line 108")
 }
 
 func getSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {

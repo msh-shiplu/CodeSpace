@@ -14,6 +14,8 @@ import (
 // When problems are deactivated, boards cleared, no new submissions are possibile.
 //-----------------------------------------------------------------------------------
 func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	CodeSnapshotSem.Lock()
+	defer CodeSnapshotSem.Unlock()
 	filename := r.FormValue("filename")
 	if prob, ok := ActiveProblems[filename]; ok {
 		prob.Active = false
@@ -22,6 +24,22 @@ func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request,
 		} else {
 			fmt.Fprintf(w, "0")
 		}
+		tempSnapshots := Snapshots
+		for studentID, _ := range StudentSnapshot {
+			StudentSnapshot[studentID] = map[int]int{}
+		}
+		Snapshots = make([]*Snapshot, 0)
+		idx := 0
+		for _, s := range tempSnapshots {
+			if s.ProblemID != prob.Info.Pid {
+				Snapshots = append(Snapshots, s)
+				for studentID, _ := range StudentSnapshot {
+					StudentSnapshot[studentID][prob.Info.Pid] = idx
+				}
+				idx++
+			}
+		}
+
 	} else {
 		fmt.Fprintf(w, "-1")
 	}

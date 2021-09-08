@@ -60,7 +60,10 @@ func codespaceHandler(w http.ResponseWriter, r *http.Request) {
 		Authenticated: passcode == Passcode,
 	}
 	w.Header().Set("Content-Type", "text/html")
-	t.Execute(w, data)
+	err = t.Execute(w, data)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request) {
@@ -81,5 +84,8 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request) {
 		UserRole: role,
 	}
 	w.Header().Set("Content-Type", "text/html")
-	t.Execute(w, data)
+	err = t.Execute(w, data)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
