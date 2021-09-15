@@ -77,6 +77,7 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request) {
 	passcode := r.FormValue("pc")
 	if passcode != Passcode {
 		http.Error(w, "Unauthorized access", http.StatusUnauthorized)
+		return
 	}
 	temp := template.New("")
 	ownFuncs := template.FuncMap{"getEditorMode": getEditorMode}
