@@ -171,7 +171,7 @@ var CODESPACE_TEMPLATE = `
 					<td>{{ .TimeSpent }}</td>
 					<td>{{ .LinesOfCode }}</td>
 					<td>{{ .Status }}</td>
-					<td><a href="/get_snapshot?student_id={{ .StudentID }}&problem_id={{ .ProblemID }}&uid={{$.UserID}}&role={{$.UserRole}}">View</a></td>
+					<td><a href="/get_snapshot?student_id={{ .StudentID }}&problem_id={{ .ProblemID }}&uid={{$.UserID}}&role={{$.UserRole}}&pc={{$.Passcode}}">View</a></td>
 				</tr>
 				{{ end }}
 				</tbody>

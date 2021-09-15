@@ -13,6 +13,7 @@ type CodeSpaceData struct {
 	UserID        int
 	UserRole      string
 	Authenticated bool
+	Passcode      string
 }
 
 type SnapshotData struct {
@@ -58,10 +59,12 @@ func codespaceHandler(w http.ResponseWriter, r *http.Request) {
 		UserID:        uid,
 		UserRole:      role,
 		Authenticated: passcode == Passcode,
+		Passcode:      passcode,
 	}
 	w.Header().Set("Content-Type", "text/html")
 	err = t.Execute(w, data)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Fatal(err)
 	}
 }
@@ -71,6 +74,10 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request) {
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
 	uid, _ := strconv.Atoi(r.FormValue("uid"))
 	role := r.FormValue("role")
+	passcode := r.FormValue("pc")
+	if passcode != Passcode {
+		http.Error(w, "Unauthorized access", http.StatusUnauthorized)
+	}
 	temp := template.New("")
 	ownFuncs := template.FuncMap{"getEditorMode": getEditorMode}
 	t, err := temp.Funcs(ownFuncs).Parse(CODE_SNAPSHOT_TEMPLATE)
@@ -86,6 +93,7 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	err = t.Execute(w, data)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Fatal(err)
 	}
 }
