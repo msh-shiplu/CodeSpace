@@ -50,6 +50,7 @@ var AddHelpMessageSQL *sql.Stmt
 var UpdateHelpMessageSQL *sql.Stmt
 var AddCodeSnapshotSQL *sql.Stmt
 var AddSnapShotFeedbackSQL *sql.Stmt
+var UpdateSnapshotFeedbackSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication
@@ -93,10 +94,10 @@ type StudentSubmissionStatus struct {
 	*/
 }
 type SnapShotFeedback struct {
+	FeedbackID  int
 	Snapshot    string
 	Feedback    string
 	ProblemName string
-	GivenAt     time.Time
 }
 type StudenInfo struct {
 	Password              string

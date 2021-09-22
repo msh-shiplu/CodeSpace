@@ -119,3 +119,9 @@ func sendThankYouHandler(w http.ResponseWriter, r *http.Request, who string, uid
 	}
 
 }
+
+func studentSendBackFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	feedback := r.FormValue("feedback")
+	snapshot_id, _ := strconv.Atoi(r.FormValue("snapshot_id"))
+	UpdateSnapshotFeedbackSQL.Exec(feedback, time.Now(), snapshot_id)
+}

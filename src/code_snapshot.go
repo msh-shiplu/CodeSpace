@@ -94,17 +94,18 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request) {
 		rows.Scan(&studentID, &code, &filename)
 	}
 	rows.Close()
-
+	result, err := AddSnapShotFeedbackSQL.Exec(snapshotID, feedback, authorID, authorRole, now)
+	if err != nil {
+		log.Fatal(err)
+	}
+	feedbackID, _ := result.LastInsertId()
 	Students[studentID].SnapShotFeedbackQueue = append(Students[studentID].SnapShotFeedbackQueue, &SnapShotFeedback{
+		FeedbackID:  int(feedbackID),
 		Snapshot:    code,
 		Feedback:    feedback,
 		ProblemName: filename,
-		GivenAt:     now,
 	})
-	AddSnapShotFeedbackSQL.Exec(snapshotID, feedback, authorID, authorRole, now)
-	// fmt.Println("line 106")
 	http.Redirect(w, r, "/get_codespace?uid="+strconv.Itoa(authorID)+"&role="+authorRole+"&pc="+Passcode, http.StatusSeeOther)
-	// fmt.Println("line 108")
 }
 
 func getSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {

@@ -38,6 +38,7 @@ gemsCurrentFiles = set()
 gemsSnapshotTracking = False
 gemsActiveFiles = {}
 lastSentCodes = {}
+isRegistered = False
 # ------------------------------------------------------------------
 
 
@@ -220,7 +221,7 @@ def gems_periodic_update():
                 if not os.path.exists(feedbackFolder):
                     os.makedirs(feedbackFolder)
                 filename = os.path.join(
-                    feedbackFolder, "feedback-"+resp['GivenAt']+"-"+resp['ProblemName'])
+                    feedbackFolder, "feedback-"+str(resp['FeedbackID'])+"-"+resp['ProblemName'])
                 if resp['ProblemName'].endswith(".py"):
                     comment = "#"
                 else:
@@ -607,6 +608,8 @@ class gemsCompleteRegistration(sublime_plugin.ApplicationCommand):
             uid, password = response.split(',')
             info['Uid'] = int(uid)
             info['Password'] = password.strip()
+            global isRegistered
+            isRegistered = True
             sublime.message_dialog('{} is registered.'.format(info['Name']))
         with open(gemsFILE, 'w') as f:
             f.write(json.dumps(info, indent=4))
@@ -950,3 +953,21 @@ class gemsGetFriendCode(sublime_plugin.TextCommand):
 # 		sublime.message_dialog(response)
 # 		self.window.run_command("close")
 # 		self.window.run_command("hide_panel", {"cancel": True})
+
+class gemsEventListeners(sublime_plugin.EventListener):
+
+    def on_pre_close(self, view):
+        if isRegistered == False:
+            return
+        filename = os.path.basename(view.file_name())
+        fn_splits = filename.split("-")
+        if filename is not None and len(fn_splits) > 2 and fn_splits[0] == "feedback" and fn_splits[1].isdigit():
+            view.window().focus_view(view)
+            resp = sublime.yes_no_cancel_dialog(
+                "Thank you, this helps!!!", "Yes", "No")
+            data = {"snapshot_id": int(fn_splits[1])}
+            if resp == sublime.DIALOG_YES:
+                data["feedback"] = "yes"
+            else:
+                data["feedback"] = "no"
+            gemsRequest("save_snapshot_back_feedback", data)
