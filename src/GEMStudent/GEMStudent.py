@@ -67,6 +67,7 @@ def sendCodeSnapshot():
                     }
                     gemsRequest('code_snapshot', data)
                     lastSentCodes[problem_id] = code
+                    print("Code snapshot sent!")
 
                     if gemsTracking == False:
                         gemsTracking = True
@@ -232,6 +233,7 @@ def gems_periodic_update():
                 if sublime.active_window().id() == 0:
                     sublime.run_command('new_window')
                 sublime.active_window().open_file(filename)
+                print("Code snapshot feedback recieved!")
 
         # Open board pages and feedback automatically
         # if board_stat == 1:
