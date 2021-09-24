@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -43,7 +44,7 @@ func addCodeSnapshot(studentID int, problemID int, code string, status int, last
 			ProblemName: problemName,
 			ProblemID:   problemID,
 			Status:      SnapshotStatus[status],
-			TimeSpent:   time.Duration(0),
+			FirstUpdate: lastUpdate,
 			LastUpdated: lastUpdate,
 			LinesOfCode: getLinesOfCode(code),
 			Code:        code,
@@ -60,13 +61,13 @@ func addCodeSnapshot(studentID int, problemID int, code string, status int, last
 			ProblemName: Snapshots[idx].ProblemName,
 			ProblemID:   problemID,
 			Status:      SnapshotStatus[status],
-			TimeSpent:   Snapshots[idx].TimeSpent + (lastUpdate.Sub(Snapshots[idx].LastUpdated)),
+			FirstUpdate: Snapshots[idx].FirstUpdate,
 			LastUpdated: lastUpdate,
 			LinesOfCode: getLinesOfCode(code),
 			Code:        code,
 		}
 	}
-
+	fmt.Println("Code snapshot saved!")
 }
 
 func codeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
@@ -105,6 +106,7 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request) {
 		Feedback:    feedback,
 		ProblemName: filename,
 	})
+	fmt.Println("Feedback on code snapshot saved!")
 	http.Redirect(w, r, "/get_codespace?uid="+strconv.Itoa(authorID)+"&role="+authorRole+"&pc="+Passcode, http.StatusSeeOther)
 }
 

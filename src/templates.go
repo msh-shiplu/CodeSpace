@@ -155,7 +155,7 @@ var CODESPACE_TEMPLATE = `
 					<tr>
 						<th>Student</th>
 						<th>Problem</th>
-						<th>Last Updated</th>
+						<th>Last Snapshot Since</th>
 						<th>Time Spent</th>
 						<th>Number of Lines</th>
 						<th>Status</th>
@@ -167,8 +167,8 @@ var CODESPACE_TEMPLATE = `
 				<tr>
 					<td>{{ .StudentName }}</td>
 					<td>{{ .ProblemName }}</td>
-					<td>{{ .LastUpdated }}</td>
-					<td>{{ .TimeSpent }}</td>
+					<td>{{ formatTimeSince .LastUpdated }}</td>
+					<td>{{ formatTimeSince .FirstUpdate }}</td>
 					<td>{{ .LinesOfCode }}</td>
 					<td>{{ .Status }}</td>
 					<td><a href="/get_snapshot?student_id={{ .StudentID }}&problem_id={{ .ProblemID }}&uid={{$.UserID}}&role={{$.UserRole}}&pc={{$.Passcode}}">View</a></td>
@@ -203,8 +203,6 @@ var CODE_SNAPSHOT_TEMPLATE = `
 				<h3 class="title is-3">Student: {{.Snapshot.StudentName}}, Problem: {{.Snapshot.ProblemName}}</h3>
 				<h3>
 				<textarea id="editor">{{ .Snapshot.Code }}</textarea>
-			</section>
-			<section class="section">
 				<form action="/save_snapshot_feedback" method="POST">
 					<textarea class="textarea" placeholder="Write your feedback!" name="feedback"></textarea>
 					<input class="button" type="submit" value="Send Feedback">
@@ -213,6 +211,18 @@ var CODE_SNAPSHOT_TEMPLATE = `
 					<input type="hidden" name="uid" value="{{.UserID}}">
 					<input type="hidden" name="role" value="{{.UserRole}}">
 				</form>
+			</section>
+			<section class="section">
+				{{range .Feedbacks}}
+					<article class="message">
+						<div class="message-header">
+						<p>Feedback given at {{.FeedbackTime}}</p>
+						</div>
+						<div class="message-body">
+							{{.Feedback}}
+						</div>
+					</article>
+				{{end}}
 			</section>
 		</div>
 		<script>
