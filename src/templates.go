@@ -149,36 +149,32 @@ var CODESPACE_TEMPLATE = `
 	</head>
 	<body>
 	<div class="container">
-		{{if .Authenticated }}
-			<table class="table is-striped is-fullwidth is-hoverable">
-				<thead>
-					<tr>
-						<th>Student</th>
-						<th>Problem</th>
-						<th>Last Snapshot Since</th>
-						<th>Time Spent</th>
-						<th>Number of Lines</th>
-						<th>Status</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-				{{ range .Snapshots }}
+		<table class="table is-striped is-fullwidth is-hoverable">
+			<thead>
 				<tr>
-					<td>{{ .StudentName }}</td>
-					<td>{{ .ProblemName }}</td>
-					<td>{{ formatTimeSince .LastUpdated }}</td>
-					<td>{{ formatTimeSince .FirstUpdate }}</td>
-					<td>{{ .LinesOfCode }}</td>
-					<td>{{ .Status }}</td>
-					<td><a href="/get_snapshot?student_id={{ .StudentID }}&problem_id={{ .ProblemID }}&uid={{$.UserID}}&role={{$.UserRole}}&pc={{$.Passcode}}">View</a></td>
+					<th>Student</th>
+					<th>Problem</th>
+					<th>Last Snapshot Since</th>
+					<th>Time Spent</th>
+					<th>Number of Lines</th>
+					<th>Status</th>
+					<th></th>
 				</tr>
-				{{ end }}
-				</tbody>
-			</table>
-		{{else}}
-			<h1 class="title">Unauthorized access!!!</h1>
-		{{end}}
+			</thead>
+			<tbody>
+			{{ range .Snapshots }}
+			<tr>
+				<td>{{ .StudentName }}</td>
+				<td>{{ .ProblemName }}</td>
+				<td>{{ formatTimeSince .LastUpdated }}</td>
+				<td>{{ formatTimeSince .FirstUpdate }}</td>
+				<td>{{ .LinesOfCode }}</td>
+				<td>{{ .Status }}</td>
+				<td><a href="/get_snapshot?student_id={{ .StudentID }}&problem_id={{ .ProblemID }}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">View</a></td>
+			</tr>
+			{{ end }}
+			</tbody>
+		</table>
 	</div>
 
 	</body>
@@ -195,6 +191,10 @@ var CODE_SNAPSHOT_TEMPLATE = `
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css" integrity="sha512-6sALqOPMrNSc+1p5xOhPwGIzs6kIlST+9oGWlI4Wwcbj1saaX9J3uzO3Vub016dmHV7hM+bMi/rfXLiF5DNIZg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/theme/monokai.min.css" integrity="sha512-R6PH4vSzF2Yxjdvb2p2FA06yWul+U0PDDav4b/od/oXf9Iw37zl10plvwOXelrjV2Ai7Eo3vyHeyFUjhXdBCVQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
 	</head>
 	<body>
 		<div class="container">
@@ -203,6 +203,7 @@ var CODE_SNAPSHOT_TEMPLATE = `
 				<h3 class="title is-3">Student: {{.Snapshot.StudentName}}, Problem: {{.Snapshot.ProblemName}}</h3>
 				<h3>
 				<textarea id="editor">{{ .Snapshot.Code }}</textarea>
+				<span></span>
 				<form action="/save_snapshot_feedback" method="POST">
 					<textarea class="textarea" placeholder="Write your feedback!" name="feedback"></textarea>
 					<input class="button" type="submit" value="Send Feedback">
@@ -210,16 +211,45 @@ var CODE_SNAPSHOT_TEMPLATE = `
 					<input type="hidden" name="snapshot_id" value="{{.Snapshot.ID}}">
 					<input type="hidden" name="uid" value="{{.UserID}}">
 					<input type="hidden" name="role" value="{{.UserRole}}">
+					<input type="hidden" name="password" value="{{.Password}}">
 				</form>
 			</section>
 			<section class="section">
 				{{range .Feedbacks}}
 					<article class="message">
 						<div class="message-header">
-						<p>Feedback given at {{.FeedbackTime}}</p>
+						<p>{{.GivenBy}} ({{.FeedbackTime.Format "Jan 02, 2006 3:4:5 PM"}})</p>
 						</div>
 						<div class="message-body">
-							{{.Feedback}}
+							<div class="columns">
+								<div class="column is-three-quarters">{{.Feedback}}</div>
+								<div class="column">
+									<a onclick="autoFeedbackSubmit('yes', {{.FeedbackID}})">
+										<span style="font-size: 1.5em; {{if eq .CurrentUserVote "yes"}} color: green; {{end}}">
+											<i class="fas fa-thumbs-up"></i>
+										</span>
+									</a>
+									<span>
+											{{.Upvote}}
+									</span>
+								</div>
+								<div class="column">
+									<a onclick="autoFeedbackSubmit('no', {{.FeedbackID}})">
+										<span style="font-size: 1.5em; {{if eq .CurrentUserVote "no"}} color: red; {{end}}">
+											<i class="fas fa-thumbs-down"></i>
+										</span>
+									</a>
+									<span>
+										{{.Downvote}}
+									</span>
+								</div>
+							</div>
+							<div class="codesnapshots">
+								<h3>Code Snapshot</h3>
+								<div>
+									<textarea class="editors">{{ .Code }}</textarea>
+								</div>
+							</div>
 						</div>
 					</article>
 				{{end}}
@@ -229,6 +259,65 @@ var CODE_SNAPSHOT_TEMPLATE = `
 			var editor = document.getElementById("editor");
 			var myCodeMirror = CodeMirror.fromTextArea(editor, {lineNumbers: true, mode: "{{getEditorMode .Snapshot.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
 			// myCodeMirror1.setSize("80%", 900)
+			var snapshotEditors = document.getElementsByClassName("editors");
+			for (i = 0;i<snapshotEditors.length; i++) {
+				CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .Snapshot.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
+			}
+			$( function() {
+				$( ".codesnapshots" ).accordion({
+					collapsible: true,
+					active: false
+				});
+			} );
+			function autoFeedbackSubmit(backFeedback, fID) {
+				$.ajax({
+					url: "/save_snapshot_back_feedback",
+					type: "POST",
+					data:  {
+						feedback: backFeedback,
+						feedback_id: fID,
+						uid: {{.UserID}},
+						role: "{{.UserRole}}",
+						password: "{{.Password}}",
+					},
+					success: function(data){
+						console.log("Success!")
+					}
+				});
+				// var form = document.createElement("form");
+				// var bkfdback = document.createElement("hidden");
+				// var feedbackID = document.createElement("hidden");
+				// var uid = document.createElement("hidden");
+				// var authorRole = document.createElement("hidden");
+				// var password = document.createElement("hidden");
+				
+				// form.setAttribute("method", "POST");
+				// form.setAttribute("action", "save_snapshot_back_feedback");
+				// bkfdback.setAttribute("name", "feedback");
+				// bkfdback.setAttribute("value", backFeedback);
+				// form.appendChild(bkfdback);
+
+				// feedbackID.setAttribute("name", "feedback_id");
+				// feedbackID.setAttribute("value", fID);
+				// form.appendChild(feedbackID);
+
+				// uid.setAttribute("name", "uid");
+				// uid.setAttribute("value", "{{.UserID}}");
+				// form.appendChild(uid);
+
+				// authorRole.setAttribute("name", "role");
+				// authorRole.setAttribute("value", "{{.UserRole}}");
+				// form.appendChild(authorRole);
+
+				// password.setAttribute("name", "password");
+				// password.setAttribute("value", "{{.Password}}");
+				// form.appendChild(password);
+
+				// document.body.appendChild(form);
+				// form.submit()
+				
+				location.reload();
+			}
 		</script>
 	</body>
 	</html>

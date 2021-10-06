@@ -10,22 +10,28 @@ import (
 )
 
 type CodeSpaceData struct {
-	Snapshots     []*Snapshot
-	UserID        int
-	UserRole      string
-	Authenticated bool
-	Passcode      string
+	Snapshots []*Snapshot
+	UserID    int
+	UserRole  string
+	Password  string
 }
 
 type FeedbackData struct {
-	Feedback     string
-	FeedbackTime time.Time
+	FeedbackID      int
+	Feedback        string
+	FeedbackTime    time.Time
+	Upvote          int
+	Downvote        int
+	CurrentUserVote string
+	GivenBy         string
+	Code            string
 }
 type SnapshotData struct {
 	Snapshot  *Snapshot
 	UserID    int
 	UserRole  string
 	Feedbacks []*FeedbackData
+	Password  string
 }
 
 func getEditorMode(filename string) string {
@@ -59,9 +65,20 @@ func formatTimeSince(t time.Time) string {
 	return formatTimeDuration(d)
 }
 
-func codespaceHandler(w http.ResponseWriter, r *http.Request) {
-	passcode := r.FormValue("pc")
-	uid, _ := strconv.Atoi(r.FormValue("uid"))
+func getVoteCount(feedbackID int, voteType string) int {
+	vote := 0
+	rows, err := Database.Query("select count(*) from snapshot_back_feedback where is_helpful = ? and snapshot_feedback_id = ?", voteType, feedbackID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for rows.Next() {
+		rows.Scan(&vote)
+	}
+	return vote
+}
+
+func codespaceHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	role := r.FormValue("role")
 	temp := template.New("")
 	ownFuncs := template.FuncMap{"formatTimeSince": formatTimeSince}
@@ -72,7 +89,9 @@ func codespaceHandler(w http.ResponseWriter, r *http.Request) {
 	var snapshots []*Snapshot
 	if role == "student" {
 		for _, s := range Snapshots {
-			if _, ok := HelpEligibleStudents[s.ProblemID][uid]; ok {
+			if s.StudentID == uid {
+				snapshots = append(snapshots, s)
+			} else if _, ok := HelpEligibleStudents[s.ProblemID][uid]; ok {
 				snapshots = append(snapshots, s)
 			}
 		}
@@ -80,11 +99,10 @@ func codespaceHandler(w http.ResponseWriter, r *http.Request) {
 		snapshots = Snapshots
 	}
 	data := &CodeSpaceData{
-		Snapshots:     snapshots,
-		UserID:        uid,
-		UserRole:      role,
-		Authenticated: passcode == Passcode,
-		Passcode:      passcode,
+		Snapshots: snapshots,
+		UserID:    uid,
+		UserRole:  role,
+		Password:  r.FormValue("password"),
 	}
 	w.Header().Set("Content-Type", "text/html")
 	err = t.Execute(w, data)
@@ -94,33 +112,67 @@ func codespaceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request) {
+func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	studentID, _ := strconv.Atoi(r.FormValue("student_id"))
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
-	uid, _ := strconv.Atoi(r.FormValue("uid"))
 	role := r.FormValue("role")
-	passcode := r.FormValue("pc")
-	if passcode != Passcode {
-		http.Error(w, "Unauthorized access", http.StatusUnauthorized)
-		return
-	}
 	temp := template.New("")
 	ownFuncs := template.FuncMap{"getEditorMode": getEditorMode}
 	t, err := temp.Funcs(ownFuncs).Parse(CODE_SNAPSHOT_TEMPLATE)
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, err := Database.Query("select F.feedback, F.given_at from code_snapshot C, snapshot_feedback F where C.id=F.snapshot_id and C.student_id=? and C.problem_id=?", studentID, problemID)
+	rows, err := Database.Query("select F.id, F.feedback, F.author_id, F.author_role, F.given_at, C.code from code_snapshot C, snapshot_feedback F where C.id=F.snapshot_id and C.student_id=? and C.problem_id=?", studentID, problemID)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
-	feedback, givenAt := "", time.Now()
+	feedbackID, feedback, authorID, authorRole, givenAt, code := 0, "", 0, "", time.Now(), ""
 	var feedbacks []*FeedbackData
 
+	upvote, downvote := 0, 0
+	currentUserVote := ""
+
 	for rows.Next() {
-		rows.Scan(&feedback, &givenAt)
-		feedbacks = append(feedbacks, &FeedbackData{Feedback: feedback, FeedbackTime: givenAt})
+		rows.Scan(&feedbackID, &feedback, &authorID, &authorRole, &givenAt, &code)
+
+		upvote = getVoteCount(feedbackID, "yes")
+		downvote = getVoteCount(feedbackID, "no")
+		rows2, err := Database.Query("select is_helpful from snapshot_back_feedback where snapshot_feedback_id=? and author_id=? and author_role=?", feedbackID, uid, role)
+		defer rows2.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+		for rows2.Next() {
+			rows2.Scan(&currentUserVote)
+		}
+		rows2.Close()
+		if authorRole == "teacher" {
+			rows2, err = Database.Query("select name from teacher where id=?", authorID)
+		} else {
+			rows2, err = Database.Query("select name from student where id=?", authorID)
+		}
+		defer rows2.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+		authorName := ""
+		if rows2.Next() {
+			rows2.Scan(&authorName)
+		}
+		rows2.Close()
+		feedbacks = append(feedbacks, &FeedbackData{
+			FeedbackID:      feedbackID,
+			Feedback:        feedback,
+			FeedbackTime:    givenAt,
+			Upvote:          upvote,
+			Downvote:        downvote,
+			CurrentUserVote: currentUserVote,
+			GivenBy:         authorName,
+			Code:            code,
+		})
+		currentUserVote = ""
+
 	}
 	idx := StudentSnapshot[studentID][problemID]
 	data := &SnapshotData{
@@ -128,6 +180,7 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request) {
 		UserID:    uid,
 		UserRole:  role,
 		Feedbacks: feedbacks,
+		Password:  r.FormValue("password"),
 	}
 	w.Header().Set("Content-Type", "text/html")
 	err = t.Execute(w, data)

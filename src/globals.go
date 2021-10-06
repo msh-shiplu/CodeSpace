@@ -50,7 +50,8 @@ var AddHelpMessageSQL *sql.Stmt
 var UpdateHelpMessageSQL *sql.Stmt
 var AddCodeSnapshotSQL *sql.Stmt
 var AddSnapShotFeedbackSQL *sql.Stmt
-var UpdateSnapshotFeedbackSQL *sql.Stmt
+var AddSnapshotBackFeedbackSQL *sql.Stmt
+var UpdateSnapshotBackFeedbackSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication

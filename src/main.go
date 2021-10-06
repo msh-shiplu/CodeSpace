@@ -72,9 +72,9 @@ func init_handlers() {
 	http.HandleFunc("/code_snapshot", Authorize(codeSnapshotHandler))
 	http.HandleFunc("/get_global_info", Authorize(globalInfoHandler))
 
-	http.HandleFunc("/get_codespace", codespaceHandler)
-	http.HandleFunc("/get_snapshot", getCodeSnapshotHandler)
-	http.HandleFunc("/save_snapshot_feedback", codeSnapshotFeedbackHandler)
+	http.HandleFunc("/get_codespace", Authorize(codespaceHandler))
+	http.HandleFunc("/get_snapshot", Authorize(getCodeSnapshotHandler))
+	http.HandleFunc("/save_snapshot_feedback", Authorize(codeSnapshotFeedbackHandler))
 	http.HandleFunc("/get_snapshot_feedback", Authorize(getSnapshotFeedbackHandler))
 	http.HandleFunc("/save_snapshot_back_feedback", Authorize(studentSendBackFeedbackHandler))
 }

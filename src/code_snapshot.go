@@ -77,7 +77,7 @@ func codeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid
 	addCodeSnapshot(studentID, problemID, code, 0, time.Now())
 }
 
-func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request) {
+func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	snapshotID, _ := strconv.Atoi(r.FormValue("snapshot_id"))
 	feedback := r.FormValue("feedback")
 	authorID, _ := strconv.Atoi(r.FormValue("uid"))
@@ -107,7 +107,7 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request) {
 		ProblemName: filename,
 	})
 	fmt.Println("Feedback on code snapshot saved!")
-	http.Redirect(w, r, "/get_codespace?uid="+strconv.Itoa(authorID)+"&role="+authorRole+"&pc="+Passcode, http.StatusSeeOther)
+	http.Redirect(w, r, "/get_codespace?uid="+strconv.Itoa(authorID)+"&role="+authorRole+"&password="+r.FormValue("password"), http.StatusSeeOther)
 }
 
 func getSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {

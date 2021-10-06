@@ -70,13 +70,13 @@ func student_return_without_feedbackHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func student_send_help_messageHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	submission_id, _ := strconv.Atoi(r.FormValue("submission_id"))
+	submissionID, _ := strconv.Atoi(r.FormValue("submission_id"))
 	message := r.FormValue("message")
-	res, err := AddHelpMessageSQL.Exec(submission_id, uid, message, time.Now())
+	res, err := AddHelpMessageSQL.Exec(submissionID, uid, message, time.Now())
 	if err != nil {
 		log.Fatal(err)
 	}
-	message_id, _ := res.LastInsertId()
+	messageID, _ := res.LastInsertId()
 	// student_id := 0
 	// rows, _ := Database.Query("select student_id from help_submission where id=?", submission_id)
 	// for rows.Next() {
@@ -84,32 +84,32 @@ func student_send_help_messageHandler(w http.ResponseWriter, r *http.Request, wh
 	// 	break
 	// }
 	// rows.Close()
-	helpSub := HelpSubmissions[submission_id]
-	student_id := helpSub.Uid
+	helpSub := HelpSubmissions[submissionID]
+	studentID := helpSub.Uid
 	message = helpSub.Content + "\n\nFeedback: " + message
 	b := &Board{
 		Content:      message,
 		Answer:       "",
 		Attempts:     0,
 		Filename:     "peer_feedback.txt",
-		Pid:          int(message_id),
+		Pid:          int(messageID),
 		StartingTime: time.Now(),
 		Type:         "peer_feedback",
 	}
-	Students[student_id].Boards = append(Students[student_id].Boards, b)
+	Students[studentID].Boards = append(Students[studentID].Boards, b)
 	fmt.Fprint(w, "Dear "+who+", Your feedback has been sent.")
 
 }
 func sendThankYouHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	message_id, _ := strconv.Atoi(r.FormValue("message_id"))
+	messageID, _ := strconv.Atoi(r.FormValue("message_id"))
 	useful := r.FormValue("useful")
-	_, err := UpdateHelpMessageSQL.Exec(useful, time.Now(), message_id)
+	_, err := UpdateHelpMessageSQL.Exec(useful, time.Now(), messageID)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if useful == "yes" {
 		studentID := 0
-		rows, _ := Database.Query("select student_id from help_message where id=?", message_id)
+		rows, _ := Database.Query("select student_id from help_message where id=?", messageID)
 		for rows.Next() {
 			rows.Scan(&studentID)
 			break
@@ -121,7 +121,22 @@ func sendThankYouHandler(w http.ResponseWriter, r *http.Request, who string, uid
 }
 
 func studentSendBackFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	feedback := r.FormValue("feedback")
-	snapshot_id, _ := strconv.Atoi(r.FormValue("snapshot_id"))
-	UpdateSnapshotFeedbackSQL.Exec(feedback, time.Now(), snapshot_id)
+	backFeedback := r.FormValue("feedback")
+	feedbackID, _ := strconv.Atoi(r.FormValue("feedback_id"))
+	authorRole := r.FormValue("role")
+	rows, err := Database.Query("select * from snapshot_back_feedback where snapshot_feedback_id = ? and author_id = ? and author_role = ?", feedbackID, uid, authorRole)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if rows.Next() {
+		rows.Close()
+		_, err = UpdateSnapshotBackFeedbackSQL.Exec(backFeedback, time.Now(), feedbackID, uid, authorRole)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		rows.Close()
+		AddSnapshotBackFeedbackSQL.Exec(feedbackID, uid, authorRole, backFeedback, time.Now())
+	}
 }

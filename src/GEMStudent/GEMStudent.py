@@ -100,16 +100,12 @@ def updateActiveProblems():
 
 class gemsGetCodeSpace(sublime_plugin.ApplicationCommand):
     def run(self):
-        response = gemsRequest('student_gets_passcode', {})
-        if response.startswith('Unauthorized'):
-            sublime.message_dialog('Unauthorized')
-        else:
-            global gemsSERVER
-            with open(gemsFILE, 'r') as f:
-                info = json.loads(f.read())
-            p = urllib.parse.urlencode(
-                {'pc': response, 'uid': info['Uid'], 'role': 'student'})
-            webbrowser.open(gemsSERVER + '/get_codespace?'+p)
+        global gemsSERVER
+        with open(gemsFILE, 'r') as f:
+            info = json.loads(f.read())
+        p = urllib.parse.urlencode(
+            {'password': info['Password'], 'uid': info['Uid'], 'role': 'student'})
+        webbrowser.open(gemsSERVER + '/get_codespace?'+p)
 
 # ------------------------------------------------------------------
 
@@ -967,9 +963,10 @@ class gemsEventListeners(sublime_plugin.EventListener):
             view.window().focus_view(view)
             resp = sublime.yes_no_cancel_dialog(
                 "Thank you, this helps!!!", "Yes", "No")
-            data = {"snapshot_id": int(fn_splits[1])}
+            data = {"feedback_id": int(fn_splits[1])}
             if resp == sublime.DIALOG_YES:
                 data["feedback"] = "yes"
             else:
                 data["feedback"] = "no"
+            data["role"] = "student"
             gemsRequest("save_snapshot_back_feedback", data)
