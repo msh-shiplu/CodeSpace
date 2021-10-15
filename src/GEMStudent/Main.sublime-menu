@@ -29,6 +29,11 @@
                 "id": "gemsGetCodeSpace",
                 "command": "gems_get_code_space"
             },
+            {
+                "caption": "Review Feedback",
+                "id": "gemsReviewFeedbackForMe",
+                "command": "gems_review_feedback_for_me"
+            },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Attendance",

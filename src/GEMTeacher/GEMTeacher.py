@@ -278,6 +278,18 @@ class gemtGetCodeSpace(sublime_plugin.ApplicationCommand):
 # ------------------------------------------------------------------
 
 
+class gemtReviewFeedback(sublime_plugin.ApplicationCommand):
+    def run(self):
+        global gemtSERVER
+        with open(gemtFILE, 'r') as f:
+            info = json.loads(f.read())
+        p = urllib.parse.urlencode(
+            {'password': info['Password'], 'uid': info['Uid'], 'role': 'teacher'})
+        webbrowser.open(gemtSERVER + '/teacher_views_feedback?'+p)
+
+# ------------------------------------------------------------------
+
+
 class gemtViewBulletinBoard(sublime_plugin.ApplicationCommand):
     def run(self):
         response = gemtRequest('teacher_gets_passcode', {})

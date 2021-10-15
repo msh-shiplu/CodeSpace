@@ -216,6 +216,7 @@ type Snapshot struct {
 	LastUpdated time.Time
 	LinesOfCode int
 	Code        string
+	NumFeedback int
 }
 
 // Snapshots contains all the current snapshots from students.

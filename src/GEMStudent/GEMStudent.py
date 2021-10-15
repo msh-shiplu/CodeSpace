@@ -98,6 +98,18 @@ def updateActiveProblems():
 # ------------------------------------------------------------------
 
 
+class gemsReviewFeedbackForMe(sublime_plugin.ApplicationCommand):
+    def run(self):
+        global gemsSERVER
+        with open(gemsFILE, 'r') as f:
+            info = json.loads(f.read())
+        p = urllib.parse.urlencode(
+            {'viewtype': 'forme', 'password': info['Password'], 'uid': info['Uid'], 'role': 'student'})
+        webbrowser.open(gemsSERVER + '/student_views_feedback?'+p)
+
+# ------------------------------------------------------------------
+
+
 class gemsGetCodeSpace(sublime_plugin.ApplicationCommand):
     def run(self):
         global gemsSERVER

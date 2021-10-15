@@ -83,7 +83,7 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 	authorID, _ := strconv.Atoi(r.FormValue("uid"))
 	authorRole := r.FormValue("role")
 	now := time.Now()
-	rows, err := Database.Query("select student_id, code, filename from code_snapshot cs, problem p where cs.problem_id=p.id and cs.id=?", snapshotID)
+	rows, err := Database.Query("select student_id, problem_id, code, filename from code_snapshot cs, problem p where cs.problem_id=p.id and cs.id=?", snapshotID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -91,14 +91,17 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 	studentID := -1
 	code := ""
 	filename := ""
+	problemID := -1
 	for rows.Next() {
-		rows.Scan(&studentID, &code, &filename)
+		rows.Scan(&studentID, &problemID, &code, &filename)
 	}
 	rows.Close()
 	result, err := AddSnapShotFeedbackSQL.Exec(snapshotID, feedback, authorID, authorRole, now)
 	if err != nil {
 		log.Fatal(err)
 	}
+	idx := StudentSnapshot[studentID][problemID]
+	Snapshots[idx].NumFeedback++
 	feedbackID, _ := result.LastInsertId()
 	Students[studentID].SnapShotFeedbackQueue = append(Students[studentID].SnapShotFeedbackQueue, &SnapShotFeedback{
 		FeedbackID:  int(feedbackID),

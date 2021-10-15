@@ -19,6 +19,11 @@
                 "id": "gemtGetCodeSpace",
                 "command": "gemt_get_code_space"
             },
+            {
+                "caption": "Review Feedback",
+                "id": "gemtReviewFeedback",
+                "command": "gemt_review_feedback"
+            },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Get a submission entry",

@@ -157,6 +157,7 @@ var CODESPACE_TEMPLATE = `
 					<th>Last Snapshot Since</th>
 					<th>Time Spent</th>
 					<th>Number of Lines</th>
+					<th>Number of Feedbacks</th>
 					<th>Status</th>
 					<th></th>
 				</tr>
@@ -169,6 +170,7 @@ var CODESPACE_TEMPLATE = `
 				<td>{{ formatTimeSince .LastUpdated }}</td>
 				<td>{{ formatTimeSince .FirstUpdate }}</td>
 				<td>{{ .LinesOfCode }}</td>
+				<td>{{ .NumFeedback }}</td>
 				<td>{{ .Status }}</td>
 				<td><a href="/get_snapshot?student_id={{ .StudentID }}&problem_id={{ .ProblemID }}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">View</a></td>
 			</tr>
@@ -284,37 +286,224 @@ var CODE_SNAPSHOT_TEMPLATE = `
 						console.log("Success!")
 					}
 				});
-				// var form = document.createElement("form");
-				// var bkfdback = document.createElement("hidden");
-				// var feedbackID = document.createElement("hidden");
-				// var uid = document.createElement("hidden");
-				// var authorRole = document.createElement("hidden");
-				// var password = document.createElement("hidden");
 				
-				// form.setAttribute("method", "POST");
-				// form.setAttribute("action", "save_snapshot_back_feedback");
-				// bkfdback.setAttribute("name", "feedback");
-				// bkfdback.setAttribute("value", backFeedback);
-				// form.appendChild(bkfdback);
-
-				// feedbackID.setAttribute("name", "feedback_id");
-				// feedbackID.setAttribute("value", fID);
-				// form.appendChild(feedbackID);
-
-				// uid.setAttribute("name", "uid");
-				// uid.setAttribute("value", "{{.UserID}}");
-				// form.appendChild(uid);
-
-				// authorRole.setAttribute("name", "role");
-				// authorRole.setAttribute("value", "{{.UserRole}}");
-				// form.appendChild(authorRole);
-
-				// password.setAttribute("name", "password");
-				// password.setAttribute("value", "{{.Password}}");
-				// form.appendChild(password);
-
-				// document.body.appendChild(form);
-				// form.submit()
+				location.reload();
+			}
+		</script>
+	</body>
+	</html>
+`
+var STUDENT_VIEWS_FEEDBACK_TEMPLATE = `
+<!DOCTYPE html>
+	<html>
+	<head>
+	<title>Feedbacks</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js" integrity="sha512-hGVnilhYD74EGnPbzyvje74/Urjrg5LSNGx0ARG1Ucqyiaz+lFvtsXk/1jCwT9/giXP0qoXSlVDjxNxjLvmqAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/python/python.min.js" integrity="sha512-/mavDpedrvPG/0Grj2Ughxte/fsm42ZmZWWpHz1jCbzd5ECv8CB7PomGtw0NAnhHmE/lkDFkRMupjoohbKNA1Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/clike/clike.min.js" integrity="sha512-GAled7oA9WlRkBaUQlUEgxm37hf43V2KEMaEiWlvBO/ueP2BLvBLKN5tIJu4VZOTwo6Z4XvrojYngoN9dJw2ug==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css" integrity="sha512-6sALqOPMrNSc+1p5xOhPwGIzs6kIlST+9oGWlI4Wwcbj1saaX9J3uzO3Vub016dmHV7hM+bMi/rfXLiF5DNIZg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/theme/monokai.min.css" integrity="sha512-R6PH4vSzF2Yxjdvb2p2FA06yWul+U0PDDav4b/od/oXf9Iw37zl10plvwOXelrjV2Ai7Eo3vyHeyFUjhXdBCVQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+	</head>
+	<body>
+		<div class="container">
+		<h1 class="title">Review Feedback for Problem: {{.Filename}}</h1>
+			<div class="tabs is-centered is-boxed is-medium">
+				<ul>
+					<li {{if eq .ViewType "forme"}}class="is-active"{{end}}>
+						<a href="student_views_feedback?pid={{.CurrentPid}}&viewtype=forme&role={{.UserRole}}&uid={{.UserID}}&password={{.Password}}">
+						<span class="icon is-small"><i class="fas fa-address-book" aria-hidden="true"></i></span>
+						<span>For me</span>
+						</a>
+					</li>
+					<li {{if eq .ViewType "all"}}class="is-active"{{end}}>
+						<a href="student_views_feedback?pid={{.CurrentPid}}&viewtype=all&role={{.UserRole}}&uid={{.UserID}}&password={{.Password}}">
+						<span class="icon is-small"><i class="fas fa-list-ul" aria-hidden="true"></i></span>
+						<span>All</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+			<section class="section">
+				{{range .Feedbacks}}
+					<article class="message">
+						<div class="message-header">
+						<p>{{.GivenBy}} gave feedback on {{$.Filename}} at ({{.FeedbackTime.Format "Jan 02, 2006 3:4:5 PM"}})</p>
+						</div>
+						<div class="message-body">
+							<div class="columns">
+								<div class="column is-three-quarters">{{.Feedback}}</div>
+								<div class="column">
+									<a onclick="autoFeedbackSubmit('yes', {{.FeedbackID}})">
+										<span style="font-size: 1.5em; {{if eq .CurrentUserVote "yes"}} color: green; {{end}}">
+											<i class="fas fa-thumbs-up"></i>
+										</span>
+									</a>
+									<span>
+											{{.Upvote}}
+									</span>
+								</div>
+								<div class="column">
+									<a onclick="autoFeedbackSubmit('no', {{.FeedbackID}})">
+										<span style="font-size: 1.5em; {{if eq .CurrentUserVote "no"}} color: red; {{end}}">
+											<i class="fas fa-thumbs-down"></i>
+										</span>
+									</a>
+									<span>
+										{{.Downvote}}
+									</span>
+								</div>
+							</div>
+							<div class="codesnapshots">
+								<h3>Code Snapshot</h3>
+								<div>
+									<textarea class="editors">{{ .Code }}</textarea>
+								</div>
+							</div>
+						</div>
+					</article>
+				{{end}}
+			</section>
+			<nav class="pagination is-rounded" role="navigation" aria-label="pagination">
+			{{if not (eq .NextPid -1)}}
+				<a class="pagination-next" href="student_views_feedback?pid={{.NextPid}}&viewtype={{.ViewType}}&role={{.UserRole}}&uid={{.UserID}}&password={{.Password}}">Next</a>
+			{{end}}
+				<ul class="pagination-list">
+				</ul>
+			</nav>
+		</div>
+		<script>
+			var snapshotEditors = document.getElementsByClassName("editors");
+			
+			for (let i = 0; i<snapshotEditors.length; i++){
+				CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode $.Filename}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
+			}
+			$( function() {
+				$( ".codesnapshots" ).accordion({
+					collapsible: true,
+					active: false
+				});
+			} );
+			function autoFeedbackSubmit(backFeedback, fID) {
+				$.ajax({
+					url: "/save_snapshot_back_feedback",
+					type: "POST",
+					data:  {
+						feedback: backFeedback,
+						feedback_id: fID,
+						uid: {{.UserID}},
+						role: "{{.UserRole}}",
+						password: "{{.Password}}",
+					},
+					success: function(data){
+						console.log("Success!")
+					}
+				});
+				
+				location.reload();
+			}
+		</script>
+	</body>
+	</html>
+`
+var TEACHER_VIEWS_FEEDBACK_TEMPLATE = `
+<!DOCTYPE html>
+	<html>
+	<head>
+	<title>Feedbacks</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js" integrity="sha512-hGVnilhYD74EGnPbzyvje74/Urjrg5LSNGx0ARG1Ucqyiaz+lFvtsXk/1jCwT9/giXP0qoXSlVDjxNxjLvmqAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/python/python.min.js" integrity="sha512-/mavDpedrvPG/0Grj2Ughxte/fsm42ZmZWWpHz1jCbzd5ECv8CB7PomGtw0NAnhHmE/lkDFkRMupjoohbKNA1Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/clike/clike.min.js" integrity="sha512-GAled7oA9WlRkBaUQlUEgxm37hf43V2KEMaEiWlvBO/ueP2BLvBLKN5tIJu4VZOTwo6Z4XvrojYngoN9dJw2ug==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css" integrity="sha512-6sALqOPMrNSc+1p5xOhPwGIzs6kIlST+9oGWlI4Wwcbj1saaX9J3uzO3Vub016dmHV7hM+bMi/rfXLiF5DNIZg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/theme/monokai.min.css" integrity="sha512-R6PH4vSzF2Yxjdvb2p2FA06yWul+U0PDDav4b/od/oXf9Iw37zl10plvwOXelrjV2Ai7Eo3vyHeyFUjhXdBCVQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+	</head>
+	<body>
+		<div class="container">
+		<<h1 class="title">Review Feedback for Problem: {{.Filename}}</h1>
+			<section class="section">
+				{{range .Feedbacks}}
+					<article class="message">
+						<div class="message-header">
+						<p>{{.GivenBy}} gave feedback on {{$.Filename}} at ({{.FeedbackTime.Format "Jan 02, 2006 3:4:5 PM"}})</p>
+						</div>
+						<div class="message-body">
+							<div class="columns">
+								<div class="column is-three-quarters">{{.Feedback}}</div>
+								<div class="column">
+									<a onclick="autoFeedbackSubmit('yes', {{.FeedbackID}})">
+										<span style="font-size: 1.5em; {{if eq .CurrentUserVote "yes"}} color: green; {{end}}">
+											<i class="fas fa-thumbs-up"></i>
+										</span>
+									</a>
+									<span>
+											{{.Upvote}}
+									</span>
+								</div>
+								<div class="column">
+									<a onclick="autoFeedbackSubmit('no', {{.FeedbackID}})">
+										<span style="font-size: 1.5em; {{if eq .CurrentUserVote "no"}} color: red; {{end}}">
+											<i class="fas fa-thumbs-down"></i>
+										</span>
+									</a>
+									<span>
+										{{.Downvote}}
+									</span>
+								</div>
+							</div>
+							<div class="codesnapshots">
+								<h3>Code Snapshot</h3>
+								<div>
+									<textarea class="editors">{{ .Code }}</textarea>
+								</div>
+							</div>
+						</div>
+					</article>
+				{{end}}
+			</section>
+			<nav class="pagination is-rounded" role="navigation" aria-label="pagination">
+			{{if not (eq .NextPid -1)}}
+				<a class="pagination-next" href="teacher_views_feedback?pid={{.NextPid}}&role={{.UserRole}}&uid={{.UserID}}&password={{.Password}}">Next</a>
+			{{end}}
+				<ul class="pagination-list">
+				</ul>
+			</nav>
+		</div>
+		<script>
+			var snapshotEditors = document.getElementsByClassName("editors");
+			
+			for (let i = 0; i<snapshotEditors.length; i++){
+				CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .Filename}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
+			}
+			$( function() {
+				$( ".codesnapshots" ).accordion({
+					collapsible: true,
+					active: false
+				});
+			} );
+			function autoFeedbackSubmit(backFeedback, fID) {
+				$.ajax({
+					url: "/save_snapshot_back_feedback",
+					type: "POST",
+					data:  {
+						feedback: backFeedback,
+						feedback_id: fID,
+						uid: {{.UserID}},
+						role: "{{.UserRole}}",
+						password: "{{.Password}}",
+					},
+					success: function(data){
+						console.log("Success!")
+					}
+				});
 				
 				location.reload();
 			}

@@ -132,7 +132,6 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, 
 
 	upvote, downvote := 0, 0
 	currentUserVote := ""
-
 	for rows.Next() {
 		rows.Scan(&feedbackID, &feedback, &authorID, &authorRole, &givenAt, &code)
 
