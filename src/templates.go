@@ -205,7 +205,8 @@ var CODE_SNAPSHOT_TEMPLATE = `
 				<h3 class="title is-3">Student: {{.Snapshot.StudentName}}, Problem: {{.Snapshot.ProblemName}}</h3>
 				<h3>
 				<textarea id="editor">{{ .Snapshot.Code }}</textarea>
-				<span></span>
+			</section>
+			<section class="section">
 				<form action="/save_snapshot_feedback" method="POST">
 					<textarea class="textarea" placeholder="Write your feedback!" name="feedback"></textarea>
 					<input class="button" type="submit" value="Send Feedback">
