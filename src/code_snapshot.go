@@ -102,6 +102,7 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 	}
 	idx := StudentSnapshot[studentID][problemID]
 	Snapshots[idx].NumFeedback++
+	fmt.Print(Snapshots[idx])
 	feedbackID, _ := result.LastInsertId()
 	Students[studentID].SnapShotFeedbackQueue = append(Students[studentID].SnapShotFeedbackQueue, &SnapShotFeedback{
 		FeedbackID:  int(feedbackID),
