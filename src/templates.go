@@ -206,7 +206,7 @@ var CODE_SNAPSHOT_TEMPLATE = `
 				<h3>
 				<textarea id="editor">{{ .Snapshot.Code }}</textarea>
 			</section>
-			<section class="section">
+			<div style="margin-top: 50px">
 				<form action="/save_snapshot_feedback" method="POST">
 					<textarea class="textarea" placeholder="Write your feedback!" name="feedback"></textarea>
 					<input class="button" type="submit" value="Send Feedback">
@@ -216,7 +216,7 @@ var CODE_SNAPSHOT_TEMPLATE = `
 					<input type="hidden" name="role" value="{{.UserRole}}">
 					<input type="hidden" name="password" value="{{.Password}}">
 				</form>
-			</section>
+			</div>
 			<section class="section">
 				{{range .Feedbacks}}
 					<article class="message">
@@ -261,7 +261,7 @@ var CODE_SNAPSHOT_TEMPLATE = `
 		<script>
 			var editor = document.getElementById("editor");
 			var myCodeMirror = CodeMirror.fromTextArea(editor, {lineNumbers: true, mode: "{{getEditorMode .Snapshot.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
-			// myCodeMirror1.setSize("80%", 900)
+			myCodeMirror.setSize("80%", 900)
 			var snapshotEditors = document.getElementsByClassName("editors");
 			for (i = 0;i<snapshotEditors.length; i++) {
 				CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .Snapshot.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
