@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -102,9 +101,7 @@ func codespaceHandler(w http.ResponseWriter, r *http.Request, who string, uid in
 			snapshots = append(snapshots, s)
 		}
 	}
-	fmt.Printf("before\n%+v\n%+v\n", snapshots[0], snapshots[1])
 	sort.Slice(snapshots, func(i, j int) bool { return snapshots[i].LastUpdated.After(snapshots[j].LastUpdated) })
-	fmt.Printf("after\n%+v\n%+v\n", snapshots[0], snapshots[1])
 	data := &CodeSpaceData{
 		Snapshots: snapshots,
 		UserID:    uid,
