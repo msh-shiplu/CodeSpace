@@ -261,7 +261,7 @@ var CODE_SNAPSHOT_TEMPLATE = `
 		<script>
 			var editor = document.getElementById("editor");
 			var myCodeMirror = CodeMirror.fromTextArea(editor, {lineNumbers: true, mode: "{{getEditorMode .Snapshot.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
-			myCodeMirror.setSize("80%", 900)
+			myCodeMirror.setSize("80%", 500)
 			var snapshotEditors = document.getElementsByClassName("editors");
 			for (i = 0;i<snapshotEditors.length; i++) {
 				CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .Snapshot.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});

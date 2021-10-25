@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -98,6 +99,7 @@ func codespaceHandler(w http.ResponseWriter, r *http.Request, who string, uid in
 	} else {
 		snapshots = Snapshots
 	}
+	sort.Slice(snapshots, func(i, j int) bool { return snapshots[i].LastUpdated.After(snapshots[j].LastUpdated) })
 	data := &CodeSpaceData{
 		Snapshots: snapshots,
 		UserID:    uid,
@@ -122,7 +124,7 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, 
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, err := Database.Query("select F.id, F.feedback, F.author_id, F.author_role, F.given_at, C.code from code_snapshot C, snapshot_feedback F where C.id=F.snapshot_id and C.student_id=? and C.problem_id=?", studentID, problemID)
+	rows, err := Database.Query("select F.id, F.feedback, F.author_id, F.author_role, F.given_at, C.code from code_snapshot C, snapshot_feedback F where C.id=F.snapshot_id and C.student_id=? and C.problem_id=? order by F.given_at desc", studentID, problemID)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
