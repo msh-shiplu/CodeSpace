@@ -157,7 +157,7 @@ var CODESPACE_TEMPLATE = `
 					<th>Last Snapshot Since</th>
 					<th>Time Spent</th>
 					<th>Number of Lines</th>
-					<th>Number of Feedbacks</th>
+					<th>Number of Feedback Messages</th>
 					<th>Status</th>
 					<th></th>
 				</tr>
