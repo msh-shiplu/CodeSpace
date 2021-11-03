@@ -151,7 +151,7 @@ var CODESPACE_TEMPLATE = `
 	</head>
 	<body>
 	<div class="container">
-		<table class="table is-striped is-fullwidth is-hoverable">
+		<table class="table is-striped is-fullwidth is-hoverable is-narrow">
 			<thead>
 				<tr>
 					<th>Student</th>
