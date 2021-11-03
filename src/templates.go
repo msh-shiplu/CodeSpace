@@ -145,6 +145,8 @@ var CODESPACE_TEMPLATE = `
 	<html>
 	<head>
 	<title>CodeSpace</title>
+	<meta http-equiv="refresh" content="120" >
+	<script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	</head>
 	<body>
@@ -153,10 +155,9 @@ var CODESPACE_TEMPLATE = `
 			<thead>
 				<tr>
 					<th>Student</th>
-					<th>Problem</th>
-					<th>Last Snapshot Since</th>
+					<th>Last Snapshot</th>
 					<th>Time Spent</th>
-					<th>Number of Lines</th>
+					<th>Lines of Code</th>
 					<th>Number of Feedback Messages</th>
 					<th>Status</th>
 					<th></th>
@@ -166,12 +167,11 @@ var CODESPACE_TEMPLATE = `
 			{{ range .Snapshots }}
 			<tr>
 				<td>{{ .StudentName }}</td>
-				<td>{{ .ProblemName }}</td>
-				<td>{{ formatTimeSince .LastUpdated }}</td>
+				<td>{{ formatTimeSince .LastUpdated }} ago</td>
 				<td>{{ formatTimeSince .FirstUpdate }}</td>
 				<td>{{ .LinesOfCode }}</td>
 				<td>{{ .NumFeedback }}</td>
-				<td>{{ .Status }}</td>
+				<td>{{ if eq .Status 0 }} Not Submitted {{else if eq .Status 1}} Submitted {{else if eq .Status 2}} <span style="font-size: 1.5em; color: red;"> <i class="far fa-times-circle"></i> </span> {{else if eq .Status 3}} <span style="font-size: 1.5em; color: green;"> <i class="far fa-check-circle"></i> </span> {{end}}</td>
 				<td><a href="/get_snapshot?student_id={{ .StudentID }}&problem_id={{ .ProblemID }}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">View</a></td>
 			</tr>
 			{{ end }}
@@ -201,12 +201,11 @@ var CODE_SNAPSHOT_TEMPLATE = `
 	<body>
 		<div class="container">
 			<section class="section">
-				<h2 class="title is-2">Code Snapshot at {{.Snapshot.LastUpdated.Format "Jan 02, 2006 3:4:5 PM"}}</h2>
-				<h3 class="title is-3">Student: {{.Snapshot.StudentName}}, Problem: {{.Snapshot.ProblemName}}</h3>
-				<h3>
+				<h3 class="title is-3">{{.Snapshot.StudentName}} ({{.Snapshot.ProblemName}} @ {{.Snapshot.LastUpdated.Format "Jan 02, 2006 3:4:5 PM"}}})</h3>
 				<textarea id="editor">{{ .Snapshot.Code }}</textarea>
 			</section>
-			<div style="margin-top: 5px">
+			{{if lt .Snapshot.Status 3}}
+			<section class="section" style="margin-top: 0px !important;">
 				<form action="/save_snapshot_feedback" method="POST">
 					<textarea class="textarea" placeholder="Write your feedback!" name="feedback"></textarea>
 					<input class="button" type="submit" value="Send Feedback">
@@ -216,7 +215,8 @@ var CODE_SNAPSHOT_TEMPLATE = `
 					<input type="hidden" name="role" value="{{.UserRole}}">
 					<input type="hidden" name="password" value="{{.Password}}">
 				</form>
-			</div>
+			</section>
+			{{end}}
 			<section class="section">
 				{{range .Feedbacks}}
 					<article class="message">

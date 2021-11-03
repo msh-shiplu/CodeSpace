@@ -55,9 +55,9 @@ func formatTimeDuration(d time.Duration) string {
 	s := int(d1.Seconds())
 	str := ""
 	if m > 0 {
-		str = strconv.Itoa(m) + " minute(s) "
+		str = strconv.Itoa(m) + " min "
 	}
-	str += strconv.Itoa(s) + " second(s)"
+	str += strconv.Itoa(s) + " sec"
 	return str
 }
 

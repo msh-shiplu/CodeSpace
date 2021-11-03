@@ -211,7 +211,7 @@ type Snapshot struct {
 	StudentID   int
 	ProblemName string
 	ProblemID   int
-	Status      string
+	Status      int
 	FirstUpdate time.Time
 	LastUpdated time.Time
 	LinesOfCode int

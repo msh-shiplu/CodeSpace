@@ -43,14 +43,14 @@ func addCodeSnapshot(studentID int, problemID int, code string, status int, last
 			StudentID:   studentID,
 			ProblemName: problemName,
 			ProblemID:   problemID,
-			Status:      SnapshotStatus[status],
+			Status:      status,
 			FirstUpdate: lastUpdate,
 			LastUpdated: lastUpdate,
 			LinesOfCode: getLinesOfCode(code),
 			Code:        code,
 		})
 	} else {
-		currentStatus := SnapshotStatusMapping[Snapshots[idx].Status]
+		currentStatus := Snapshots[idx].Status
 		if currentStatus > status {
 			status = currentStatus
 		}
@@ -60,7 +60,7 @@ func addCodeSnapshot(studentID int, problemID int, code string, status int, last
 			StudentID:   studentID,
 			ProblemName: Snapshots[idx].ProblemName,
 			ProblemID:   problemID,
-			Status:      SnapshotStatus[status],
+			Status:      status,
 			FirstUpdate: Snapshots[idx].FirstUpdate,
 			LastUpdated: lastUpdate,
 			LinesOfCode: getLinesOfCode(code),
