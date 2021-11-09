@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func addCodeSnapshot(studentID int, problemID int, code string, status int, lastUpdate time.Time) {
+func addCodeSnapshot(studentID int, problemID int, code string, status int, lastUpdate time.Time) int {
 	result, err := AddCodeSnapshotSQL.Exec(studentID, problemID, code, status, lastUpdate)
 	if err != nil {
 		log.Fatal(err)
@@ -69,6 +69,7 @@ func addCodeSnapshot(studentID int, problemID int, code string, status int, last
 		}
 	}
 	fmt.Println("Code snapshot saved!")
+	return int(snapshotID)
 }
 
 func codeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {

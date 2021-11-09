@@ -137,13 +137,14 @@ var Submissions = make(map[int]*Submission)
 //---------------------------------------------------------
 
 type HelpSubmission struct {
-	Sid      int // submission id
-	Uid      int // student id
-	Pid      int // problem id
-	Status   int // 0=ok, 1=queue empty, 2=not elligible
-	Content  string
-	Filename string
-	At       time.Time
+	Sid        int // submission id
+	Uid        int // student id
+	Pid        int // problem id
+	Status     int // 0=ok, 1=queue empty, 2=not elligible
+	Content    string
+	Filename   string
+	At         time.Time
+	SnapshotID int
 }
 
 var WorkingHelpSubs = make([]*HelpSubmission, 0)

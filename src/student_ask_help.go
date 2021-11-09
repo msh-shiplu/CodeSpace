@@ -22,7 +22,7 @@ func studentAskHelpHandler(w http.ResponseWriter, r *http.Request, who string, u
 
 	pid := 0
 	prob, ok := ActiveProblems[filename]
-
+	snapshotID := 0
 	if ok {
 		if !prob.Active {
 			msg = "Problem is no longer active. But the teacher will look at your submission."
@@ -31,8 +31,10 @@ func studentAskHelpHandler(w http.ResponseWriter, r *http.Request, who string, u
 			if _, ok := prob.Attempts[uid]; !ok {
 				ActiveProblems[filename].Attempts[uid] = prob.Info.Attempts
 			}
+			now := time.Now()
+			snapshotID = addCodeSnapshot(uid, pid, content, 0, now)
 			var result sql.Result
-			result, err = AddHelpSubmissionSQL.Exec(pid, uid, content, "", need_help_with, time.Now())
+			result, err = AddHelpSubmissionSQL.Exec(pid, uid, content, "", need_help_with, now)
 
 			if err != nil {
 				log.Fatal(err)
@@ -46,12 +48,13 @@ func studentAskHelpHandler(w http.ResponseWriter, r *http.Request, who string, u
 		HelpSubSem.Lock()
 		defer HelpSubSem.Unlock()
 		sub := &HelpSubmission{
-			Sid:      int(sid),
-			Uid:      uid,
-			Pid:      pid,
-			Content:  content,
-			Filename: filename,
-			At:       time.Now(),
+			Sid:        int(sid),
+			Uid:        uid,
+			Pid:        pid,
+			Content:    content,
+			Filename:   filename,
+			At:         time.Now(),
+			SnapshotID: snapshotID,
 		}
 		WorkingHelpSubs = append(WorkingHelpSubs, sub)
 		HelpSubmissions[int(sid)] = sub

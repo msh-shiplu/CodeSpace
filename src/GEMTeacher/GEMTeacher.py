@@ -20,6 +20,7 @@ gemtStudentSubmissions = {}
 gemtFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemtSERVER = ''
 gemtCurrentHelpSubId = None
+gemtCurrentSnapshotID = None
 gemtHelpRequestMessage = [
     "You have fetched a help request entry.", "There is no pending help request."]
 
@@ -780,6 +781,7 @@ class gemtGetHelpCode(sublime_plugin.TextCommand):
     def run(self, edit):
         global gemtCurrentHelpSubId
         global gemtHelpRequestMessage
+        global gemtCurrentSnapshotID
 
         # filename = self.view.file_name()
         # # print(filename)
@@ -805,7 +807,9 @@ class gemtGetHelpCode(sublime_plugin.TextCommand):
         if not os.path.exists(helpFolder):
             os.mkdir(helpFolder)
 
-        local_file = os.path.join(helpFolder, filename)
+        gemtCurrentSnapshotID = response['SnapshotID']
+        local_file = os.path.join(
+            helpFolder, filename)
         # print(helpFolder, local_file, filename)
         with open(local_file, 'w', encoding='utf-8') as f:
             f.write(content)
@@ -831,13 +835,15 @@ class gemtGetHelpCode(sublime_plugin.TextCommand):
 
     def send_help_message(self, message):
         global gemtCurrentHelpSubId
+        global gemtCurrentSnapshotID
 
         if message is None or message == "":
             self.return_without_feedback()
             # sublime.message_dialog("This entry is returned without feedback!")
         else:
-            data = {"submission_id": gemtCurrentHelpSubId, "message": message}
-            response = gemtRequest("teacher_send_help_message", data)
+            data = {"snapshot_id": gemtCurrentSnapshotID, "feedback": message}
+            response = gemtRequest("save_snapshot_feedback", data)
+            gemtCurrentSnapshotID = None
             gemtCurrentHelpSubId = None
             sublime.active_window().run_command("close")
             sublime.message_dialog(response)
