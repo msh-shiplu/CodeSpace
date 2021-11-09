@@ -64,7 +64,7 @@ func teacher_send_help_messageHandler(w http.ResponseWriter, r *http.Request, wh
 		log.Fatal(err)
 	}
 	// student_id := 0
-	// rows, _ := Database.Query("select student_id from help_submission where id=?", submission_id)
+	// rows, _ := Database.Query("select student_id from code_explanation where id=?", submission_id)
 	// for rows.Next() {
 	// 	rows.Scan(&student_id)
 	// 	break
