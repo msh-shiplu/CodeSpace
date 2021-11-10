@@ -35,6 +35,19 @@ type SnapshotData struct {
 	Password  string
 }
 
+type HelpRequest struct {
+	StudentName string
+	Explanation string
+	GivenAt     time.Time
+}
+
+type HelpRequestListData struct {
+	HelpRequests []*HelpRequest
+	UserID       int
+	UserRole     string
+	Password     string
+}
+
 func getEditorMode(filename string) string {
 	filename = strings.ToLower(filename)
 	if strings.HasSuffix(filename, ".py") {
@@ -184,6 +197,55 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, 
 		UserRole:  role,
 		Feedbacks: feedbacks,
 		Password:  r.FormValue("password"),
+	}
+	w.Header().Set("Content-Type", "text/html")
+	err = t.Execute(w, data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Fatal(err)
+	}
+}
+
+func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	role := r.FormValue("role")
+	temp := template.New("")
+	ownFuncs := template.FuncMap{"formatTimeSince": formatTimeSince}
+	t, err := temp.Funcs(ownFuncs).Parse(HELP_REQUEST_LIST_TEMPLATE)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var helpRequests []*HelpRequest
+	if role == "student" {
+		for _, s := range HelpSubmissions {
+			if s.Uid == uid {
+				helpRequests = append(helpRequests, &HelpRequest{
+					StudentName: Students[s.Uid].Name,
+					Explanation: s.Content,
+					GivenAt:     s.At,
+				})
+			} else if _, ok := HelpEligibleStudents[s.Pid][uid]; ok {
+				helpRequests = append(helpRequests, &HelpRequest{
+					StudentName: Students[s.Uid].Name,
+					Explanation: s.Content,
+					GivenAt:     s.At,
+				})
+			}
+		}
+	} else {
+		for _, s := range HelpSubmissions {
+			helpRequests = append(helpRequests, &HelpRequest{
+				StudentName: Students[s.Uid].Name,
+				Explanation: s.Content,
+				GivenAt:     s.At,
+			})
+		}
+	}
+	sort.Slice(helpRequests, func(i, j int) bool { return helpRequests[i].GivenAt.Before(helpRequests[j].GivenAt) })
+	data := &HelpRequestListData{
+		HelpRequests: helpRequests,
+		UserID:       uid,
+		UserRole:     role,
+		Password:     r.FormValue("password"),
 	}
 	w.Header().Set("Content-Type", "text/html")
 	err = t.Execute(w, data)

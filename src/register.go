@@ -64,7 +64,7 @@ func add_user(name, role string) {
 	if role == "teacher" {
 		init_teacher(int(id), password)
 	} else {
-		init_student(int(id), password)
+		init_student(int(id), name, password)
 	}
 	fmt.Printf("|%s| is added. Must complete registeration.\n", name)
 }

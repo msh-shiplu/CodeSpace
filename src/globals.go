@@ -101,6 +101,7 @@ type SnapShotFeedback struct {
 	ProblemName string
 }
 type StudenInfo struct {
+	Name                  string
 	Password              string
 	Boards                []*Board
 	SubmissionStatus      []*StudentSubmissionStatus

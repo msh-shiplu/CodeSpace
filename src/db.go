@@ -29,7 +29,7 @@ func create_tables() {
 	execSQL("create table if not exists score (id integer primary key, problem_id integer, student_id integer, teacher_id integer, score integer, graded_submission_number integer, score_given_at timestamp, unique(problem_id,student_id))")
 	execSQL("create table if not exists feedback (id integer primary key, teacher_id integer, student_id integer, feedback text, feedback_given_at timestamp, submission_id integer)")
 	execSQL("create table if not exists test_case (id integer primary key, problem_id integer, student_id integer, test_cases text, added_at timestamp)")
-	execSQL("create table if not exists code_explanation (id integer primary key, problem_id integer, student_id integer, student_code blob, trying_what text, need_help_with text, code_submitted_at timestamp)")
+	execSQL("create table if not exists code_explanation (id integer primary key, problem_id integer, student_id integer, snapshot_id integer, trying_what text, need_help_with text, code_submitted_at timestamp)")
 	execSQL("create table if not exists help_message (id integer primary key, code_explanation_id integer, student_id integer, message text, given_at timestamp, useful text, updated_at timestamp)")
 	execSQL("create table if not exists code_snapshot (id integer primary key, student_id integer, problem_id integer, code blob, last_updated_at timestamp, status int default 0)") // 0 = not submitted, 1 = submitted but not graded, 2 = submitted and incorrect, 3 = submitted and correct
 	execSQL("create table if not exists snapshot_feedback (id integer primary key, snapshot_id integer, feedback text, author_id integer, author_role string, given_at timestamp)")
@@ -66,7 +66,7 @@ func init_database(db_name string) {
 	AddTagSQL = prepare("insert into tag (topic_description) values (?)")
 	AddTestCaseSQL = prepare("insert into test_case (problem_id, student_id, test_cases, added_at) values (?, ?, ?, ?)")
 	UpdateTestCaseSQL = prepare("update test_case set test_cases=?, added_at=? where id=?")
-	AddHelpSubmissionSQL = prepare("insert into code_explanation (problem_id, student_id, student_code, trying_what, need_help_with, code_submitted_at) values(?, ?, ?, ?, ?, ?)")
+	AddHelpSubmissionSQL = prepare("insert into code_explanation (problem_id, student_id, snapshot_id, trying_what, need_help_with, code_submitted_at) values(?, ?, ?, ?, ?, ?)")
 	AddHelpMessageSQL = prepare("insert into help_message (code_explanation_id, student_id, message, given_at) values (?, ?, ?, ?)")
 	UpdateHelpMessageSQL = prepare("update help_message set useful=?, updated_at=? where id=?")
 	AddCodeSnapshotSQL = prepare("insert into code_snapshot (student_id, problem_id, code, status, last_updated_at) values(?, ?, ?, ?, ?)")
@@ -156,13 +156,14 @@ func init_teacher(id int, password string) {
 //-----------------------------------------------------------------
 // initialize once per session
 //-----------------------------------------------------------------
-func init_student(student_id int, password string) {
+func init_student(student_id int, name string, password string) {
 	AddAttendanceSQL.Exec(student_id, time.Now())
 
 	BoardsSem.Lock()
 	defer BoardsSem.Unlock()
 
 	Students[student_id] = &StudenInfo{
+		Name:                  name,
 		Password:              password,
 		Boards:                make([]*Board, 0),
 		SubmissionStatus:      make([]*StudentSubmissionStatus, 0),
@@ -189,11 +190,11 @@ func init_student(student_id int, password string) {
 
 //-----------------------------------------------------------------
 func load_and_authorize_student(student_id int, password string) bool {
-	var pw string
+	var pw, name string
 	found := false
-	rows, _ := Database.Query("select password from student where id=?", student_id)
+	rows, _ := Database.Query("select name, password from student where id=?", student_id)
 	for rows.Next() {
-		rows.Scan(&pw)
+		rows.Scan(&name, &pw)
 		found = true
 		break
 	}
@@ -201,7 +202,7 @@ func load_and_authorize_student(student_id int, password string) bool {
 	if !found || pw != password {
 		return false
 	}
-	init_student(student_id, password)
+	init_student(student_id, name, password)
 	return true
 }
 

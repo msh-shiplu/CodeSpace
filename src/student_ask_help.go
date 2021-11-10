@@ -34,7 +34,7 @@ func studentAskHelpHandler(w http.ResponseWriter, r *http.Request, who string, u
 			now := time.Now()
 			snapshotID = addCodeSnapshot(uid, pid, content, 0, now)
 			var result sql.Result
-			result, err = AddHelpSubmissionSQL.Exec(pid, uid, content, "", need_help_with, now)
+			result, err = AddHelpSubmissionSQL.Exec(pid, uid, snapshotID, "", need_help_with, now)
 
 			if err != nil {
 				log.Fatal(err)

@@ -23,7 +23,7 @@ func addCodeSnapshot(studentID int, problemID int, code string, status int, last
 		defer rows.Close()
 		if err != nil {
 			log.Fatal(err)
-			return
+			return -1
 		}
 		name := ""
 		if rows.Next() {
