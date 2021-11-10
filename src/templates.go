@@ -538,7 +538,6 @@ var HELP_REQUEST_LIST_TEMPLATE = `
 			<tr>
 				<td>{{ .StudentName }}</td>
 				<td>{{ formatTimeSince .GivenAt }} ago</td>
-				<td><a href="/get_snapshot?student_id={{ .StudentID }}&problem_id={{ .ProblemID }}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">View</a></td>
 			</tr>
 			{{ end }}
 			</tbody>
