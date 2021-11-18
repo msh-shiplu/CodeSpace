@@ -98,6 +98,10 @@ func getVoteCount(feedbackID int, voteType string) int {
 	return vote
 }
 
+func add(x int, y int) int {
+	return x + y
+}
+
 func codespaceHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	role := r.FormValue("role")
 	temp := template.New("")
@@ -156,7 +160,7 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, 
 	}
 	role := r.FormValue("role")
 	temp := template.New("")
-	ownFuncs := template.FuncMap{"getEditorMode": getEditorMode}
+	ownFuncs := template.FuncMap{"getEditorMode": getEditorMode, "add": add}
 	t, err := temp.Funcs(ownFuncs).Parse(CODE_SNAPSHOT_TEMPLATE)
 	if err != nil {
 		log.Fatal(err)
