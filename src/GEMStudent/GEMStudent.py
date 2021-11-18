@@ -321,9 +321,6 @@ class gemsNeedHelp(sublime_plugin.TextCommand):
         content = self.view.substr(
             sublime.Region(0, self.view.size())).lstrip()
 
-        # content += "\n\n# Explain what you are trying to do: "+self.trying_what_message
-        content += "\n\n# Explain what you need help with: "+need_help_with_message
-
         data = dict(
             content=content,
             filename=os.path.basename(fname),

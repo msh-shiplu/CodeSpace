@@ -202,6 +202,11 @@ var CODE_SNAPSHOT_TEMPLATE = `
 		<div class="container">
 			<section class="section">
 				<h3 class="title is-3">{{.Snapshot.StudentName}} ({{.Snapshot.ProblemName}} @ {{.Snapshot.LastUpdated.Format "Jan 02, 2006 3:4:5 PM"}})</h3>
+				<b>Help requests: </b>
+				{
+				{{range $i, $v := .HelpRequestIDs}}
+					<a href="/view_help_request?request_id={{.}}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">Request {{add $i 1}}|</a>
+				{{end}}
 				<textarea id="editor">{{ .Snapshot.Code }}</textarea>
 			</section>
 			{{if lt .Snapshot.Status 3}}

@@ -51,7 +51,7 @@ func studentAskHelpHandler(w http.ResponseWriter, r *http.Request, who string, u
 			Sid:        int(sid),
 			Uid:        uid,
 			Pid:        pid,
-			Content:    content,
+			Content:    need_help_with,
 			Filename:   filename,
 			At:         time.Now(),
 			SnapshotID: snapshotID,

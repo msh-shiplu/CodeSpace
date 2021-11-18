@@ -28,11 +28,12 @@ type FeedbackData struct {
 	Code            string
 }
 type SnapshotData struct {
-	Snapshot  *Snapshot
-	UserID    int
-	UserRole  string
-	Feedbacks []*FeedbackData
-	Password  string
+	Snapshot       *Snapshot
+	HelpRequestIDs []int
+	UserID         int
+	UserRole       string
+	Feedbacks      []*FeedbackData
+	Password       string
 }
 
 type HelpRequest struct {
@@ -160,7 +161,20 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, 
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, err := Database.Query("select F.id, F.feedback, F.author_id, F.author_role, F.given_at, C.code from code_snapshot C, snapshot_feedback F where C.id=F.snapshot_id and C.student_id=? and C.problem_id=? order by F.given_at desc", studentID, problemID)
+	rows, err := Database.Query("select id from code_explanation where student_id = ? and problem_id = ?", studentID, problemID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var helpID int
+	var helpIDs []int
+	for rows.Next() {
+		rows.Scan(&helpID)
+		helpIDs = append(helpIDs, helpID)
+	}
+	rows.Close()
+
+	rows, err = Database.Query("select F.id, F.feedback, F.author_id, F.author_role, F.given_at, C.code from code_snapshot C, snapshot_feedback F where C.id=F.snapshot_id and C.student_id=? and C.problem_id=? order by F.given_at desc", studentID, problemID)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
@@ -213,11 +227,12 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, 
 	}
 	idx := StudentSnapshot[studentID][problemID]
 	data := &SnapshotData{
-		Snapshot:  Snapshots[idx],
-		UserID:    uid,
-		UserRole:  role,
-		Feedbacks: feedbacks,
-		Password:  r.FormValue("password"),
+		Snapshot:       Snapshots[idx],
+		HelpRequestIDs: helpIDs,
+		UserID:         uid,
+		UserRole:       role,
+		Feedbacks:      feedbacks,
+		Password:       r.FormValue("password"),
 	}
 	w.Header().Set("Content-Type", "text/html")
 	err = t.Execute(w, data)
