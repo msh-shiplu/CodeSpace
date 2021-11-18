@@ -36,6 +36,7 @@ type SnapshotData struct {
 }
 
 type HelpRequest struct {
+	ID          int
 	StudentName string
 	Explanation string
 	GivenAt     time.Time
@@ -239,6 +240,7 @@ func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, 
 		for _, s := range HelpSubmissions {
 			if _, ok := HelpEligibleStudents[s.Pid][uid]; ok || s.Uid == uid {
 				helpRequests = append(helpRequests, &HelpRequest{
+					ID:          s.Sid,
 					StudentName: Students[s.Uid].Name,
 					Explanation: s.Content,
 					GivenAt:     s.At,
@@ -248,6 +250,7 @@ func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, 
 	} else {
 		for _, s := range HelpSubmissions {
 			helpRequests = append(helpRequests, &HelpRequest{
+				ID:          s.Sid,
 				StudentName: Students[s.Uid].Name,
 				Explanation: s.Content,
 				GivenAt:     s.At,

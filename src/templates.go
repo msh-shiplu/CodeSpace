@@ -201,7 +201,7 @@ var CODE_SNAPSHOT_TEMPLATE = `
 	<body>
 		<div class="container">
 			<section class="section">
-				<h3 class="title is-3">{{.Snapshot.StudentName}} ({{.Snapshot.ProblemName}} @ {{.Snapshot.LastUpdated.Format "Jan 02, 2006 3:4:5 PM"}}})</h3>
+				<h3 class="title is-3">{{.Snapshot.StudentName}} ({{.Snapshot.ProblemName}} @ {{.Snapshot.LastUpdated.Format "Jan 02, 2006 3:4:5 PM"}})</h3>
 				<textarea id="editor">{{ .Snapshot.Code }}</textarea>
 			</section>
 			{{if lt .Snapshot.Status 3}}
@@ -537,7 +537,7 @@ var HELP_REQUEST_LIST_TEMPLATE = `
 			<tr>
 				<td>{{ .StudentName }}</td>
 				<td>{{ formatTimeSince .GivenAt }} ago</td>
-				<td></td>
+				<td><a href="/view_help_request?request_id={{.ID}}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">View</a></td>
 			</tr>
 			{{ end }}
 			</tbody>
