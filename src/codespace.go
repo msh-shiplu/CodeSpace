@@ -39,6 +39,10 @@ type HelpRequest struct {
 	StudentName string
 	Explanation string
 	GivenAt     time.Time
+	SnapshotID  int
+	UserID      int
+	UserRole    string
+	Password    string
 }
 
 type HelpRequestListData struct {
@@ -130,8 +134,24 @@ func codespaceHandler(w http.ResponseWriter, r *http.Request, who string, uid in
 }
 
 func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	studentID, _ := strconv.Atoi(r.FormValue("student_id"))
-	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
+	snapshotID := 0
+	studentID := 0
+	problemID := 0
+	if r.FormValue("snapshot_id") != "" {
+		snapshotID, _ = strconv.Atoi(r.FormValue("snapshot_id"))
+		rows, err := Database.Query("select student_id, problem_id from code_snapshot where id = ?", snapshotID)
+		defer rows.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+		if rows.Next() {
+			rows.Scan(&studentID, &problemID)
+		}
+		rows.Close()
+	} else {
+		studentID, _ = strconv.Atoi(r.FormValue("student_id"))
+		problemID, _ = strconv.Atoi(r.FormValue("problem_id"))
+	}
 	role := r.FormValue("role")
 	temp := template.New("")
 	ownFuncs := template.FuncMap{"getEditorMode": getEditorMode}
@@ -217,13 +237,7 @@ func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, 
 	var helpRequests []*HelpRequest
 	if role == "student" {
 		for _, s := range HelpSubmissions {
-			if s.Uid == uid {
-				helpRequests = append(helpRequests, &HelpRequest{
-					StudentName: Students[s.Uid].Name,
-					Explanation: s.Content,
-					GivenAt:     s.At,
-				})
-			} else if _, ok := HelpEligibleStudents[s.Pid][uid]; ok {
+			if _, ok := HelpEligibleStudents[s.Pid][uid]; ok || s.Uid == uid {
 				helpRequests = append(helpRequests, &HelpRequest{
 					StudentName: Students[s.Uid].Name,
 					Explanation: s.Content,
@@ -253,4 +267,33 @@ func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Fatal(err)
 	}
+}
+
+func viewHelpRequestHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	requestID, _ := strconv.Atoi(r.FormValue("request_id"))
+	role := r.FormValue("role")
+	pw := r.FormValue("password")
+	temp := template.New("")
+	ownFuncs := template.FuncMap{"formatTimeSince": formatTimeSince}
+	t, err := temp.Funcs(ownFuncs).Parse(HELP_REQUEST_VIEW_TEMPLATE)
+	if err != nil {
+		log.Fatal(err)
+	}
+	data := &HelpRequest{}
+	for _, s := range HelpSubmissions {
+		if s.Sid == requestID {
+			data = &HelpRequest{
+				StudentName: who,
+				Explanation: s.Content,
+				GivenAt:     s.At,
+				SnapshotID:  s.SnapshotID,
+				UserID:      uid,
+				UserRole:    role,
+				Password:    pw,
+			}
+		}
+	}
+	w.Header().Set("Content-Type", "text/html")
+	err = t.Execute(w, data)
+
 }

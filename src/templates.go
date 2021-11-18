@@ -529,7 +529,6 @@ var HELP_REQUEST_LIST_TEMPLATE = `
 				<tr>
 					<th>Student</th>
 					<th>Given At</th>
-					<th>Lines of Code</th>
 					<th></th>
 				</tr>
 			</thead>
@@ -538,12 +537,44 @@ var HELP_REQUEST_LIST_TEMPLATE = `
 			<tr>
 				<td>{{ .StudentName }}</td>
 				<td>{{ formatTimeSince .GivenAt }} ago</td>
+				<td></td>
 			</tr>
 			{{ end }}
 			</tbody>
 		</table>
 	</div>
 
+	</body>
+	</html>
+`
+
+var HELP_REQUEST_VIEW_TEMPLATE = `
+<!DOCTYPE html>
+	<html>
+	<head>
+	<title>Code Snapshot</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
+	</head>
+	<body>
+		<div class="container">
+			
+			<section class="section">
+				<article class="message">
+					<div class="message-header">
+					<p>Help Request from {{.StudentName}} At ({{.GivenAt.Format "Jan 02, 2006 3:4:5 PM"}})</p>
+					</div>
+					<div class="message-body">
+						{{.Explanation}}
+					</div>
+				</article>
+				<footer class="footer">
+					<div class="content has-text-centered">
+					<a href="/get_snapshot?snapshot_id={{.SnapshotID}}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">View Snapshot</a>
+					</div>
+				</footer>
+			</section>
+		</div>
 	</body>
 	</html>
 `
