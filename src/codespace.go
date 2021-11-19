@@ -305,7 +305,7 @@ func viewHelpRequestHandler(w http.ResponseWriter, r *http.Request, who string, 
 	for _, s := range HelpSubmissions {
 		if s.Sid == requestID {
 			data = &HelpRequest{
-				StudentName: who,
+				StudentName: Students[s.Uid].Name,
 				Explanation: s.Content,
 				GivenAt:     s.At,
 				SnapshotID:  s.SnapshotID,
