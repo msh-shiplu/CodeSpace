@@ -55,6 +55,7 @@ func studentAskHelpHandler(w http.ResponseWriter, r *http.Request, who string, u
 			Filename:   filename,
 			At:         time.Now(),
 			SnapshotID: snapshotID,
+			Snapshot:   content,
 		}
 		WorkingHelpSubs = append(WorkingHelpSubs, sub)
 		HelpSubmissions[int(sid)] = sub

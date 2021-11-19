@@ -146,6 +146,7 @@ type HelpSubmission struct {
 	Filename   string
 	At         time.Time
 	SnapshotID int
+	Snapshot   string
 }
 
 var WorkingHelpSubs = make([]*HelpSubmission, 0)
