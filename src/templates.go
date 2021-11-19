@@ -201,11 +201,13 @@ var CODE_SNAPSHOT_TEMPLATE = `
 	<body>
 		<div class="container">
 			<section class="section">
-				<h3 class="title is-3">{{.Snapshot.StudentName}} ({{.Snapshot.ProblemName}} @ {{.Snapshot.LastUpdated.Format "Jan 02, 2006 3:4:5 PM"}})</h3>
-				<b>Help requests: </b>
-				{
+				<h3 class="title is-3">{{.Snapshot.StudentName}} ({{.Snapshot.ProblemName}} @ {{.Snapshot.LastUpdated.Format "Jan 02, 2006 3:04:05 PM"}})</h3>
+				{{$l := (len .HelpRequestIDs)}}
+				{{if ne $l 0}}
+					<b>Help requests: </b>
+				{{end}}
 				{{range $i, $v := .HelpRequestIDs}}
-					<a href="/view_help_request?request_id={{.}}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">Request {{add $i 1}}|</a>
+					<a href="/view_help_request?request_id={{.}}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">Request {{add $i 1}}</a>{{if lt (add $i 1) $l}} | {{end}}
 				{{end}}
 				<textarea id="editor">{{ .Snapshot.Code }}</textarea>
 			</section>
@@ -338,7 +340,7 @@ var STUDENT_VIEWS_FEEDBACK_TEMPLATE = `
 				{{range .Feedbacks}}
 					<article class="message">
 						<div class="message-header">
-						<p>{{.GivenBy}} gave feedback on {{$.Filename}} at ({{.FeedbackTime.Format "Jan 02, 2006 3:4:5 PM"}})</p>
+						<p>{{.GivenBy}} gave feedback on {{$.Filename}} at ({{.FeedbackTime.Format "Jan 02, 2006 3:04:05 PM"}})</p>
 						</div>
 						<div class="message-body">
 							<div class="columns">
@@ -439,7 +441,7 @@ var TEACHER_VIEWS_FEEDBACK_TEMPLATE = `
 				{{range .Feedbacks}}
 					<article class="message">
 						<div class="message-header">
-						<p>{{.GivenBy}} gave feedback on {{$.Filename}} at ({{.FeedbackTime.Format "Jan 02, 2006 3:4:5 PM"}})</p>
+						<p>{{.GivenBy}} gave feedback on {{$.Filename}} at ({{.FeedbackTime.Format "Jan 02, 2006 3:04:05 PM"}})</p>
 						</div>
 						<div class="message-body">
 							<div class="columns">
@@ -567,7 +569,7 @@ var HELP_REQUEST_VIEW_TEMPLATE = `
 			<section class="section">
 				<article class="message">
 					<div class="message-header">
-					<p>Help Request from {{.StudentName}} At ({{.GivenAt.Format "Jan 02, 2006 3:4:5 PM"}})</p>
+					<p>Help Request from {{.StudentName}} At ({{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}})</p>
 					</div>
 					<div class="message-body">
 						{{.Explanation}}
