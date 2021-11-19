@@ -297,7 +297,7 @@ func viewHelpRequestHandler(w http.ResponseWriter, r *http.Request, who string, 
 	role := r.FormValue("role")
 	pw := r.FormValue("password")
 	temp := template.New("")
-	ownFuncs := template.FuncMap{"formatTimeSince": formatTimeSince}
+	ownFuncs := template.FuncMap{"getEditorMode": getEditorMode, "formatTimeSince": formatTimeSince}
 	t, err := temp.Funcs(ownFuncs).Parse(HELP_REQUEST_VIEW_TEMPLATE)
 	if err != nil {
 		log.Fatal(err)
