@@ -610,7 +610,7 @@ var HELP_REQUEST_VIEW_TEMPLATE = `
 	</body>
 	<script>
 			var editor = document.getElementById("editor");
-			var myCodeMirror = CodeMirror.fromTextArea(editor, {lineNumbers: true, mode: "{{getEditorMode .Snapshot.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
+			var myCodeMirror = CodeMirror.fromTextArea(editor, {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
 			myCodeMirror.setSize("100%", 400)
 			
 		</script>

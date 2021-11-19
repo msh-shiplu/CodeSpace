@@ -43,6 +43,7 @@ type HelpRequest struct {
 	GivenAt     time.Time
 	SnapshotID  int
 	Snapshot    string
+	ProblemName string
 	UserID      int
 	UserRole    string
 	Password    string
@@ -311,6 +312,7 @@ func viewHelpRequestHandler(w http.ResponseWriter, r *http.Request, who string, 
 				GivenAt:     s.At,
 				SnapshotID:  s.SnapshotID,
 				Snapshot:    s.Snapshot,
+				ProblemName: s.Filename,
 				UserID:      uid,
 				UserRole:    role,
 				Password:    pw,
