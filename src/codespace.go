@@ -40,6 +40,7 @@ type HelpRequest struct {
 	ID          int
 	StudentName string
 	Explanation string
+	NumReply    int
 	GivenAt     time.Time
 	SnapshotID  int
 	Snapshot    string
@@ -248,6 +249,19 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, 
 	}
 }
 
+func getNumberOfReply(helpRequestID int) int {
+	rows, err := Database.Query("select count(*) from help_message where code_explanation_id = ?", helpRequestID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	c := 0
+	if rows.Next() {
+		rows.Scan(&c)
+	}
+	return c
+}
+
 func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	role := r.FormValue("role")
 	temp := template.New("")
@@ -262,8 +276,8 @@ func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, 
 			if _, ok := HelpEligibleStudents[s.Pid][uid]; ok || s.Uid == uid {
 				helpRequests = append(helpRequests, &HelpRequest{
 					ID:          s.Sid,
+					NumReply:    getNumberOfReply(s.Sid),
 					StudentName: Students[s.Uid].Name,
-					Explanation: s.Content,
 					GivenAt:     s.At,
 				})
 			}
@@ -272,8 +286,8 @@ func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, 
 		for _, s := range HelpSubmissions {
 			helpRequests = append(helpRequests, &HelpRequest{
 				ID:          s.Sid,
+				NumReply:    getNumberOfReply(s.Sid),
 				StudentName: Students[s.Uid].Name,
-				Explanation: s.Content,
 				GivenAt:     s.At,
 			})
 		}

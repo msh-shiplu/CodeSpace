@@ -536,6 +536,7 @@ var HELP_REQUEST_LIST_TEMPLATE = `
 				<tr>
 					<th>Student</th>
 					<th>Given At</th>
+					<th># of Reply</th>
 					<th></th>
 				</tr>
 			</thead>
@@ -544,6 +545,7 @@ var HELP_REQUEST_LIST_TEMPLATE = `
 			<tr>
 				<td>{{ .StudentName }}</td>
 				<td>{{ formatTimeSince .GivenAt }} ago</td>
+				<td>{{ .NumReply}}</td>
 				<td><a href="/view_help_request?request_id={{.ID}}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">View</a></td>
 			</tr>
 			{{ end }}
