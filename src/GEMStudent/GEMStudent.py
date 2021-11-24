@@ -979,3 +979,16 @@ class gemsEventListeners(sublime_plugin.EventListener):
                 data["feedback"] = "no"
             data["role"] = "student"
             gemsRequest("save_snapshot_back_feedback", data)
+
+# ------------------------------------------------------------------
+
+
+class gemsViewHelpRequests(sublime_plugin.ApplicationCommand):
+    def run(self):
+        with open(gemsFILE, 'r') as f:
+            info = json.loads(f.read())
+            p = urllib.parse.urlencode(
+                {'password': info['Password'], 'uid': info['Uid'], 'role': 'student'})
+        webbrowser.open(gemsSERVER + '/help_requests?'+p)
+
+# ------------------------------------------------------------------

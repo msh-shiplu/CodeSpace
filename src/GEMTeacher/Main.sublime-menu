@@ -10,11 +10,6 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Get help request",
-                "id": "gemtGetHelpCode",
-                "command": "gemt_get_help_code"
-            },
-            {
                 "caption": "View help requests",
                 "id": "gemtViewHelpRequests",
                 "command": "gemt_view_help_requests"

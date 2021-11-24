@@ -20,9 +20,9 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "Help Friends",
-                "id": "gemsGetFriendCode",
-                "command": "gems_get_friend_code",
+                "caption": "View help requests",
+                "id": "gemsViewHelpRequests",
+                "command": "gems_view_help_requests"
             },
             {
                 "caption": "View CodeSpace",
