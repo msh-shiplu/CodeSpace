@@ -151,6 +151,7 @@ var CODESPACE_TEMPLATE = `
 	</head>
 	<body>
 	<div class="container">
+		<h3 class="title is-3">CodeSpace: List of Code Snapshots</h3>
 		<table class="table is-striped is-fullwidth is-hoverable is-narrow">
 			<thead>
 				<tr>
@@ -523,14 +524,14 @@ var HELP_REQUEST_LIST_TEMPLATE = `
 	<!DOCTYPE html>
 	<html>
 	<head>
-	<title>Help Requests</title>
+	<title>List of Help Requests</title>
 	<meta http-equiv="refresh" content="120" >
 	<script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	</head>
 	<body>
 	<div class="container">
-		<h1 class="title">Help Requests/<h1>
+	<h3 class="title is-3">List of Help Requests/<h3>
 		<table class="table is-striped is-fullwidth is-hoverable is-narrow">
 			<thead>
 				<tr>
@@ -561,7 +562,7 @@ var HELP_REQUEST_VIEW_TEMPLATE = `
 <!DOCTYPE html>
 	<html>
 	<head>
-	<title>Code Snapshot</title>
+	<title>Help Request</title>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js" integrity="sha512-hGVnilhYD74EGnPbzyvje74/Urjrg5LSNGx0ARG1Ucqyiaz+lFvtsXk/1jCwT9/giXP0qoXSlVDjxNxjLvmqAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/python/python.min.js" integrity="sha512-/mavDpedrvPG/0Grj2Ughxte/fsm42ZmZWWpHz1jCbzd5ECv8CB7PomGtw0NAnhHmE/lkDFkRMupjoohbKNA1Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/clike/clike.min.js" integrity="sha512-GAled7oA9WlRkBaUQlUEgxm37hf43V2KEMaEiWlvBO/ueP2BLvBLKN5tIJu4VZOTwo6Z4XvrojYngoN9dJw2ug==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -575,7 +576,7 @@ var HELP_REQUEST_VIEW_TEMPLATE = `
 	</head>
 	<body>
 		<div class="container">
-			
+			<h3 class="title is-3">Help Request</h3>
 			<section class="section">
 				<article class="message">
 					<div class="message-header">
