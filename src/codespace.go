@@ -249,8 +249,8 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, 
 	}
 }
 
-func getNumberOfReply(helpRequestID int) int {
-	rows, err := Database.Query("select count(*) from help_message where code_explanation_id = ?", helpRequestID)
+func getNumberOfReply(snapshotID int) int {
+	rows, err := Database.Query("select count(*) from snapshot_feedback where snapshot_id = ?", snapshotID)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
@@ -276,7 +276,7 @@ func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, 
 			if _, ok := HelpEligibleStudents[s.Pid][uid]; ok || s.Uid == uid {
 				helpRequests = append(helpRequests, &HelpRequest{
 					ID:          s.Sid,
-					NumReply:    getNumberOfReply(s.Sid),
+					NumReply:    getNumberOfReply(s.SnapshotID),
 					StudentName: Students[s.Uid].Name,
 					GivenAt:     s.At,
 				})
@@ -286,7 +286,7 @@ func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, 
 		for _, s := range HelpSubmissions {
 			helpRequests = append(helpRequests, &HelpRequest{
 				ID:          s.Sid,
-				NumReply:    getNumberOfReply(s.Sid),
+				NumReply:    getNumberOfReply(s.SnapshotID),
 				StudentName: Students[s.Uid].Name,
 				GivenAt:     s.At,
 			})
