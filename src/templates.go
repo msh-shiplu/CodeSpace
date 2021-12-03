@@ -202,7 +202,7 @@ var CODE_SNAPSHOT_TEMPLATE = `
 	<body>
 		<div class="container">
 			<section class="section">
-				<h3 class="title is-3">Latest Code Snapshot from {{.Snapshot.StudentNme}}</h3>
+				<h3 class="title is-3">Latest Code Snapshot from {{.Snapshot.StudentName}}</h3>
 				<h4 class="title is-4">{{.Snapshot.StudentName}} ({{.Snapshot.ProblemName}} @ {{.Snapshot.LastUpdated.Format "Jan 02, 2006 3:04:05 PM"}})</h4>
 				<h5 class="title is-5">If you think that this student needs help, feel free to offer a brief comment.</h5>
 				{{$l := (len .HelpRequestIDs)}}

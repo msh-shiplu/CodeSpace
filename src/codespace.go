@@ -286,7 +286,7 @@ func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, 
 					StudentName: Students[s.Uid].Name,
 					GivenAt:     s.At,
 				})
-				if numReply > 0 {
+				if numReply == 0 {
 					helpNeededCount++
 				}
 			}
@@ -300,7 +300,7 @@ func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, 
 				StudentName: Students[s.Uid].Name,
 				GivenAt:     s.At,
 			})
-			if numReply > 0 {
+			if numReply == 0 {
 				helpNeededCount++
 			}
 		}
