@@ -27,6 +27,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	attempt_number := -1
 	pid := 0
 	prob, ok := ActiveProblems[filename]
+	now := time.Now()
 	if ok {
 		if !prob.Active {
 			msg = "Problem is no longer active. But the teacher will look at your submission."
@@ -67,9 +68,9 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			}
 			var result sql.Result
 			if complete {
-				result, err = AddSubmissionCompleteSQL.Exec(pid, uid, content, priority, attempt_number, time.Now(), time.Now())
+				result, err = AddSubmissionCompleteSQL.Exec(pid, uid, content, priority, attempt_number, now, now)
 			} else {
-				result, err = AddSubmissionSQL.Exec(pid, uid, content, priority, attempt_number, time.Now())
+				result, err = AddSubmissionSQL.Exec(pid, uid, content, priority, attempt_number, now)
 			}
 			if err != nil {
 
@@ -78,7 +79,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			sid, _ = result.LastInsertId()
 
 			// Add submitted but not graded code to code snapshot.
-			addCodeSnapshot(uid, pid, content, 1, time.Now())
+			addCodeSnapshot(uid, pid, content, 1, now)
 
 			if test_cases != "" {
 				rows, _ := Database.Query("select id from test_case where student_id=? and problem_id=?", uid, pid)
@@ -89,9 +90,9 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 				}
 				rows.Close()
 				if tc_id != 0 {
-					UpdateTestCaseSQL.Exec(test_cases, time.Now(), tc_id)
+					UpdateTestCaseSQL.Exec(test_cases, now, tc_id)
 				} else {
-					AddTestCaseSQL.Exec(pid, uid, test_cases, time.Now())
+					AddTestCaseSQL.Exec(pid, uid, test_cases, now)
 				}
 
 			}
@@ -101,6 +102,8 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 					SeenHelpSubmissions[uid] = map[int]bool{}
 					// fmt.Fprintf(w, "You are now elligible to help you friends. To help please click on 'Help Friends' button.")
 					msg = msg + "\nYou are now elligible to help you friends. To help please click on 'Help Friends' button."
+
+					AddHelpEligibleSQL.Exec(pid, uid, now)
 				}
 			}
 
@@ -117,7 +120,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			Filename:      filename,
 			Priority:      priority,
 			AttemptNumber: attempt_number,
-			At:            time.Now(),
+			At:            now,
 			Name:          r.FormValue("name"),
 		}
 		WorkingSubs = append(WorkingSubs, sub)

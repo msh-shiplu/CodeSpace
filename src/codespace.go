@@ -51,10 +51,11 @@ type HelpRequest struct {
 }
 
 type HelpRequestListData struct {
-	HelpRequests []*HelpRequest
-	UserID       int
-	UserRole     string
-	Password     string
+	HelpRequests  []*HelpRequest
+	NumHelpNeeded int
+	UserID        int
+	UserRole      string
+	Password      string
 }
 
 func getEditorMode(filename string) string {
@@ -140,6 +141,7 @@ func codespaceHandler(w http.ResponseWriter, r *http.Request, who string, uid in
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Fatal(err)
 	}
+	AddUserEventLogSQL.Exec(uid, role, "click", nil, "codespace", time.Now())
 }
 
 func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
@@ -247,6 +249,7 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Fatal(err)
 	}
+	AddUserEventLogSQL.Exec(uid, role, "click", problemID, "snapshot", time.Now())
 }
 
 func getNumberOfReply(snapshotID int) int {
@@ -271,33 +274,44 @@ func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, 
 		log.Fatal(err)
 	}
 	var helpRequests []*HelpRequest
+	var helpNeededCount int
+	var numReply int
 	if role == "student" {
 		for _, s := range HelpSubmissions {
 			if _, ok := HelpEligibleStudents[s.Pid][uid]; ok || s.Uid == uid {
+				numReply = getNumberOfReply(s.SnapshotID)
 				helpRequests = append(helpRequests, &HelpRequest{
 					ID:          s.Sid,
-					NumReply:    getNumberOfReply(s.SnapshotID),
+					NumReply:    numReply,
 					StudentName: Students[s.Uid].Name,
 					GivenAt:     s.At,
 				})
+				if numReply > 0 {
+					helpNeededCount++
+				}
 			}
 		}
 	} else {
 		for _, s := range HelpSubmissions {
+			numReply = getNumberOfReply(s.SnapshotID)
 			helpRequests = append(helpRequests, &HelpRequest{
 				ID:          s.Sid,
-				NumReply:    getNumberOfReply(s.SnapshotID),
+				NumReply:    numReply,
 				StudentName: Students[s.Uid].Name,
 				GivenAt:     s.At,
 			})
+			if numReply > 0 {
+				helpNeededCount++
+			}
 		}
 	}
 	sort.Slice(helpRequests, func(i, j int) bool { return helpRequests[i].GivenAt.Before(helpRequests[j].GivenAt) })
 	data := &HelpRequestListData{
-		HelpRequests: helpRequests,
-		UserID:       uid,
-		UserRole:     role,
-		Password:     r.FormValue("password"),
+		HelpRequests:  helpRequests,
+		NumHelpNeeded: helpNeededCount,
+		UserID:        uid,
+		UserRole:      role,
+		Password:      r.FormValue("password"),
 	}
 	w.Header().Set("Content-Type", "text/html")
 	err = t.Execute(w, data)
@@ -305,6 +319,7 @@ func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Fatal(err)
 	}
+	AddUserEventLogSQL.Exec(uid, role, "click", nil, "help_request_list", time.Now())
 }
 
 func viewHelpRequestHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
@@ -318,6 +333,7 @@ func viewHelpRequestHandler(w http.ResponseWriter, r *http.Request, who string, 
 		log.Fatal(err)
 	}
 	data := &HelpRequest{}
+	problemID := -1
 	for _, s := range HelpSubmissions {
 		if s.Sid == requestID {
 			data = &HelpRequest{
@@ -331,9 +347,15 @@ func viewHelpRequestHandler(w http.ResponseWriter, r *http.Request, who string, 
 				UserRole:    role,
 				Password:    pw,
 			}
+			problemID = s.Pid
 		}
 	}
 	w.Header().Set("Content-Type", "text/html")
 	err = t.Execute(w, data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Fatal(err)
+	}
+	AddUserEventLogSQL.Exec(uid, role, "click", problemID, "view_help_request", time.Now())
 
 }

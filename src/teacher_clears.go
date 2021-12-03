@@ -6,6 +6,8 @@ package main
 import (
 	// "encoding/json"
 	"fmt"
+	"time"
+
 	// "log"
 	"net/http"
 )
@@ -39,6 +41,7 @@ func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request,
 				idx++
 			}
 		}
+		UpdateProblemEndTimeSQL.Exec(time.Now(), prob.Info.Pid)
 
 	} else {
 		fmt.Fprintf(w, "-1")

@@ -187,7 +187,7 @@ var CODE_SNAPSHOT_TEMPLATE = `
 <!DOCTYPE html>
 	<html>
 	<head>
-	<title>Code Snapshot</title>
+	<title>Latest Code Snapshot from {{.Snapshot.StudentName}}</title>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js" integrity="sha512-hGVnilhYD74EGnPbzyvje74/Urjrg5LSNGx0ARG1Ucqyiaz+lFvtsXk/1jCwT9/giXP0qoXSlVDjxNxjLvmqAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/python/python.min.js" integrity="sha512-/mavDpedrvPG/0Grj2Ughxte/fsm42ZmZWWpHz1jCbzd5ECv8CB7PomGtw0NAnhHmE/lkDFkRMupjoohbKNA1Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/clike/clike.min.js" integrity="sha512-GAled7oA9WlRkBaUQlUEgxm37hf43V2KEMaEiWlvBO/ueP2BLvBLKN5tIJu4VZOTwo6Z4XvrojYngoN9dJw2ug==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -202,7 +202,9 @@ var CODE_SNAPSHOT_TEMPLATE = `
 	<body>
 		<div class="container">
 			<section class="section">
-				<h3 class="title is-3">{{.Snapshot.StudentName}} ({{.Snapshot.ProblemName}} @ {{.Snapshot.LastUpdated.Format "Jan 02, 2006 3:04:05 PM"}})</h3>
+				<h3 class="title is-3">Latest Code Snapshot from {{.Snapshot.StudentNme}}</h3>
+				<h4 class="title is-4">{{.Snapshot.StudentName}} ({{.Snapshot.ProblemName}} @ {{.Snapshot.LastUpdated.Format "Jan 02, 2006 3:04:05 PM"}})</h4>
+				<h5 class="title is-5">If you think that this student needs help, feel free to offer a brief comment.</h5>
 				{{$l := (len .HelpRequestIDs)}}
 				{{if ne $l 0}}
 					<b>Help requests: </b>
@@ -524,14 +526,15 @@ var HELP_REQUEST_LIST_TEMPLATE = `
 	<!DOCTYPE html>
 	<html>
 	<head>
-	<title>List of Help Requests</title>
+	<title>Help Hotline</title>
 	<meta http-equiv="refresh" content="120" >
 	<script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	</head>
 	<body>
 	<div class="container">
-	<h3 class="title is-3">List of Help Requests/<h3>
+	<h3 class="title is-3">Help Hotline/<h3>
+	<h5 class="title is-5">Currently, there are {{.NumHelpNeeded}} students who need help.</h5>
 		<table class="table is-striped is-fullwidth is-hoverable is-narrow">
 			<thead>
 				<tr>

@@ -24,7 +24,7 @@ func create_tables() {
 	execSQL("create table if not exists teacher (id integer primary key, name text unique, password text)")
 	execSQL("create table if not exists attendance (id integer primary key, student_id integer, attendance_at timestamp)")
 	execSQL("create table if not exists tag (id integer primary key, topic_description text unique)")
-	execSQL("create table if not exists problem (id integer primary key, teacher_id integer, problem_description blob, answer text, filename text, merit integer, effort integer, attempts integer, topic_id integer, tag integer, problem_uploaded_at timestamp)")
+	execSQL("create table if not exists problem (id integer primary key, teacher_id integer, problem_description blob, answer text, filename text, merit integer, effort integer, attempts integer, topic_id integer, tag integer, problem_uploaded_at timestamp, problem_ended_at timestamp)")
 	execSQL("create table if not exists submission (id integer primary key, problem_id integer, student_id integer, student_code blob, submission_category integer, code_submitted_at timestamp, completed timestamp, verdict text, attempt_number integer)")
 	execSQL("create table if not exists score (id integer primary key, problem_id integer, student_id integer, teacher_id integer, score integer, graded_submission_number integer, score_given_at timestamp, unique(problem_id,student_id))")
 	execSQL("create table if not exists feedback (id integer primary key, teacher_id integer, student_id integer, feedback text, feedback_given_at timestamp, submission_id integer)")
@@ -34,6 +34,8 @@ func create_tables() {
 	execSQL("create table if not exists code_snapshot (id integer primary key, student_id integer, problem_id integer, code blob, last_updated_at timestamp, status int default 0)") // 0 = not submitted, 1 = submitted but not graded, 2 = submitted and incorrect, 3 = submitted and correct
 	execSQL("create table if not exists snapshot_feedback (id integer primary key, snapshot_id integer, feedback text, author_id integer, author_role string, given_at timestamp)")
 	execSQL("create table if not exists snapshot_back_feedback (id integer primary key, snapshot_feedback_id integer, author_id integer, author_role string, is_helpful string, given_at timestamp)")
+	execSQL("create table if not exists help_eligible (id integer primary key, problem_id integer, student_id integer, became_eligible_at timestamp)")
+	execSQL("create table if not exists user_event_log (id integer primary key, user_id integer, user_type string, event_type string, problem_id integer, event_address string, event_time timestamp)")
 	// foreign key example: http://www.sqlitetutorial.net/sqlite-foreign-key/
 }
 
@@ -73,6 +75,9 @@ func init_database(db_name string) {
 	AddSnapShotFeedbackSQL = prepare("insert into snapshot_feedback (snapshot_id, feedback, author_id, author_role, given_at) values(?, ?, ?, ?, ?)")
 	AddSnapshotBackFeedbackSQL = prepare("insert into snapshot_back_feedback (snapshot_feedback_id, author_id, author_role, is_helpful, given_at) values(?, ?, ?, ?, ?)")
 	UpdateSnapshotBackFeedbackSQL = prepare("update snapshot_back_feedback set is_helpful=?, given_at=? where snapshot_feedback_id=? and author_id=? and author_role=?")
+	UpdateProblemEndTimeSQL = prepare("update problem set problem_ended_at=? where id=?")
+	AddHelpEligibleSQL = prepare("insert into help_eligible (problem_id, student_id, became_eligible_at) values(?, ?, ?)")
+	AddUserEventLogSQL = prepare("insert into user_event_log (user_id, user_type, event_type, problem_id, event_address, event_time) values(?, ?, ?, ?, ?, ?)")
 	// Initialize passcode for current session and default board
 	Passcode = RandStringRunes(12)
 	Students[0] = &StudenInfo{

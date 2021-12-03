@@ -52,6 +52,9 @@ var AddCodeSnapshotSQL *sql.Stmt
 var AddSnapShotFeedbackSQL *sql.Stmt
 var AddSnapshotBackFeedbackSQL *sql.Stmt
 var UpdateSnapshotBackFeedbackSQL *sql.Stmt
+var UpdateProblemEndTimeSQL *sql.Stmt
+var AddHelpEligibleSQL *sql.Stmt
+var AddUserEventLogSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication
