@@ -251,3 +251,6 @@ func getLinesOfCode(code string) int {
 	}
 	return count
 }
+
+// PeerTutorAllowed is the flag that decides whether peers are allowed to help other students or not.
+var PeerTutorAllowed = false

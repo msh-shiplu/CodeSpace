@@ -890,3 +890,13 @@ class gemtGetHelpCode(sublime_plugin.TextCommand):
 # 		sublime.message_dialog(response)
 # 		self.window.run_command("close")
 # 		self.window.run_command("hide_panel", {"cancel": False})
+
+
+class gemtPeerTutoringTurnOn(sublime_plugin.ApplicationCommand):
+    def run(self):
+        gemtRequest("set_peer_tutor", data={"turn_on": 1})
+
+
+class gemtPeerTutoringTurnOff(sublime_plugin.ApplicationCommand):
+    def run(self):
+        gemtRequest("set_peer_tutor", data={"turn_on": 0})

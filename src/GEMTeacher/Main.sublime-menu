@@ -10,6 +10,22 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
+                "caption": "Peer Tutoring",
+                "id": "gemtPeerTutoring",
+                "children": [
+                    {
+                        "caption": "Turn On",
+                        "id": "gemtPeerTutoringTurnOn",
+                        "command": "gemt_peer_tutoring_turn_on"
+                    },
+                    {
+                        "caption": "Turn Off",
+                        "id": "gemtPeerTutoringTurnOff",
+                        "command": "gemt_peer_tutoring_turn_off"
+                    },
+                ]
+            },
+            {
                 "caption": "View help requests",
                 "id": "gemtViewHelpRequests",
                 "command": "gemt_view_help_requests"

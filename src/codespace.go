@@ -359,3 +359,12 @@ func viewHelpRequestHandler(w http.ResponseWriter, r *http.Request, who string, 
 	AddUserEventLogSQL.Exec(uid, role, "click", problemID, "view_help_request", time.Now())
 
 }
+
+func setPeerTutorHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	turnOn, _ := strconv.Atoi(r.FormValue("turn_on"))
+	if turnOn == 1 {
+		PeerTutorAllowed = true
+	} else if turnOn == 0 {
+		PeerTutorAllowed = false
+	}
+}

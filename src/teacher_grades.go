@@ -99,11 +99,13 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			now := time.Now()
 			ActiveProblems[sub.Filename].Attempts[student_id] = 0 // This prevents further submission.
 			pid := sub.Pid
-			if _, ok := HelpEligibleStudents[pid][sub.Uid]; !ok {
-				HelpEligibleStudents[pid][sub.Uid] = true
-				SeenHelpSubmissions[sub.Uid] = map[int]bool{}
-				// Add eligible timestamp to datbase
-				AddHelpEligibleSQL.Exec(pid, sub.Uid, now)
+			if PeerTutorAllowed {
+				if _, ok := HelpEligibleStudents[pid][sub.Uid]; !ok {
+					HelpEligibleStudents[pid][sub.Uid] = true
+					SeenHelpSubmissions[sub.Uid] = map[int]bool{}
+					// Add eligible timestamp to datbase
+					AddHelpEligibleSQL.Exec(pid, sub.Uid, now)
+				}
 			}
 
 			// Add the correct submission to codesnapshot.
