@@ -95,7 +95,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 				AttemptNumber: sub.AttemptNumber,
 				Status:        4,
 			}
-			Students[sub.Uid].SubmissionStatus = append(Students[sub.Uid].SubmissionStatus, subStat)
+
 			now := time.Now()
 			ActiveProblems[sub.Filename].Attempts[student_id] = 0 // This prevents further submission.
 			pid := sub.Pid
@@ -105,8 +105,10 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 					SeenHelpSubmissions[sub.Uid] = map[int]bool{}
 					// Add eligible timestamp to datbase
 					AddHelpEligibleSQL.Exec(pid, sub.Uid, now)
+					subStat.Status = 5
 				}
 			}
+			Students[sub.Uid].SubmissionStatus = append(Students[sub.Uid].SubmissionStatus, subStat)
 
 			// Add the correct submission to codesnapshot.
 			addCodeSnapshot(sub.Uid, pid, content, 3, now)

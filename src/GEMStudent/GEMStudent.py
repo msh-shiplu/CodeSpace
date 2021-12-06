@@ -27,7 +27,8 @@ gemsUpdateMessage = {
     1: "Your {} submission for problem {} is being looked at.",
     2: "Teacher did not grade your {} submission for problem {}.",
     3: "Good effort!!!  However, the teacher did not think your {} solution for problem {} was correct.",
-    4: "Your {} solution for problem {} was correct. You are now elligible to help your friends.",
+    4: "Your {} solution for problem {} was correct.",
+    5: "Your {} solution for problem {} was correct. You are now elligible to help your friends.",
 }
 gemsFeedbackFolder = 'FEEDBACKS'
 gemsCurrentHelpSubId = None
