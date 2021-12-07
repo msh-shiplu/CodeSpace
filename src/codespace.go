@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
@@ -141,8 +142,6 @@ func codespaceHandler(w http.ResponseWriter, r *http.Request, who string, uid in
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Fatal(err)
 	}
-	AddUserEventLogSQL.Exec(uid, role, "click", nil, "codespace", time.Now())
-}
 
 func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	snapshotID := 0
@@ -249,7 +248,14 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Fatal(err)
 	}
-	AddUserEventLogSQL.Exec(uid, role, "click", problemID, "snapshot", time.Now())
+	otherInfo := struct {
+		Referral string
+		ProblemID int
+	} {
+		Referral: r.URL.String(),
+		ProblemID: problemID,
+	}
+	logEvent("willing to help", uid, role, "click", string(json.Marshal(otherInfo)))
 }
 
 func getNumberOfReply(snapshotID int) int {
@@ -319,7 +325,6 @@ func helpRequestListHandler(w http.ResponseWriter, r *http.Request, who string, 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Fatal(err)
 	}
-	AddUserEventLogSQL.Exec(uid, role, "click", nil, "help_request_list", time.Now())
 }
 
 func viewHelpRequestHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
@@ -356,7 +361,14 @@ func viewHelpRequestHandler(w http.ResponseWriter, r *http.Request, who string, 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Fatal(err)
 	}
-	AddUserEventLogSQL.Exec(uid, role, "click", problemID, "view_help_request", time.Now())
+	otherInfo := struct {
+		Referral string
+		ProblemID int
+	} {
+		Referral: r.URL.String(),
+		ProblemID: problemID,
+	}
+	logEvent("willing to help", uid, role, "click", string(json.Marshal(otherInfo)))
 
 }
 

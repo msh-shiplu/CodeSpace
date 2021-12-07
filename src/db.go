@@ -35,7 +35,7 @@ func create_tables() {
 	execSQL("create table if not exists snapshot_feedback (id integer primary key, snapshot_id integer, feedback text, author_id integer, author_role string, given_at timestamp)")
 	execSQL("create table if not exists snapshot_back_feedback (id integer primary key, snapshot_feedback_id integer, author_id integer, author_role string, is_helpful string, given_at timestamp)")
 	execSQL("create table if not exists help_eligible (id integer primary key, problem_id integer, student_id integer, became_eligible_at timestamp)")
-	execSQL("create table if not exists user_event_log (id integer primary key, user_id integer, user_type string, event_type string, problem_id integer, event_address string, event_time timestamp)")
+	execSQL("create table if not exists user_event_log (id integer primary key, name string, user_id integer, user_type string, event_type string, referral_info string, event_time timestamp)")
 	// foreign key example: http://www.sqlitetutorial.net/sqlite-foreign-key/
 }
 
@@ -77,7 +77,7 @@ func init_database(db_name string) {
 	UpdateSnapshotBackFeedbackSQL = prepare("update snapshot_back_feedback set is_helpful=?, given_at=? where snapshot_feedback_id=? and author_id=? and author_role=?")
 	UpdateProblemEndTimeSQL = prepare("update problem set problem_ended_at=? where id=?")
 	AddHelpEligibleSQL = prepare("insert into help_eligible (problem_id, student_id, became_eligible_at) values(?, ?, ?)")
-	AddUserEventLogSQL = prepare("insert into user_event_log (user_id, user_type, event_type, problem_id, event_address, event_time) values(?, ?, ?, ?, ?, ?)")
+	AddUserEventLogSQL = prepare("insert into user_event_log (name, ser_id, user_type, event_type, referral_info, event_time) values(?, ?, ?, ?, ?, ?)")
 	// Initialize passcode for current session and default board
 	Passcode = RandStringRunes(12)
 	Students[0] = &StudenInfo{

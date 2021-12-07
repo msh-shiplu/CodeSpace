@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 )
 
 //-----------------------------------------------------------------------------------
@@ -71,4 +72,8 @@ func testcase_getsHandler(w http.ResponseWriter, r *http.Request, who string, ui
 		}
 	}
 	fmt.Fprintf(w, "["+test_cases+"]")
+}
+
+func logEvent(eventName string, userID int, userType, eventType, otherInfo string) {
+	AddUserEventLogSQL.Exec(eventName, userID, userType, eventType, otherInfo, time.Now())
 }
