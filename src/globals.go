@@ -133,6 +133,7 @@ type Submission struct {
 	AttemptNumber int
 	At            time.Time
 	Name          string
+	SnapshotID    int
 }
 
 var WorkingSubs = make([]*Submission, 0)

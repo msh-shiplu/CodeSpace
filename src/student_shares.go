@@ -28,6 +28,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	pid := 0
 	prob, ok := ActiveProblems[filename]
 	now := time.Now()
+	snapshotID := -1
 	if ok {
 		if !prob.Active {
 			msg = "Problem is no longer active. But the teacher will look at your submission."
@@ -79,7 +80,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			sid, _ = result.LastInsertId()
 
 			// Add submitted but not graded code to code snapshot.
-			addCodeSnapshot(uid, pid, content, 1, now)
+			snapshotID = addCodeSnapshot(uid, pid, content, 1, now)
 
 			if test_cases != "" {
 				rows, _ := Database.Query("select id from test_case where student_id=? and problem_id=?", uid, pid)
@@ -124,6 +125,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			AttemptNumber: attempt_number,
 			At:            now,
 			Name:          r.FormValue("name"),
+			SnapshotID:    snapshotID,
 		}
 		WorkingSubs = append(WorkingSubs, sub)
 		Submissions[int(sid)] = sub

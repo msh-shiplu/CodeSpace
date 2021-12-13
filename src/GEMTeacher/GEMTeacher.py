@@ -398,8 +398,21 @@ def gemt_grade(self, edit, decision):
     response = gemtRequest('teacher_grades', data)
     if response:
         sublime.message_dialog(response)
-        self.view.window().run_command('close')
 
+        global gemtCurrentSnapshotID
+        global gemtFeedbackView
+        if gemtFeedbackView is None:
+            self.view.window().run_command('close')
+            return
+        message = gemtFeedbackView.substr(
+            sublime.Region(0, self.view.size())).strip()
+        if message is not None and message != '':
+            data = {"snapshot_id": gemtCurrentSnapshotID, "feedback": message}
+            response = gemtRequest("save_snapshot_feedback", data)
+            gemtCurrentSnapshotID = None
+        gemtFeedbackView.close()
+        gemtFeedbackView = None
+        self.view.window().run_command('close')
 # ------------------------------------------------------------------
 
 
@@ -432,6 +445,8 @@ def gemt_gets(self, index, priority):
     if response is not None:
         sub = json.loads(response)
         if sub['Content'] != '':
+            global gemtCurrentSnapshotID
+            gemtCurrentSnapshotID = sub['SnapshotID']
             filename = sub['Filename']
             sid = str(sub['Sid'])
             dir = os.path.join(gemtFOLDER, sid)
@@ -446,6 +461,13 @@ def gemt_gets(self, index, priority):
             sublime.active_window().open_file(local_file)
             if sub['Priority'] == 2:
                 sublime.message_dialog('This student asked for help.')
+
+            global gemtFeedbackView
+            gemtFeedbackView = sublime.active_window().show_input_panel("Feedback: ",
+                                                                        "",
+                                                                        None,
+                                                                        None,
+                                                                        None)
         elif priority == 0:
             sublime.message_dialog('There are no submissions.')
         elif priority > 0:
