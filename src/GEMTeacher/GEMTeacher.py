@@ -362,6 +362,12 @@ def remove_first_line(content):
 
 
 def gemt_grade(self, edit, decision):
+    global gemtFeedbackView
+    if gemtFeedbackView is not None:
+        message = gemtFeedbackView.substr(
+            sublime.Region(0, self.view.size())).strip()
+        sublime.active_window().run_command("hide_panel", {"cancel": True})
+
     fname = self.view.file_name()
     changed = False
     sid = os.path.basename(os.path.dirname(fname))
@@ -400,17 +406,16 @@ def gemt_grade(self, edit, decision):
         sublime.message_dialog(response)
 
         global gemtCurrentSnapshotID
-        global gemtFeedbackView
+
         if gemtFeedbackView is None:
             self.view.window().run_command('close')
             return
-        message = gemtFeedbackView.substr(
-            sublime.Region(0, self.view.size())).strip()
+
         if message is not None and message != '':
             data = {"snapshot_id": gemtCurrentSnapshotID, "feedback": message}
             response = gemtRequest("save_snapshot_feedback", data)
             gemtCurrentSnapshotID = None
-        gemtFeedbackView.close()
+
         gemtFeedbackView = None
         self.view.window().run_command('close')
 # ------------------------------------------------------------------
@@ -468,6 +473,7 @@ def gemt_gets(self, index, priority):
                                                                         None,
                                                                         None,
                                                                         None)
+            gemtFeedbackView.set_name(filename)
         elif priority == 0:
             sublime.message_dialog('There are no submissions.')
         elif priority > 0:
