@@ -77,7 +77,7 @@ func init_database(db_name string) {
 	UpdateSnapshotBackFeedbackSQL = prepare("update snapshot_back_feedback set is_helpful=?, given_at=? where snapshot_feedback_id=? and author_id=? and author_role=?")
 	UpdateProblemEndTimeSQL = prepare("update problem set problem_ended_at=? where id=?")
 	AddHelpEligibleSQL = prepare("insert into help_eligible (problem_id, student_id, became_eligible_at) values(?, ?, ?)")
-	AddUserEventLogSQL = prepare("insert into user_event_log (name, ser_id, user_type, event_type, referral_info, event_time) values(?, ?, ?, ?, ?, ?)")
+	AddUserEventLogSQL = prepare("insert into user_event_log (name, user_id, user_type, event_type, referral_info, event_time) values(?, ?, ?, ?, ?, ?)")
 	// Initialize passcode for current session and default board
 	Passcode = RandStringRunes(12)
 	Students[0] = &StudenInfo{

@@ -142,6 +142,7 @@ func codespaceHandler(w http.ResponseWriter, r *http.Request, who string, uid in
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Fatal(err)
 	}
+}
 
 func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	snapshotID := 0
@@ -249,13 +250,14 @@ func getCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, 
 		log.Fatal(err)
 	}
 	otherInfo := struct {
-		Referral string
+		Referral  string
 		ProblemID int
-	} {
-		Referral: r.URL.String(),
+	}{
+		Referral:  r.URL.String(),
 		ProblemID: problemID,
 	}
-	logEvent("willing to help", uid, role, "click", string(json.Marshal(otherInfo)))
+	elog, _ := json.Marshal((otherInfo))
+	logEvent("willing to help", uid, role, "click", string(elog))
 }
 
 func getNumberOfReply(snapshotID int) int {
@@ -362,13 +364,14 @@ func viewHelpRequestHandler(w http.ResponseWriter, r *http.Request, who string, 
 		log.Fatal(err)
 	}
 	otherInfo := struct {
-		Referral string
+		Referral  string
 		ProblemID int
-	} {
-		Referral: r.URL.String(),
+	}{
+		Referral:  r.URL.String(),
 		ProblemID: problemID,
 	}
-	logEvent("willing to help", uid, role, "click", string(json.Marshal(otherInfo)))
+	elog, _ := json.Marshal(otherInfo)
+	logEvent("willing to help", uid, role, "click", string(elog))
 
 }
 
