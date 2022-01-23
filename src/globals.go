@@ -55,6 +55,11 @@ var UpdateSnapshotBackFeedbackSQL *sql.Stmt
 var UpdateProblemEndTimeSQL *sql.Stmt
 var AddHelpEligibleSQL *sql.Stmt
 var AddUserEventLogSQL *sql.Stmt
+var AddStudentStatusSQL *sql.Stmt
+var UpdateStudentCodingStatSQL *sql.Stmt
+var UpdateStudentSubmissionStatSQL *sql.Stmt
+var UpdateStudentHelpStatSQL *sql.Stmt
+var UpdateStudentTutoringStatSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication

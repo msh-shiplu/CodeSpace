@@ -36,6 +36,7 @@ func create_tables() {
 	execSQL("create table if not exists snapshot_back_feedback (id integer primary key, snapshot_feedback_id integer, author_id integer, author_role string, is_helpful string, given_at timestamp)")
 	execSQL("create table if not exists help_eligible (id integer primary key, problem_id integer, student_id integer, became_eligible_at timestamp)")
 	execSQL("create table if not exists user_event_log (id integer primary key, name string, user_id integer, user_type string, event_type string, referral_info string, event_time timestamp)")
+	execSQL("create table if not exists student_status (id integer primary key, student_id integer, problem_id integer, coding_stat string, help_stat string, submission_stat string, tutoring_stat string, last_updated_at timestamp)")
 	// foreign key example: http://www.sqlitetutorial.net/sqlite-foreign-key/
 }
 
@@ -78,6 +79,11 @@ func init_database(db_name string) {
 	UpdateProblemEndTimeSQL = prepare("update problem set problem_ended_at=? where id=?")
 	AddHelpEligibleSQL = prepare("insert into help_eligible (problem_id, student_id, became_eligible_at) values(?, ?, ?)")
 	AddUserEventLogSQL = prepare("insert into user_event_log (name, user_id, user_type, event_type, referral_info, event_time) values(?, ?, ?, ?, ?, ?)")
+	AddStudentStatusSQL = prepare("insert into student_status (student_id, problem_id, coding_stat, help_stat, submission_stat, tutoring_stat, last_updated_at) values(?, ?, ?, ?, ?, ?, ?)")
+	UpdateStudentCodingStatSQL = prepare("update student_status set coding_stat = ?, last_updated_at = ? where student_id = ? and problem_id = ?")
+	UpdateStudentHelpStatSQL = prepare("update student_status set help_stat = ?, last_updated_at = ? where student_id = ? and problem_id = ?")
+	UpdateStudentSubmissionStatSQL = prepare("update student_status set submission_stat = ?, last_updated_at = ? where student_id = ? and problem_id = ?")
+	UpdateStudentTutoringStatSQL = prepare("update student_status set tutoring_stat = ?, last_updated_at = ? where student_id = ? and problem_id = ?")
 	// Initialize passcode for current session and default board
 	Passcode = RandStringRunes(12)
 	Students[0] = &StudenInfo{
@@ -151,6 +157,32 @@ func add_or_update_score(decision string, pid, student_id, teacher_id, partial_c
 		}
 	}
 	return mesg
+}
+
+func addOrUpdateStudentStatus(studentID int, problemID int, codingStat string, helpStat string, submissionStat string, tutoringStat string) {
+	rows, err := Database.Query("select * from student_status where student_id = ? and problem_id = ?", studentID, problemID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if rows.Next() {
+		now := time.Now()
+		if codingStat != "" {
+			UpdateStudentCodingStatSQL.Exec(codingStat, now, studentID, problemID)
+		}
+		if helpStat != "" {
+			UpdateStudentHelpStatSQL.Exec(helpStat, now, studentID, problemID)
+		}
+		if submissionStat != "" {
+			UpdateStudentSubmissionStatSQL.Exec(submissionStat, now, studentID, problemID)
+		}
+		if tutoringStat != "" {
+			UpdateStudentTutoringStatSQL.Exec(tutoringStat, now, studentID, problemID)
+		}
+	} else {
+		AddStudentStatusSQL.Exec(studentID, problemID, codingStat, helpStat, submissionStat, tutoringStat, time.Now())
+	}
+	rows.Close()
 }
 
 //-----------------------------------------------------------------
