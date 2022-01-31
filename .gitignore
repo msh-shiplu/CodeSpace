@@ -7,3 +7,7 @@ src/MyCourse.sqlite3
 Examples/gem_config.json
 src/.DS_Store
 src/GEMStudent/.DS_Store
+src/gem
+src/go.mod
+.gitignore
+src/go.sum
