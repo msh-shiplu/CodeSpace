@@ -34,6 +34,8 @@ func create_tables() {
 	execSQL("create table if not exists code_snapshot (id integer primary key, student_id integer, problem_id integer, code blob, last_updated_at timestamp, status int default 0)") // 0 = not submitted, 1 = submitted but not graded, 2 = submitted and incorrect, 3 = submitted and correct
 	execSQL("create table if not exists snapshot_feedback (id integer primary key, snapshot_id integer, feedback text, author_id integer, author_role string, given_at timestamp)")
 	execSQL("create table if not exists snapshot_back_feedback (id integer primary key, snapshot_feedback_id integer, author_id integer, author_role string, is_helpful string, given_at timestamp)")
+	execSQL("create table if not exists message (id integer primary key, snapshot_id integer, message text, author_id integer, author_role integer, given_at timestamp, type string)")
+	execSQL("create table if not exists message_feedback (id integer primary key, message_id integer, feedback text, author_id integer, author_role string, given_at timestamp)")
 	execSQL("create table if not exists help_eligible (id integer primary key, problem_id integer, student_id integer, became_eligible_at timestamp)")
 	execSQL("create table if not exists user_event_log (id integer primary key, name string, user_id integer, user_type string, event_type string, referral_info string, event_time timestamp)")
 	execSQL("create table if not exists student_status (id integer primary key, student_id integer, problem_id integer, coding_stat string, help_stat string, submission_stat string, tutoring_stat string, last_updated_at timestamp)")
@@ -84,6 +86,8 @@ func init_database(db_name string) {
 	UpdateStudentHelpStatSQL = prepare("update student_status set help_stat = ?, last_updated_at = ? where student_id = ? and problem_id = ?")
 	UpdateStudentSubmissionStatSQL = prepare("update student_status set submission_stat = ?, last_updated_at = ? where student_id = ? and problem_id = ?")
 	UpdateStudentTutoringStatSQL = prepare("update student_status set tutoring_stat = ?, last_updated_at = ? where student_id = ? and problem_id = ?")
+	AddMessageSQL = prepare("insert into message (snapshot_id, message, author_id, author_role, given_at, type) values (?, ?, ?, ?, ?, ?)")
+	AddMessageFeedbackSQL = prepare("insert into message_feedback (message_id, feedback, author_id, author_role, given_at) values(?, ?, ?, ?, ?)")
 	// Initialize passcode for current session and default board
 	Passcode = RandStringRunes(12)
 	Students[0] = &StudenInfo{
@@ -222,6 +226,8 @@ func init_student(student_id int, name string, password string) {
 			StartingTime: time.Now(),
 		}
 		Students[student_id].Boards = append(Students[student_id].Boards, b)
+		// Add student coding status as idle
+		addOrUpdateStudentStatus(student_id, b.Pid, "Idle", "", "", "Not eligible")
 	}
 }
 

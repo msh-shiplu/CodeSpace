@@ -26,6 +26,9 @@ func student_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 			w.Write(js)
 			return
 		}
+		for _, b := range Students[uid].Boards {
+			addOrUpdateStudentStatus(uid, b.Pid, "Working", "", "", "")
+		}
 	}
 	fmt.Println(err.Error())
 	js, err = json.Marshal([]*Board{})

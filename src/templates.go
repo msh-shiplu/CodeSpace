@@ -622,3 +622,112 @@ var HELP_REQUEST_VIEW_TEMPLATE = `
 		</script>
 	</html>
 `
+var FEEDBACK_PROVISION_TEMPLATE = `
+	<!DOCTYPE html>
+	<html>
+	<head>
+	<title>Student Dashboard</title>
+	<meta http-equiv="refresh" content="120" >
+	<script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	</head>
+	<body>
+	<div class="container">
+		<h2 class="title is-2">{{.StudentName}}'s Dashboard for {{.ProblemName}}</h2>
+		<div class="tabs">
+			<ul>
+				<li class="is-active"><a>Feedback Provision</a></li>
+				<li><a>Submissions</a></li>
+			</ul>
+			</div>
+		</div>
+		<h3 class="title is-3">Latest Code Snapshot at {{.LastSnapshotAt.Format "Jan 02, 2006 3:04:05 PM"}}</h3>
+		<textarea id="editor">{{ .Code }}</textarea>
+
+		<section class="section">
+			{{range .Messages}}
+				<article class="message">
+					<div class="message-header">
+					<p>{{if eq .Type 0}}Help Request {{else}} Feedback {{end}} from {{.Name}} At ({{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}})</p>
+					</div>
+					<div class="message-body">
+						{{.Message}}
+					</div>
+					<textarea id="editor">{{ .Code }}</textarea>
+					{{range .Feedbacks}}
+						<article class="message">
+							<div class="message-header">
+							<p>Reply from {{.Name}} given at {{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}} </p>
+							</div>
+							<div class="message-body">
+								{{.Feedback}}
+							</div>
+						</article>
+					{{end}}
+				</article>
+				
+			{{end}}
+		</section>
+
+	</body>
+	</html>
+`
+var PROBLEM_DASHBOARD_TEMPLATE = `
+<!DOCTYPE html>
+<html>
+<head>
+<title>Problem Dashboard</title>
+<meta http-equiv="refresh" content="120" >
+<script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+<div class="container">
+	<h2 class="title is-2">Dashboard for {{.ProblemName}}</h2>
+	<table class="table">
+			<thead>
+				<tr>
+					<th>Students</th>
+					<th>Help Requests</th>
+					<th>Not Graded</th>
+					<th>Correct</th>
+					<th>Incorrect</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{len .StudentInfo}}</td>
+					<td>{{.NumHelpRequest}}</td>
+					<td>{{.NumNotGraded}}</td>
+					<td>{{.NumGradedCorrect}}</td>
+					<td>{{.NumGradedIncorrect}}</td>
+				</tr>
+			</tbody>
+	</table>
+
+	<table class="table">
+			<thead>
+				<tr>
+					<th>Student</th>
+					<th>Active</th>
+					<th>Coding Status</th>
+					<th>Help Status</th>
+					<th>Submission Status</th>
+					<th>Tutoring Status</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{range .StudentInfo}}
+				<td>.StudentName</td>
+				<td>{{ formatTimeSince .LastUpdatedAt }} ago</td>
+				<td>{{.CodingStat}}</td>
+				<td>{{.HelpStat}}</td>
+				<td>{{.SubmissionStat}}</td>
+				<td>{{.TutoringStat}}</td>
+				{{end}}
+			</tbody>
+	</table>
+
+</body>
+</html>
+`

@@ -60,6 +60,8 @@ var UpdateStudentCodingStatSQL *sql.Stmt
 var UpdateStudentSubmissionStatSQL *sql.Stmt
 var UpdateStudentHelpStatSQL *sql.Stmt
 var UpdateStudentTutoringStatSQL *sql.Stmt
+var AddMessageSQL *sql.Stmt
+var AddMessageFeedbackSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication
@@ -160,6 +162,16 @@ type HelpSubmission struct {
 
 var WorkingHelpSubs = make([]*HelpSubmission, 0)
 var HelpSubmissions = make(map[int]*HelpSubmission)
+
+type HelpFeedback struct {
+	Feedback         string
+	HelpSubmissionID int
+	GivenBy          int
+	GivenByRole      string
+	GivenAt          time.Time
+}
+
+var HelpFeedbacks = make([]*HelpFeedback, 0)
 
 //---------------------------------------------------------
 type ProblemInfo struct {

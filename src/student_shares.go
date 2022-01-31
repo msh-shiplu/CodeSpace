@@ -82,6 +82,8 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			// Add submitted but not graded code to code snapshot.
 			snapshotID = addCodeSnapshot(uid, pid, content, 1, now)
 
+			addOrUpdateStudentStatus(uid, pid, "", "", "submitted", "")
+
 			if test_cases != "" {
 				rows, _ := Database.Query("select id from test_case where student_id=? and problem_id=?", uid, pid)
 				tc_id := 0
@@ -106,6 +108,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 						msg = msg + "\nYou are now elligible to help you friends. To help please click on 'Help Friends' button."
 
 						AddHelpEligibleSQL.Exec(pid, uid, now)
+						addOrUpdateStudentStatus(uid, pid, "", "", "", "Eligible")
 					}
 				}
 			}
