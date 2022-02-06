@@ -766,7 +766,7 @@ var PROBLEM_LIST_TEMPLATE = `
 					<td>{{ .UploadedAt.Format "Jan 02, 2006 3:04:05 PM" }}</td>
 					<td>{{.Attendance}}</td>
 					<td>{{.NumActive}}</td>
-					<td>{{.NumHelpReuest}}</td>
+					<td>{{.NumHelpRequest}}</td>
 					<td>{{.NumGradedCorrect}}</td>
 					<td>{{.NumGradedIncorrect}}</td>
 					<td>{{.NumNotGraded}}</td>
