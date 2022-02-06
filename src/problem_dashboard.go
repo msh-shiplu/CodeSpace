@@ -42,6 +42,76 @@ func getCurrentStudents() []int {
 	return currentStudents
 }
 
+func getNumHelpRequest(problemID int) int {
+	rows, err := Database.Query("Select count(*) from message M, code_snapshot C where M.snapshot_id = C.id and C.problem_id = ?", problemID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var numHelpReq int
+	if rows.Next() {
+		rows.Scan(&numHelpReq)
+	}
+	rows.Close()
+	return numHelpReq
+}
+
+func getNumCorrectSubmission(problemID int) int {
+	rows, err := Database.Query("Select count(*) from submission where problem_id = ? and verdict='correct'", problemID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var numGradedCorrect int
+	if rows.Next() {
+		rows.Scan(&numGradedCorrect)
+	}
+	rows.Close()
+	return numGradedCorrect
+}
+
+func getNumIncorrectSubmission(problemID int) int {
+	rows, err := Database.Query("Select count(*) from submission where problem_id = ? and verdict='incorrect'", problemID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var numGradedIncorrect int
+	if rows.Next() {
+		rows.Scan(&numGradedIncorrect)
+	}
+	rows.Close()
+	return numGradedIncorrect
+}
+
+func getNumNotGradedSubmission(problemID int) int {
+	rows, err := Database.Query("Select count(*) from submission where problem_id = ? and verdict is NULL", problemID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var numNotGraded int
+	if rows.Next() {
+		rows.Scan(&numNotGraded)
+	}
+	rows.Close()
+	return numNotGraded
+}
+
+func getProblemNameFromID(problemID int) string {
+	rows, err := Database.Query("Select filename from problem where id = ?", problemID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var problemName string
+	if rows.Next() {
+		rows.Scan(&problemName)
+	}
+	rows.Close()
+	return problemName
+}
+
 func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
 	role := r.FormValue("role")
@@ -84,63 +154,14 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 		})
 	}
 	rows.Close()
-	rows, err = Database.Query("Select count(*) from code_explanation where problem_id = ?", problemID)
-	defer rows.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-	var numHelpReq int
-	if rows.Next() {
-		rows.Scan(&numHelpReq)
-	}
-	rows.Close()
-	rows, err = Database.Query("Select count(*) from submission where problem_id = ? and verdict='correct'", problemID)
-	defer rows.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-	var numGradedCorrect int
-	if rows.Next() {
-		rows.Scan(&numGradedCorrect)
-	}
-	rows.Close()
-	rows, err = Database.Query("Select count(*) from submission where problem_id = ? and verdict='incorrect'", problemID)
-	defer rows.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-	var numGradedIncorrect int
-	if rows.Next() {
-		rows.Scan(&numGradedIncorrect)
-	}
-	rows.Close()
-	rows, err = Database.Query("Select count(*) from submission where problem_id = ? and verdict is NULL", problemID)
-	defer rows.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-	var numNotGraded int
-	if rows.Next() {
-		rows.Scan(&numNotGraded)
-	}
-	rows.Close()
-	rows, err = Database.Query("Select filename from problem where id = ?", problemID)
-	defer rows.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-	var problemName string
-	if rows.Next() {
-		rows.Scan(&problemName)
-	}
-	rows.Close()
+
 	dashBoardData := &DashBoardInfo{
 		StudentInfo:        studentInfo,
-		ProblemName:        problemName,
-		NumHelpRequest:     numHelpReq,
-		NumGradedCorrect:   numGradedCorrect,
-		NumGradedIncorrect: numGradedIncorrect,
-		NumNotGraded:       numNotGraded,
+		ProblemName:        getProblemNameFromID(problemID),
+		NumHelpRequest:     getNumHelpRequest(problemID),
+		NumGradedCorrect:   getNumCorrectSubmission(problemID),
+		NumGradedIncorrect: getNumIncorrectSubmission(problemID),
+		NumNotGraded:       getNumNotGradedSubmission(problemID),
 	}
 	temp := template.New("")
 	ownFuncs := template.FuncMap{"formatTimeSince": formatTimeSince}

@@ -718,12 +718,59 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			</thead>
 			<tbody>
 				{{range .StudentInfo}}
-				<td>.StudentName</td>
-				<td>{{ formatTimeSince .LastUpdatedAt }} ago</td>
-				<td>{{.CodingStat}}</td>
-				<td>{{.HelpStat}}</td>
-				<td>{{.SubmissionStat}}</td>
-				<td>{{.TutoringStat}}</td>
+				<tr>
+					<td>{{.StudentName}}</td>
+					<td>{{ formatTimeSince .LastUpdatedAt }} ago</td>
+					<td>{{.CodingStat}}</td>
+					<td>{{.HelpStat}}</td>
+					<td>{{.SubmissionStat}}</td>
+					<td>{{.TutoringStat}}</td>
+				</tr>
+				{{end}}
+			</tbody>
+	</table>
+
+</body>
+</html>
+`
+var PROBLEM_LIST_TEMPLATE = `
+<!DOCTYPE html>
+<html>
+<head>
+<title>Exercises</title>
+<meta http-equiv="refresh" content="120" >
+<script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+<div class="container">
+	<h2 class="title is-2">Exercises</h2>
+
+	<table class="table">
+			<thead>
+				<tr>
+					<th>Filename</th>
+					<th>Posted At</th>
+					<th>Attendance</th>
+					<th>Active Students</th>
+					<th>Help Requests</th>
+					<th>Correct</th>
+					<th>Incorrect</th>
+					<th>Not Graded</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{range .Problems}}
+				<tr {{if .IsActive true}}class="is-selected"{{end}}>
+					<td>{{.Filename}}</td>
+					<td>{{ UploadedAt.Format "Jan 02, 2006 3:04:05 PM" }}</td>
+					<td>{{.Attendance}}</td>
+					<td>{{.NumActive}}</td>
+					<td>{{.NumHelpReuest}}</td>
+					<td>{{.NumGradedCorrect}}</td>
+					<td>{{.NumGradedIncorrect}}</td>
+					<td>{{.NumNotGraded}}</td>
+				</tr>
 				{{end}}
 			</tbody>
 	</table>

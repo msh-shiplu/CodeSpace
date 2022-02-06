@@ -267,14 +267,14 @@ def gemtRequest(path, data, authenticated=True, method='POST'):
 # ------------------------------------------------------------------
 
 
-class gemtViewHelpRequests(sublime_plugin.ApplicationCommand):
+class gemtViewExercises(sublime_plugin.ApplicationCommand):
     def run(self):
         global gemtSERVER
         with open(gemtFILE, 'r') as f:
             info = json.loads(f.read())
         p = urllib.parse.urlencode(
             {'password': info['Password'], 'uid': info['Uid'], 'role': 'teacher'})
-        webbrowser.open(gemtSERVER + '/help_requests?'+p)
+        webbrowser.open(gemtSERVER + '/view_exercises?'+p)
 
 # ------------------------------------------------------------------
 

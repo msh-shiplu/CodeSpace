@@ -26,19 +26,9 @@
                 ]
             },
             {
-                "caption": "View help requests",
-                "id": "gemtViewHelpRequests",
-                "command": "gemt_view_help_requests"
-            },
-            {
-                "caption": "View CodeSpace",
-                "id": "gemtGetCodeSpace",
-                "command": "gemt_get_code_space"
-            },
-            {
-                "caption": "Review Feedback",
-                "id": "gemtReviewFeedback",
-                "command": "gemt_review_feedback"
+                "caption": "Exercises",
+                "id": "gemtViewExercises",
+                "command": "gemt_view_exercises"
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
