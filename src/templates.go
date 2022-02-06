@@ -763,7 +763,7 @@ var PROBLEM_LIST_TEMPLATE = `
 				{{range .Problems}}
 				<tr {{if .IsActive true}}class="is-selected"{{end}}>
 					<td>{{.Filename}}</td>
-					<td>{{ UploadedAt.Format "Jan 02, 2006 3:04:05 PM" }}</td>
+					<td>{{ .UploadedAt.Format "Jan 02, 2006 3:04:05 PM" }}</td>
 					<td>{{.Attendance}}</td>
 					<td>{{.NumActive}}</td>
 					<td>{{.NumHelpReuest}}</td>
