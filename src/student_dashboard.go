@@ -68,6 +68,25 @@ func getMessageFeedbacks(messageID int) []*FeedbackDashBaord {
 	return feedbacks
 }
 
+func getLatestSnapshot(studentID int, problemID int) *Snapshot {
+	rows, err := Database.Query("select code, max(last_updated_at) from code_snapshot where problem_id = ? and student_id=? group by problem_id, student_id", problemID, studentID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var code string
+	var lastUpdate time.Time
+	if rows.Next() {
+		rows.Scan(&code, &lastUpdate)
+	}
+	rows.Close()
+	return &Snapshot{
+		ProblemName: getProblemNameFromID(problemID),
+		Code:        code,
+		LastUpdated: lastUpdate,
+	}
+}
+
 func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	role := r.FormValue("role")
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
@@ -114,7 +133,12 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 	}
 	// TODO(shiplu): sort the messages array
 	// sort.Slice(helpRequests, func(i, j int) bool { return helpRequests[i].GivenAt.Before(helpRequests[j].GivenAt) })
-	latestSnapshot := Snapshots[StudentSnapshot[studentID][problemID]]
+	latestSnapshot := &Snapshot{}
+	if _, ok := StudentSnapshot[studentID][problemID]; ok {
+		latestSnapshot = Snapshots[StudentSnapshot[studentID][problemID]]
+	} else {
+		latestSnapshot = getLatestSnapshot(studentID, problemID)
+	}
 	data := &FeedbackProvisionDashBoard{
 		StudentName:    students[studentID],
 		ProblemName:    latestSnapshot.ProblemName,
