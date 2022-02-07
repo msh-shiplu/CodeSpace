@@ -9,6 +9,7 @@ import (
 )
 
 type DashBoardStudentInfo struct {
+	StudentID      int
 	StudentName    string
 	LastUpdatedAt  time.Time
 	CodingStat     string
@@ -20,10 +21,14 @@ type DashBoardStudentInfo struct {
 type DashBoardInfo struct {
 	StudentInfo        []*DashBoardStudentInfo
 	ProblemName        string
+	ProblemID          int
 	NumHelpRequest     int
 	NumGradedCorrect   int
 	NumGradedIncorrect int
 	NumNotGraded       int
+	UserID             int
+	UserRole           string
+	Password           string
 }
 
 func getCurrentStudents() []int {
@@ -115,6 +120,7 @@ func getProblemNameFromID(problemID int) string {
 func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
 	role := r.FormValue("role")
+	password := r.FormValue("password")
 	if role != "teacher" {
 		http.Error(w, "Unauthorized access", http.StatusUnauthorized)
 		return
@@ -145,6 +151,7 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 		rows.Scan(&studentID, &codingStat, &helpStat, &submissionStat, &tutoringStat)
 
 		studentInfo = append(studentInfo, &DashBoardStudentInfo{
+			StudentID:      studentID,
 			StudentName:    Students[studentID].Name,
 			LastUpdatedAt:  lastUpdateMap[studentID],
 			CodingStat:     codingStat,
@@ -157,11 +164,15 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 
 	dashBoardData := &DashBoardInfo{
 		StudentInfo:        studentInfo,
+		ProblemID:          problemID,
 		ProblemName:        getProblemNameFromID(problemID),
 		NumHelpRequest:     getNumHelpRequest(problemID),
 		NumGradedCorrect:   getNumCorrectSubmission(problemID),
 		NumGradedIncorrect: getNumIncorrectSubmission(problemID),
 		NumNotGraded:       getNumNotGradedSubmission(problemID),
+		UserID:             uid,
+		UserRole:           role,
+		Password:           password,
 	}
 	temp := template.New("")
 	ownFuncs := template.FuncMap{"formatTimeSince": formatTimeSince}
