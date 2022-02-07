@@ -92,7 +92,7 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
 	studentID, _ := strconv.Atoi(r.FormValue("student_id"))
 	temp := template.New("")
-	ownFuncs := template.FuncMap{"formatTimeSince": formatTimeSince}
+	ownFuncs := template.FuncMap{"getEditorMode": getEditorMode}
 	t, err := temp.Funcs(ownFuncs).Parse(FEEDBACK_PROVISION_TEMPLATE)
 	if err != nil {
 		log.Fatal(err)
