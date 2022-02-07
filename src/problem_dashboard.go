@@ -47,6 +47,22 @@ func getCurrentStudents() []int {
 	return currentStudents
 }
 
+func getAllStudents() map[int]string {
+	rows, err := Database.Query("select id, name from student")
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var ID int
+	var name string
+	var students = make(map[int]string)
+	for rows.Next() {
+		rows.Scan(&ID, &name)
+		students[ID] = name
+	}
+	return students
+}
+
 func getNumHelpRequest(problemID int) int {
 	rows, err := Database.Query("Select count(*) from message M, code_snapshot C where M.snapshot_id = C.id and C.problem_id = ?", problemID)
 	defer rows.Close()
@@ -121,6 +137,7 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
 	role := r.FormValue("role")
 	password := r.FormValue("password")
+	students := getAllStudents()
 	if role != "teacher" {
 		http.Error(w, "Unauthorized access", http.StatusUnauthorized)
 		return
@@ -152,7 +169,7 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 
 		studentInfo = append(studentInfo, &DashBoardStudentInfo{
 			StudentID:      studentID,
-			StudentName:    Students[studentID].Name,
+			StudentName:    students[studentID],
 			LastUpdatedAt:  lastUpdateMap[studentID],
 			CodingStat:     codingStat,
 			HelpStat:       helpStat,
