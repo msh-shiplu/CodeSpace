@@ -650,34 +650,37 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 			</ul>
 			</div>
 		</div>
-		<h3 class="title is-3">Latest Code Snapshot at {{.LastSnapshotAt.Format "Jan 02, 2006 3:04:05 PM"}}</h3>
-		<textarea class="editor">{{ .Code }}</textarea>
+		<div>
+			<h3 class="title is-3">Latest Code Snapshot at {{.LastSnapshotAt.Format "Jan 02, 2006 3:04:05 PM"}}</h3>
+			<textarea class="editor">{{ .Code }}</textarea>
 
-		<section class="section">
-			{{range .Messages}}
-				<article class="message">
-					<div class="message-header">
-					<p>{{if eq .Type 0}}Help Request {{else}} Feedback {{end}} from {{.Name}} At ({{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}})</p>
-					</div>
-					<div class="message-body">
-						{{.Message}}
-					</div>
-					<textarea class="editor">{{ .Code }}</textarea>
-					{{range .Feedbacks}}
-						<article class="message">
-							<div class="message-header">
-							<p>Reply from {{.Name}} given at {{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}} </p>
-							</div>
-							<div class="message-body">
-								{{.Feedback}}
-							</div>
-						</article>
-					{{end}}
-				</article>
-				
-			{{end}}
-		</section>
-
+			<section class="section">
+				{{range .Messages}}
+					<article class="message">
+						<div class="message-header">
+						<p>{{if eq .Type 0}}Help Request {{else}} Feedback {{end}} from {{.Name}} At ({{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}})</p>
+						</div>
+						<div class="message-body">
+							{{.Message}}
+						</div>
+						<div style="left-margin:20px;">
+							<textarea class="editor">{{ .Code }}</textarea>
+							{{range .Feedbacks}}
+								<article class="message">
+									<div class="message-header">
+									<p>Reply from {{.Name}} given at {{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}} </p>
+									</div>
+									<div class="message-body">
+										{{.Feedback}}
+									</div>
+								</article>
+							{{end}}
+						</div>
+					</article>
+					
+				{{end}}
+			</section>
+		</div>
 		<script>
 			var snapshotEditors = document.getElementsByClassName("editor");
 				
