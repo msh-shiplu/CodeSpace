@@ -719,7 +719,7 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			<tbody>
 				{{range .StudentInfo}}
 				<tr>
-					<td><a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&user_id={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">{{.StudentName}}</a></td>
+					<td><a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">{{.StudentName}}</a></td>
 					<td>{{ formatTimeSince .LastUpdatedAt }} ago</td>
 					<td>{{.CodingStat}}</td>
 					<td>{{.HelpStat}}</td>
@@ -762,7 +762,7 @@ var PROBLEM_LIST_TEMPLATE = `
 			<tbody>
 				{{range .Problems}}
 				<tr {{if eq .IsActive true}}class="is-selected"{{end}}>
-					<td><a href="/problem_dashboard?problem_id={{.ID}}&user_id={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">{{.Filename}}</a></td>
+					<td><a href="/problem_dashboard?problem_id={{.ID}}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">{{.Filename}}</a></td>
 					<td>{{ .UploadedAt.Format "Jan 02, 2006 3:04:05 PM" }}</td>
 					<td>{{.Attendance}}</td>
 					<td>{{.NumActive}}</td>
