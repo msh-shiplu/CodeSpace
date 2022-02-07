@@ -78,6 +78,7 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		log.Fatal(err)
 	}
+	students := getAllStudents()
 	var messages = make([]*MessageDashBoard, 0)
 	_, ok := HelpEligibleStudents[problemID][uid]
 	if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok) {
@@ -95,7 +96,7 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 			if authorRole == "teacher" {
 				name = Teacher[authorID]
 			} else {
-				name = Students[authorID].Name
+				name = students[authorID]
 			}
 			messages = append(messages, &MessageDashBoard{
 				Name:       name,
@@ -115,7 +116,7 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 	// sort.Slice(helpRequests, func(i, j int) bool { return helpRequests[i].GivenAt.Before(helpRequests[j].GivenAt) })
 	latestSnapshot := Snapshots[StudentSnapshot[studentID][problemID]]
 	data := &FeedbackProvisionDashBoard{
-		StudentName:    Students[studentID].Name,
+		StudentName:    students[studentID],
 		ProblemName:    latestSnapshot.ProblemName,
 		Code:           latestSnapshot.Code,
 		LastSnapshotAt: latestSnapshot.LastUpdated,
