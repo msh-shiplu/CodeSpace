@@ -38,7 +38,7 @@ type FeedbackProvisionDashBoard struct {
 }
 
 func getMessageFeedbacks(messageID int) []*FeedbackDashBaord {
-	rows, err := Database.Query("select feedback, author_id, author_role, given_at from message_feedback, where message_id = ?", messageID)
+	rows, err := Database.Query("select feedback, author_id, author_role, given_at from message_feedback where message_id = ?", messageID)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
