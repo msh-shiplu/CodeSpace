@@ -98,7 +98,8 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 		rows.Scan(&studentID, &problemID, &code, &filename)
 	}
 	rows.Close()
-	result, err := AddSnapShotFeedbackSQL.Exec(snapshotID, feedback, authorID, authorRole, now)
+	result, err := AddMessageSQL.Exec(snapshotID, feedback, authorID, authorRole, now, 1)
+	// result, err := AddSnapShotFeedbackSQL.Exec(snapshotID, feedback, authorID, authorRole, now)
 	if err != nil {
 		log.Fatal(err)
 	}
