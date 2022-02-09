@@ -651,9 +651,13 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 			</div>
 		</div>
 		<div>
-			<h3 class="title is-3">Latest Code Snapshot at {{.LastSnapshotAt.Format "Jan 02, 2006 3:04:05 PM"}}</h3>
-			<textarea class="editor">{{ .Code }}</textarea>
-
+			<h3 class="title is-3">Latest Code Snapshot at {{.LastSnapshot.LastUpdated.Format "Jan 02, 2006 3:04:05 PM"}}</h3>
+			<textarea class="editor">{{ .LastSnapshot.Code }}</textarea>
+			<div class="columns">
+				<div class="column is-three-quarters"><input id="snapshot-feedback-input" class="input is-info" type="text" placeholder="Provide your feedback!"></div>
+ 				 <div class="column"><button id="snapshot-feedback-submit" class="button is-primary">Post</button></div>
+			
+			</div>
 			<section class="section">
 				{{range .Messages}}
 					<article class="message">
@@ -663,7 +667,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 						<div class="message-body">
 							{{.Message}}
 						</div>
-						<div style="left-margin:20px;">
+						<div style="margin-left:20px;">
 							<textarea class="editor">{{ .Code }}</textarea>
 							{{range .Feedbacks}}
 								<article class="message">
@@ -675,6 +679,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 									</div>
 								</article>
 							{{end}}
+							<input id="message-{{.ID}}" class="input is-info" type="text" placeholder="Provide your feedback!">
 						</div>
 					</article>
 					
@@ -687,6 +692,24 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 			for (let i = 0; i<snapshotEditors.length; i++){
 				CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
 			}
+			
+			$(document).ready(function(){
+				$('#snapshot-feedback-submit').click(function(){
+					var feedback = $('#snapshot-feedback-input').val().trim();
+					if(feedback == "") {
+						alert("Please write a feedback!");
+					} else {
+						$.post("/save_snapshot_feedback", {feedback: feedback, snapshot_id: {{.LastSnapshot.ID}}, uid: {{.UserID}}, role: {{.UserRole}}, password: {{.Password}}  }, function(data, status){
+							if (status == "success"){
+								alert("Feedback posted successfully!");
+							} else {
+								alert("Could post the feedback. Please try again!");
+							}
+						});
+					}
+				});
+			});
+
 		</script>
 
 	</body>

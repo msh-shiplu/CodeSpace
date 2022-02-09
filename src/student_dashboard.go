@@ -16,6 +16,7 @@ type FeedbackDashBaord struct {
 }
 
 type MessageDashBoard struct {
+	ID         int
 	Name       string
 	Role       string
 	Message    string
@@ -27,14 +28,13 @@ type MessageDashBoard struct {
 }
 
 type FeedbackProvisionDashBoard struct {
-	StudentName    string
-	ProblemName    string
-	Code           string
-	LastSnapshotAt time.Time
-	Messages       []*MessageDashBoard
-	UserID         int
-	UserRole       string
-	Password       string
+	StudentName  string
+	ProblemName  string
+	LastSnapshot *Snapshot
+	Messages     []*MessageDashBoard
+	UserID       int
+	UserRole     string
+	Password     string
 }
 
 func getMessageFeedbacks(messageID int) []*FeedbackDashBaord {
@@ -69,18 +69,20 @@ func getMessageFeedbacks(messageID int) []*FeedbackDashBaord {
 }
 
 func getLatestSnapshot(studentID int, problemID int) *Snapshot {
-	rows, err := Database.Query("select code, max(last_updated_at) from code_snapshot where problem_id = ? and student_id=? group by problem_id, student_id", problemID, studentID)
+	rows, err := Database.Query("select id, code, max(last_updated_at) from code_snapshot where problem_id = ? and student_id=? group by problem_id, student_id", problemID, studentID)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
+	var ID int
 	var code string
 	var lastUpdate time.Time
 	if rows.Next() {
-		rows.Scan(&code, &lastUpdate)
+		rows.Scan(&ID, &code, &lastUpdate)
 	}
 	rows.Close()
 	return &Snapshot{
+		ID:          ID,
 		ProblemName: getProblemNameFromID(problemID),
 		Code:        code,
 		LastUpdated: lastUpdate,
@@ -118,6 +120,7 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 				name = students[authorID]
 			}
 			messages = append(messages, &MessageDashBoard{
+				ID:         messageID,
 				Name:       name,
 				Role:       authorRole,
 				Message:    message,
@@ -140,14 +143,13 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 		latestSnapshot = getLatestSnapshot(studentID, problemID)
 	}
 	data := &FeedbackProvisionDashBoard{
-		StudentName:    students[studentID],
-		ProblemName:    latestSnapshot.ProblemName,
-		Code:           latestSnapshot.Code,
-		LastSnapshotAt: latestSnapshot.LastUpdated,
-		Messages:       messages,
-		UserID:         uid,
-		UserRole:       role,
-		Password:       r.FormValue("password"),
+		StudentName:  students[studentID],
+		ProblemName:  latestSnapshot.ProblemName,
+		LastSnapshot: latestSnapshot,
+		Messages:     messages,
+		UserID:       uid,
+		UserRole:     role,
+		Password:     r.FormValue("password"),
 	}
 	w.Header().Set("Content-Type", "text/html")
 	err = t.Execute(w, data)
