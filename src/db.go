@@ -34,7 +34,7 @@ func create_tables() {
 	execSQL("create table if not exists code_snapshot (id integer primary key, student_id integer, problem_id integer, code blob, last_updated_at timestamp, status int default 0)") // 0 = not submitted, 1 = submitted but not graded, 2 = submitted and incorrect, 3 = submitted and correct
 	execSQL("create table if not exists snapshot_feedback (id integer primary key, snapshot_id integer, feedback text, author_id integer, author_role string, given_at timestamp)")
 	execSQL("create table if not exists snapshot_back_feedback (id integer primary key, snapshot_feedback_id integer, author_id integer, author_role string, is_helpful string, given_at timestamp)")
-	execSQL("create table if not exists message (id integer primary key, snapshot_id integer, message text, author_id integer, author_role integer, given_at timestamp, type string)")
+	execSQL("create table if not exists message (id integer primary key, snapshot_id integer, message text, author_id integer, author_role string, given_at timestamp, type integer)")
 	execSQL("create table if not exists message_feedback (id integer primary key, message_id integer, feedback text, author_id integer, author_role string, given_at timestamp)")
 	execSQL("create table if not exists help_eligible (id integer primary key, problem_id integer, student_id integer, became_eligible_at timestamp)")
 	execSQL("create table if not exists user_event_log (id integer primary key, name string, user_id integer, user_type string, event_type string, referral_info string, event_time timestamp)")
