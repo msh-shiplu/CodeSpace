@@ -80,6 +80,7 @@ func codeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid
 }
 
 func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	fmt.Println("I am here")
 	snapshotID, _ := strconv.Atoi(r.FormValue("snapshot_id"))
 	feedback := r.FormValue("feedback")
 	authorID, _ := strconv.Atoi(r.FormValue("uid"))
