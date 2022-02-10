@@ -669,7 +669,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 						<div style="margin-left:20px;">
 							<textarea class="editor">{{ .Code }}</textarea>
 							{{range .Feedbacks}}
-								<article class="message">
+								<article class="message" style="margin-left: 25px;">
 									<div class="message-header">
 									<p>Reply from {{.Name}} given at {{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}} </p>
 									</div>
