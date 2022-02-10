@@ -87,6 +87,7 @@ func init_handlers() {
 	http.HandleFunc("/view_exercises", Authorize(problemListHandler))
 	http.HandleFunc("/problem_dashboard", Authorize(problemDashboardHandler))
 	http.HandleFunc("/student_dashboard_feedback_provision", Authorize(studentDashboardFeedbackProvisionHandler))
+	http.HandleFunc("/save_message_feedback", Authorize(messageFeedbackHandler))
 }
 
 //-----------------------------------------------------------------

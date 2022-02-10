@@ -648,7 +648,6 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 				<li class="is-active"><a>Feedback Provision</a></li>
 				<li><a>Submissions</a></li>
 			</ul>
-			</div>
 		</div>
 		<div>
 			<h3 class="title is-3">Latest Code Snapshot at {{.LastSnapshot.LastUpdated.Format "Jan 02, 2006 3:04:05 PM"}}</h3>
@@ -680,8 +679,8 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 								</article>
 							{{end}}
 							<div class="columns">
-								<div class="column is-three-quarters"><input  class="input is-info" type="text" placeholder="Provide your feedback!"></div>
-								<div class="column"><button  class="button is-primary">Post</button></div>
+								<div class="column is-three-quarters"><input  class="input is-info" id="{{.ID}}" type="text" placeholder="Provide your feedback!"></div>
+								<div class="column"><button  class="button is-primary" onclick="sendMessageFeedback({{.ID}})">Post</button></div>
 							
 							</div>
 						</div>
@@ -707,12 +706,27 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 							if (status == "success"){
 								alert("Feedback posted successfully!");
 							} else {
-								alert("Could post the feedback. Please try again!");
+								alert("Could not post the feedback. Please try again!");
 							}
 						});
 					}
 				});
 			});
+
+			function sendMessageFeedback(message_id) {
+				var feedback = $('#'+message_id).val();
+				if(feedback == "") {
+					alert("Please write a feedback!");
+				} else {
+					$.post("/save_message_feedback", {feedback: feedback, message_id: message_id, uid: {{.UserID}}, role: {{.UserRole}}, password: {{.Password}}  }, function(data, status){
+						if (status == "success"){
+							alert("Feedback posted successfully!");
+						} else {
+							alert("Could not post the feedback. Please try again!");
+						}
+					});
+				}
+			}
 
 		</script>
 
