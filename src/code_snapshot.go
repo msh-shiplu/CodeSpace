@@ -93,31 +93,31 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 	if err != nil {
 		log.Fatal(err)
 	}
-	// rows, err := Database.Query("select student_id, problem_id, code, filename from code_snapshot cs, problem p where cs.problem_id=p.id and cs.id=?", snapshotID)
-	// defer rows.Close()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	rows, err := Database.Query("select student_id, problem_id, code, filename from code_snapshot cs, problem p where cs.problem_id=p.id and cs.id=?", snapshotID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// studentID := -1
-	// code := ""
-	// filename := ""
-	// problemID := -1
-	// for rows.Next() {
-	// 	rows.Scan(&studentID, &problemID, &code, &filename)
-	// }
-	// rows.Close()
-	// idx := StudentSnapshot[studentID][problemID]
-	// Snapshots[idx].NumFeedback++
-	// feedbackID, _ := result.LastInsertId()
-	// Students[studentID].SnapShotFeedbackQueue = append(Students[studentID].SnapShotFeedbackQueue, &SnapShotFeedback{
-	// 	FeedbackID:  int(feedbackID),
-	// 	Snapshot:    code,
-	// 	Feedback:    feedback,
-	// 	ProblemName: filename,
-	// })
-	// fmt.Println("Feedback on code snapshot saved!")
-	// // http.Redirect(w, r, "/get_codespace?uid="+strconv.Itoa(authorID)+"&role="+authorRole+"&password="+r.FormValue("password"), http.StatusSeeOther)
+	studentID := -1
+	code := ""
+	filename := ""
+	problemID := -1
+	for rows.Next() {
+		rows.Scan(&studentID, &problemID, &code, &filename)
+	}
+	rows.Close()
+	idx := StudentSnapshot[studentID][problemID]
+	Snapshots[idx].NumFeedback++
+	feedbackID, _ := result.LastInsertId()
+	Students[studentID].SnapShotFeedbackQueue = append(Students[studentID].SnapShotFeedbackQueue, &SnapShotFeedback{
+		FeedbackID:  int(feedbackID),
+		Snapshot:    code,
+		Feedback:    feedback,
+		ProblemName: filename,
+	})
+	fmt.Println("Feedback on code snapshot saved!")
+	// http.Redirect(w, r, "/get_codespace?uid="+strconv.Itoa(authorID)+"&role="+authorRole+"&password="+r.FormValue("password"), http.StatusSeeOther)
 }
 
 func getSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
