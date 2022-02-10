@@ -53,9 +53,9 @@ func getMessageFeedbacks(messageID int) []*FeedbackDashBaord {
 		rows.Scan(&feedback, &authorID, &authorRole, &givenAt)
 		name := ""
 		if authorRole == "teacher" {
-			name = Teacher[authorID]
+			name = getTeacherName(authorID)
 		} else {
-			name = Students[authorID].Name
+			name = getStudentName(authorID)
 		}
 		feedbacks = append(feedbacks, &FeedbackDashBaord{
 			Name:     name,
@@ -143,7 +143,7 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 			if authorRole == "teacher" {
 				name = getTeacherName(authorID)
 			} else {
-				name = getStudentName(authorID)
+				name = students[authorID]
 			}
 			messages = append(messages, &MessageDashBoard{
 				ID:         messageID,
