@@ -89,8 +89,21 @@ func getLatestSnapshot(studentID int, problemID int) *Snapshot {
 	}
 }
 
-func getName(authorID int, authorRole string) string {
-	rows, err := Database.Query("select name from ? where id = ?", authorRole, authorID)
+func getTeacherName(authorID int) string {
+	rows, err := Database.Query("select name from teacher where id = ?", authorID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var name string
+	if rows.Next() {
+		rows.Scan(&name)
+	}
+	return name
+}
+
+func getStudentName(authorID int) string {
+	rows, err := Database.Query("select name from student where id = ?", authorID)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
@@ -126,7 +139,12 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 		var givenAt time.Time
 		for rows.Next() {
 			rows.Scan(&messageID, &snapshotID, &message, &authorID, &authorRole, &givenAt, &messageType, &code)
-			name := getName(authorID, authorRole)
+			name := ""
+			if authorRole == "teacher" {
+				name = getTeacherName(authorID)
+			} else {
+				name = getStudentName(authorID)
+			}
 			messages = append(messages, &MessageDashBoard{
 				ID:         messageID,
 				Name:       name,
