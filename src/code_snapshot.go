@@ -80,7 +80,6 @@ func codeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid
 }
 
 func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
-	fmt.Println("I am here")
 	snapshotID, _ := strconv.Atoi(r.FormValue("snapshot_id"))
 	feedback := r.FormValue("feedback")
 	authorID, _ := strconv.Atoi(r.FormValue("uid"))
@@ -88,8 +87,6 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 	now := time.Now()
 
 	result, err := AddMessageSQL.Exec(snapshotID, feedback, authorID, authorRole, now, 1)
-	fmt.Printf("result: %v\n", result)
-	// result, err := AddSnapShotFeedbackSQL.Exec(snapshotID, feedback, authorID, authorRole, now)
 	if err != nil {
 		log.Fatal(err)
 	}

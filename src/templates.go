@@ -679,7 +679,11 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 									</div>
 								</article>
 							{{end}}
-							<input id="message-{{.ID}}" class="input is-info" type="text" placeholder="Provide your feedback!">
+							<div class="columns">
+								<div class="column is-three-quarters"><input  class="input is-info" type="text" placeholder="Provide your feedback!"></div>
+								<div class="column"><button  class="button is-primary">Post</button></div>
+							
+							</div>
 						</div>
 					</article>
 					
