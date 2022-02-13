@@ -19,12 +19,6 @@ func student_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 
 	if _, ok := Students[uid]; ok {
 		js, err = json.Marshal(Students[uid].Boards)
-		if err == nil {
-			// fmt.Println(string(js))
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(js)
-			return
-		}
 		for _, b := range Students[uid].Boards {
 			if b.Pid != 0 {
 				addOrUpdateStudentStatus(uid, b.Pid, "Working", "", "", "")
@@ -32,6 +26,12 @@ func student_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 			}
 		}
 		Students[uid].Boards = []*Board{}
+		if err == nil {
+			// fmt.Println(string(js))
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(js)
+			return
+		}
 	}
 	fmt.Println(err.Error())
 	js, err = json.Marshal([]*Board{})
