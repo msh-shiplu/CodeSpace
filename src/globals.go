@@ -66,6 +66,8 @@ var AddProblemStatisticsSQL *sql.Stmt
 var IncProblemStatActiveSQL *sql.Stmt
 var IncProblemStatSubmissionSQL *sql.Stmt
 var IncProblemStatHelpSQL *sql.Stmt
+var IncProblemStatGradedCorrectSQL *sql.Stmt
+var IncProblemStatGradedIncorrectSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication

@@ -39,7 +39,7 @@ func create_tables() {
 	execSQL("create table if not exists help_eligible (id integer primary key, problem_id integer, student_id integer, became_eligible_at timestamp)")
 	execSQL("create table if not exists user_event_log (id integer primary key, name string, user_id integer, user_type string, event_type string, referral_info string, event_time timestamp)")
 	execSQL("create table if not exists student_status (id integer primary key, student_id integer, problem_id integer, coding_stat string, help_stat string, submission_stat string, tutoring_stat string, last_updated_at timestamp)")
-	execSQL("create table if not exists problem_statistics (id integer primary key, problem_id integer not null, active integer default 0, submission integer default 0, help_request integer default 0)")
+	execSQL("create table if not exists problem_statistics (id integer primary key, problem_id integer not null, active integer default 0, submission integer default 0, help_request integer default 0, graded_correct integer default 0, graded_incorrect integer default 0)")
 	// foreign key example: http://www.sqlitetutorial.net/sqlite-foreign-key/
 }
 
@@ -89,10 +89,12 @@ func init_database(db_name string) {
 	UpdateStudentTutoringStatSQL = prepare("update student_status set tutoring_stat = ?, last_updated_at = ? where student_id = ? and problem_id = ?")
 	AddMessageSQL = prepare("insert into message (snapshot_id, message, author_id, author_role, given_at, type) values (?, ?, ?, ?, ?, ?)")
 	AddMessageFeedbackSQL = prepare("insert into message_feedback (message_id, feedback, author_id, author_role, given_at) values(?, ?, ?, ?, ?)")
-	AddProblemStatisticsSQL = prepare("insert into problem_statistics (problem_id, active, submission, help_request) values (?, 0, 0, 0)")
+	AddProblemStatisticsSQL = prepare("insert into problem_statistics (problem_id, active, submission, help_request, graded_correct, graded_incorrect) values (?, 0, 0, 0, 0, 0)")
 	IncProblemStatActiveSQL = prepare("update problem_statistics set active = active + 1 where problem_id = ?")
 	IncProblemStatSubmissionSQL = prepare("update problem_statistics set submission = submission + 1 where problem_id = ?")
 	IncProblemStatHelpSQL = prepare("update problem_statistics set help_request = help_request + 1 where problem_id = ?")
+	IncProblemStatGradedCorrectSQL = prepare("update problem_statistics set graded_correct = graded_correct + 1 where problem_id = ?")
+	IncProblemStatGradedIncorrectSQL = prepare("update problem_statistics set graded_incorrect = graded_incorrect + 1 where problem_id = ?")
 	// Initialize passcode for current session and default board
 	Passcode = RandStringRunes(12)
 	Students[0] = &StudenInfo{
