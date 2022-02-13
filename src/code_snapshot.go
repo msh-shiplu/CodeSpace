@@ -86,7 +86,7 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 	authorRole := r.FormValue("role")
 	now := time.Now()
 
-	result, err := AddMessageSQL.Exec(snapshotID, feedback, authorID, authorRole, now, 1)
+	result, err := AddMessageSQL.Exec(snapshotID, "", authorID, authorRole, now, 1)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -96,6 +96,7 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 		log.Fatal(err)
 	}
 
+	messageID, _ := result.LastInsertId()
 	studentID := -1
 	code := ""
 	filename := ""
@@ -106,6 +107,10 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 	rows.Close()
 	idx := StudentSnapshot[studentID][problemID]
 	Snapshots[idx].NumFeedback++
+	result, err = AddMessageFeedbackSQL.Exec(messageID, feedback, authorID, authorRole, now)
+	if err != nil {
+		log.Fatal(err)
+	}
 	feedbackID, _ := result.LastInsertId()
 	Students[studentID].SnapShotFeedbackQueue = append(Students[studentID].SnapShotFeedbackQueue, &SnapShotFeedback{
 		FeedbackID:  int(feedbackID),
