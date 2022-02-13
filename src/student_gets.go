@@ -27,7 +27,10 @@ func student_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 			return
 		}
 		for _, b := range Students[uid].Boards {
-			addOrUpdateStudentStatus(uid, b.Pid, "Working", "", "", "")
+			if b.Pid != 0 {
+				addOrUpdateStudentStatus(uid, b.Pid, "Working", "", "", "")
+				IncProblemStatActiveSQL.Exec(b.Pid)
+			}
 		}
 	}
 	fmt.Println(err.Error())

@@ -84,6 +84,8 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 
 			addOrUpdateStudentStatus(uid, pid, "", "", "submitted", "")
 
+			IncProblemStatSubmissionSQL.Exec(pid)
+
 			if test_cases != "" {
 				rows, _ := Database.Query("select id from test_case where student_id=? and problem_id=?", uid, pid)
 				tc_id := 0

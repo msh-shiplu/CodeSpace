@@ -62,6 +62,10 @@ var UpdateStudentHelpStatSQL *sql.Stmt
 var UpdateStudentTutoringStatSQL *sql.Stmt
 var AddMessageSQL *sql.Stmt
 var AddMessageFeedbackSQL *sql.Stmt
+var AddProblemStatisticsSQL *sql.Stmt
+var IncProblemStatActiveSQL *sql.Stmt
+var IncProblemStatSubmissionSQL *sql.Stmt
+var IncProblemStatHelpSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication
