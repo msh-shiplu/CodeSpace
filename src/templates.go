@@ -661,7 +661,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 				{{range .Messages}}
 					<article class="message">
 						<div class="message-header">
-						<p>{{if eq .Type 0}}{{.Name}} asked for help{{else}} Snapshot taken {{end}} from {{.Name}} at ({{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}})</p>
+						<p>{{if eq .Type 0}}{{.Name}} asked for help{{else}} Snapshot taken {{end}} at ({{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}})</p>
 						</div>
 						<div class="message-body">
 							{{.Message}}

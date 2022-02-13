@@ -233,8 +233,6 @@ func init_student(student_id int, name string, password string) {
 			StartingTime: time.Now(),
 		}
 		Students[student_id].Boards = append(Students[student_id].Boards, b)
-		// Add student coding status as idle
-		addOrUpdateStudentStatus(student_id, b.Pid, "Idle", "", "", "Not eligible")
 	}
 }
 
