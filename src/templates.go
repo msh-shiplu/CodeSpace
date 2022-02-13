@@ -705,6 +705,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 						$.post("/save_snapshot_feedback", {feedback: feedback, snapshot_id: {{.LastSnapshot.ID}}, uid: {{.UserID}}, role: {{.UserRole}}, password: {{.Password}}  }, function(data, status){
 							if (status == "success"){
 								alert("Feedback posted successfully!");
+								window.location.reload();
 							} else {
 								alert("Could not post the feedback. Please try again!");
 							}
@@ -721,6 +722,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 					$.post("/save_message_feedback", {feedback: feedback, message_id: message_id, uid: {{.UserID}}, role: {{.UserRole}}, password: {{.Password}}  }, function(data, status){
 						if (status == "success"){
 							alert("Feedback posted successfully!");
+							window.location.reload();
 						} else {
 							alert("Could not post the feedback. Please try again!");
 						}
@@ -757,7 +759,7 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			</thead>
 			<tbody>
 				<tr>
-					<td>{{len .StudentInfo}}</td>
+					<td>{{.NumActive}}</td>
 					<td>{{.NumHelpRequest}}</td>
 					<td>{{.NumNotGraded}}</td>
 					<td>{{.NumGradedCorrect}}</td>

@@ -19,7 +19,6 @@ func student_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 
 	if _, ok := Students[uid]; ok {
 		js, err = json.Marshal(Students[uid].Boards)
-		Students[uid].Boards = []*Board{}
 		if err == nil {
 			// fmt.Println(string(js))
 			w.Header().Set("Content-Type", "application/json")
@@ -32,6 +31,7 @@ func student_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 				IncProblemStatActiveSQL.Exec(b.Pid)
 			}
 		}
+		Students[uid].Boards = []*Board{}
 	}
 	fmt.Println(err.Error())
 	js, err = json.Marshal([]*Board{})

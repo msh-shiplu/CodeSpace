@@ -22,6 +22,7 @@ type DashBoardInfo struct {
 	StudentInfo        []*DashBoardStudentInfo
 	ProblemName        string
 	ProblemID          int
+	NumActive          int
 	NumHelpRequest     int
 	NumGradedCorrect   int
 	NumGradedIncorrect int
@@ -61,6 +62,19 @@ func getAllStudents() map[int]string {
 		students[ID] = name
 	}
 	return students
+}
+
+func getProblemStats(problemID int) (int, int, int, int, int) {
+	rows, err := Database.Query("select active, submission, help_request, graded_correct, graded_incorrect from problem_statistics where problem_id = ?", problemID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var active, sub, help, correct, incorrect int
+	if rows.Next() {
+		rows.Scan(&active, &sub, &help, &correct, &incorrect)
+	}
+	return active, help, sub - correct - incorrect, correct, incorrect
 }
 
 func getNumHelpRequest(problemID int) int {
@@ -179,14 +193,17 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 	}
 	rows.Close()
 
+	nActive, nHelp, nNotGraded, nCorrect, nIncorrect := getProblemStats(problemID)
+
 	dashBoardData := &DashBoardInfo{
 		StudentInfo:        studentInfo,
 		ProblemID:          problemID,
 		ProblemName:        getProblemNameFromID(problemID),
-		NumHelpRequest:     getNumHelpRequest(problemID),
-		NumGradedCorrect:   getNumCorrectSubmission(problemID),
-		NumGradedIncorrect: getNumIncorrectSubmission(problemID),
-		NumNotGraded:       getNumNotGradedSubmission(problemID),
+		NumActive:          nActive,
+		NumHelpRequest:     nHelp,
+		NumGradedCorrect:   nCorrect,
+		NumGradedIncorrect: nIncorrect,
+		NumNotGraded:       nNotGraded,
 		UserID:             uid,
 		UserRole:           role,
 		Password:           password,

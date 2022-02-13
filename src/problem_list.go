@@ -41,17 +41,18 @@ func problemListHandler(w http.ResponseWriter, r *http.Request, who string, uid 
 	var problems = make([]*ProblemData, 0)
 	for rows.Next() {
 		rows.Scan(&problemID, &filename, &problemUploadedAt, &problemEndedAt)
+		nActive, nHelp, nNotGraded, nCorrect, nIncorrect := getProblemStats(problemID)
 		problems = append(problems, &ProblemData{
 			ID:                 problemID,
 			Filename:           filename,
 			UploadedAt:         problemUploadedAt,
 			IsActive:           problemEndedAt.Before(time.Now()),
 			Attendance:         len(getCurrentStudents()),
-			NumActive:          len(getCurrentStudents()),
-			NumHelpRequest:     getNumHelpRequest(problemID),
-			NumGradedCorrect:   getNumCorrectSubmission(problemID),
-			NumGradedIncorrect: getNumIncorrectSubmission(problemID),
-			NumNotGraded:       getNumNotGradedSubmission(problemID),
+			NumActive:          nActive,
+			NumHelpRequest:     nHelp,
+			NumGradedCorrect:   nCorrect,
+			NumGradedIncorrect: nIncorrect,
+			NumNotGraded:       nNotGraded,
 		})
 	}
 	problemListData := &ProblemListData{
