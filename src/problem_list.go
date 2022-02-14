@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -41,12 +42,14 @@ func problemListHandler(w http.ResponseWriter, r *http.Request, who string, uid 
 	var problems = make([]*ProblemData, 0)
 	for rows.Next() {
 		rows.Scan(&problemID, &filename, &problemUploadedAt, &problemEndedAt)
+		fmt.Println(problemUploadedAt)
+		fmt.Println(problemEndedAt)
 		nActive, nHelp, nNotGraded, nCorrect, nIncorrect := getProblemStats(problemID)
 		problems = append(problems, &ProblemData{
 			ID:                 problemID,
 			Filename:           filename,
 			UploadedAt:         problemUploadedAt,
-			IsActive:           problemEndedAt.Before(time.Now()),
+			IsActive:           true,
 			Attendance:         len(getCurrentStudents()),
 			NumActive:          nActive,
 			NumHelpRequest:     nHelp,
