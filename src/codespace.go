@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -75,7 +74,6 @@ func getEditorMode(filename string) string {
 }
 
 func formatTimeDuration(d time.Duration) string {
-	fmt.Println(d)
 	m := int(d.Minutes())
 	d1 := d - time.Duration(m*60*1000000000)
 	s := int(d1.Seconds())

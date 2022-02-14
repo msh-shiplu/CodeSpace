@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -113,6 +114,7 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 	for rows.Next() {
 		rows.Scan(&studentID, &lastUpdate)
 		lastUpdateMap[studentID] = lastUpdate
+		fmt.Println(lastUpdate)
 	}
 	rows.Close()
 	rows, err = Database.Query("select student_id, coding_stat, help_stat, submission_stat, tutoring_stat from student_status where problem_id=?", problemID)
