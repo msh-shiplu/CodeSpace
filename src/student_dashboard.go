@@ -32,6 +32,8 @@ type FeedbackProvisionDashBoard struct {
 	ProblemName  string
 	LastSnapshot *Snapshot
 	Messages     []*MessageDashBoard
+	StudentID    int
+	ProblemID    int
 	UserID       int
 	UserRole     string
 	Password     string
@@ -49,6 +51,8 @@ type SubmissionDashboard struct {
 	Submissions []*SubmissionInfo
 	StudentName string
 	ProblemName string
+	StudentID   int
+	ProblemID   int
 	UserID      int
 	UserRole    string
 	Password    string
@@ -190,6 +194,8 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 		ProblemName:  latestSnapshot.ProblemName,
 		LastSnapshot: latestSnapshot,
 		Messages:     messages,
+		StudentID:    studentID,
+		ProblemID:    problemID,
 		UserID:       uid,
 		UserRole:     role,
 		Password:     r.FormValue("password"),
@@ -244,6 +250,8 @@ func studentDashboardSubmissionHandler(w http.ResponseWriter, r *http.Request, w
 		StudentName: getStudentName(studentID),
 		ProblemName: getProblemNameFromID(problemID),
 		Submissions: submissions,
+		StudentID:   studentID,
+		ProblemID:   problemID,
 		UserID:      uid,
 		UserRole:    role,
 		Password:    r.FormValue("password"),

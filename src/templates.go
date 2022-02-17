@@ -646,7 +646,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 		<div class="tabs">
 			<ul>
 				<li class="is-active"><a>Feedback Provision</a></li>
-				<li><a href="/student_dashboard_submissions">Submissions</a></li>
+				<li><a href="/student_dashboard_submissions?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}&password={{.Password}}">Submissions</a></li>
 			</ul>
 		</div>
 		<div>
@@ -865,7 +865,7 @@ var SUBMISSION_VIEW_TEMPLATE = `
 		<h2 class="title is-2">{{.StudentName}}'s Submissions for {{.ProblemName}}</h2>
 		<div class="tabs">
 			<ul>
-				<li><a href="/student_dashboard_feedback_provision" >Feedback Provision</a></li>
+				<li><a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}&password={{.Password}}" >Feedback Provision</a></li>
 				<li class="is-active"><a>Submissions</a></li>
 			</ul>
 		</div>
