@@ -873,7 +873,7 @@ var SUBMISSION_VIEW_TEMPLATE = `
 			{{range .Submissions}}
 			<h3 class="title is-3">Submitted at {{.SubmittedAt.Format "Jan 02, 2006 3:04:05 PM"}}</h3>
 			{{if eq .Grade ""}} Not Graded {{else}} Graded {{.Grade}} {{end}}
-			<textarea class="editor">{{ .Code }}</textarea>
+			<textarea class="editor" id="editor-{{.ID}}">{{ .Code }}</textarea>
 			{{if eq .Grade ""}}
 			<div class="columns">
 				<div class="column is-three-quarters"><input  class="input is-info" id="{{.ID}}" type="text" placeholder="Provide your feedback!"></div>
@@ -893,7 +893,8 @@ var SUBMISSION_VIEW_TEMPLATE = `
 
 			function sendGrade(submission_id, snapshot_id, grade) {
 				var feedback = $('#'+submission_id).val().trim();
-				$.post("/teacher_grades", {content: "", changed: "", decision: grade, sid: submission_id, uid: {{.UserID}}, role: {{.UserRole}}, password: {{.Password}}  }, function(data, status){
+				var code = $('#editor-'+submission_id).val();
+				$.post("/teacher_grades", {content: code, changed: "", decision: grade, sid: submission_id, uid: {{.UserID}}, role: {{.UserRole}}, password: {{.Password}}  }, function(data, status){
 					if (status == "success"){
 						if (feedback != "") {
 							$.post("/save_snapshot_feedback", {snapshot_id: snapshot_id, feedback: feedback, uid: {{.UserID}}, role: {{.UserRole}}, password: {{.Password}} }, function(data1, status1){
