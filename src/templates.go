@@ -646,7 +646,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 		<div class="tabs">
 			<ul>
 				<li class="is-active"><a>Feedback Provision</a></li>
-				<li><a>Submissions</a></li>
+				<li><a href="/student_dashboard_submissions">Submissions</a></li>
 			</ul>
 		</div>
 		<div>
@@ -840,4 +840,73 @@ var PROBLEM_LIST_TEMPLATE = `
 
 </body>
 </html>
+`
+
+var SUBMISSION_VIEW_TEMPLATE = `
+	<!DOCTYPE html>
+	<html>
+	<head>
+	<title>Student Dashboard</title>
+	<meta http-equiv="refresh" content="120" >
+	<script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js" integrity="sha512-hGVnilhYD74EGnPbzyvje74/Urjrg5LSNGx0ARG1Ucqyiaz+lFvtsXk/1jCwT9/giXP0qoXSlVDjxNxjLvmqAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/python/python.min.js" integrity="sha512-/mavDpedrvPG/0Grj2Ughxte/fsm42ZmZWWpHz1jCbzd5ECv8CB7PomGtw0NAnhHmE/lkDFkRMupjoohbKNA1Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/clike/clike.min.js" integrity="sha512-GAled7oA9WlRkBaUQlUEgxm37hf43V2KEMaEiWlvBO/ueP2BLvBLKN5tIJu4VZOTwo6Z4XvrojYngoN9dJw2ug==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css" integrity="sha512-6sALqOPMrNSc+1p5xOhPwGIzs6kIlST+9oGWlI4Wwcbj1saaX9J3uzO3Vub016dmHV7hM+bMi/rfXLiF5DNIZg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/theme/monokai.min.css" integrity="sha512-R6PH4vSzF2Yxjdvb2p2FA06yWul+U0PDDav4b/od/oXf9Iw37zl10plvwOXelrjV2Ai7Eo3vyHeyFUjhXdBCVQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+	</head>
+	<body>
+	<div class="container">
+		<h2 class="title is-2">{{.StudentName}}'s Submissions for {{.ProblemName}}</h2>
+		<div class="tabs">
+			<ul>
+				<li><a href="/student_dashboard_feedback_provision" >Feedback Provision</a></li>
+				<li class="is-active"><a>Submissions</a></li>
+			</ul>
+		</div>
+		<div>
+			{{range .Submissions}}
+			<h3 class="title is-3">Submitted at {{.SubmittedAt.Format "Jan 02, 2006 3:04:05 PM"}}</h3>
+			{{if eq .Grade ""}} Not Graded {{else}} Graded {{.Grade}} {{end}}
+			<textarea class="editor">{{ .Code }}</textarea>
+			<div class="columns">
+				<div class="column is-three-quarters"><input  class="input is-info" id="{{.ID}}" type="text" placeholder="Provide your feedback!"></div>
+				<div class="column"><button  class="button is-success" onclick="sendGrade({{.ID}}, {{.SnapshotID}}, 'correct')">Correct</button></div>
+				<div class="column"><button  class="button is-danger" onclick="sendGrade({{.ID}}, {{.SnapshotID}}, 'incorrect')">Incorrect</button></div>
+			</div>
+			{{end}}
+		</div>
+		<script>
+			var snapshotEditors = document.getElementsByClassName("editor");
+				
+			for (let i = 0; i<snapshotEditors.length; i++){
+				CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
+			}
+			
+
+			function sendGrade(submission_id, snapshot_id, grade) {
+				var feedback = $('#'+submission_id).val().trim();
+				$.post("/teacher_grades", {content: "", changed: "", decision: grade, sid: submission_id, uid: {{.UserID}}, role: {{.UserRole}}, password: {{.Password}}  }, function(data, status){
+					if (status == "success"){
+						if (feedback != "") {
+							$.post("/save_snapshot_feedback", {snapshot_id: snapshot_id, feedback: feedback, uid: {{.UserID}}, role: {{.UserRole}}, password: {{.Password}} }, function(data1, status1){
+							});
+						}
+						alert("Graded successfully!");
+						window.location.reload();
+					} else {
+						alert("Could not grade the submission. Please try again!");
+					}
+				});
+			}
+
+		</script>
+
+	</body>
+	</html>
 `

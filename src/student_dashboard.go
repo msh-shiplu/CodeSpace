@@ -37,6 +37,23 @@ type FeedbackProvisionDashBoard struct {
 	Password     string
 }
 
+type SubmissionInfo struct {
+	ID          int
+	Code        string
+	Grade       string
+	SubmittedAt time.Time
+	SnapshotID  int
+}
+
+type SubmissionDashboard struct {
+	Submissions []*SubmissionInfo
+	StudentName string
+	ProblemName string
+	UserID      int
+	UserRole    string
+	Password    string
+}
+
 func getMessageFeedbacks(messageID int) []*FeedbackDashBaord {
 	rows, err := Database.Query("select feedback, author_id, author_role, given_at from message_feedback where message_id = ?", messageID)
 	defer rows.Close()
@@ -102,8 +119,8 @@ func getTeacherName(authorID int) string {
 	return name
 }
 
-func getStudentName(authorID int) string {
-	rows, err := Database.Query("select name from student where id = ?", authorID)
+func getStudentName(studentID int) string {
+	rows, err := Database.Query("select name from student where id = ?", studentID)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
@@ -176,6 +193,60 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 		UserID:       uid,
 		UserRole:     role,
 		Password:     r.FormValue("password"),
+	}
+	w.Header().Set("Content-Type", "text/html")
+	err = t.Execute(w, data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Fatal(err)
+	}
+}
+
+func studentDashboardSubmissionHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	role := r.FormValue("role")
+	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
+	studentID, _ := strconv.Atoi(r.FormValue("student_id"))
+	temp := template.New("")
+	ownFuncs := template.FuncMap{"getEditorMode": getEditorMode}
+	t, err := temp.Funcs(ownFuncs).Parse(SUBMISSION_VIEW_TEMPLATE)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var submissions = make([]*SubmissionInfo, 0)
+	_, ok := HelpEligibleStudents[problemID][uid]
+	if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok) {
+		rows, err := Database.Query("select id, snapshot_id, code, code_submitted_at, verdict from submission where student_id = ? and problem_id = ?", studentID, problemID)
+		defer rows.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+		var snapshotID, submissionID int
+		var verdict, code string
+		var submittedAt time.Time
+		for rows.Next() {
+			rows.Scan(&submissionID, &snapshotID, &code, &submittedAt, &verdict)
+
+			submissions = append(submissions, &SubmissionInfo{
+				ID:          submissionID,
+				SnapshotID:  snapshotID,
+				Code:        code,
+				Grade:       verdict,
+				SubmittedAt: submittedAt,
+			})
+		}
+	} else {
+		http.Error(w, "You are not authorized to access!", http.StatusUnauthorized)
+	}
+	// TODO(shiplu): sort the messages array
+	// sort.Slice(helpRequests, func(i, j int) bool { return helpRequests[i].GivenAt.Before(helpRequests[j].GivenAt) })
+	data := &SubmissionDashboard{
+		StudentName: getStudentName(studentID),
+		ProblemName: getProblemNameFromID(problemID),
+		Submissions: submissions,
+		UserID:      uid,
+		UserRole:    role,
+		Password:    r.FormValue("password"),
 	}
 	w.Header().Set("Content-Type", "text/html")
 	err = t.Execute(w, data)

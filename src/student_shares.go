@@ -67,22 +67,24 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 					scoring_mesg = "Answer appears to be incorrect. It will be looked at."
 				}
 				ActiveProblems[filename].Answers = append(ActiveProblems[filename].Answers, answer)
+
 				fmt.Fprintf(w, scoring_mesg)
 			}
+
+			// Add submitted but not graded code to code snapshot.
+			snapshotID = addCodeSnapshot(uid, pid, content, 1, now)
+
 			var result sql.Result
 			if complete {
-				result, err = AddSubmissionCompleteSQL.Exec(pid, uid, content, priority, attempt_number, now, now)
+				result, err = AddSubmissionCompleteSQL.Exec(pid, uid, content, priority, attempt_number, now, now, snapshotID)
 			} else {
-				result, err = AddSubmissionSQL.Exec(pid, uid, content, priority, attempt_number, now)
+				result, err = AddSubmissionSQL.Exec(pid, uid, content, priority, attempt_number, now, snapshotID)
 			}
 			if err != nil {
 
 				log.Fatal(err)
 			}
 			sid, _ = result.LastInsertId()
-
-			// Add submitted but not graded code to code snapshot.
-			snapshotID = addCodeSnapshot(uid, pid, content, 1, now)
 
 			addOrUpdateStudentStatus(uid, pid, "", "", "submitted", "")
 
