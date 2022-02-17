@@ -133,7 +133,7 @@ func messageFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, 
 	if err != nil {
 		log.Fatal(err)
 	}
-	rows, err := Database.Query("select student_id, problem_id, code, filename m.type from code_snapshot cs, problem p, message m where cs.problem_id=p.id and m.snapshot_id = cs.id and m.id=?", messageID)
+	rows, err := Database.Query("select student_id, problem_id, code, filename, m.type from code_snapshot cs, problem p, message m where cs.problem_id=p.id and m.snapshot_id = cs.id and m.id=?", messageID)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
