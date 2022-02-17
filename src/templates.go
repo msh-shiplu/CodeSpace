@@ -874,11 +874,13 @@ var SUBMISSION_VIEW_TEMPLATE = `
 			<h3 class="title is-3">Submitted at {{.SubmittedAt.Format "Jan 02, 2006 3:04:05 PM"}}</h3>
 			{{if eq .Grade ""}} Not Graded {{else}} Graded {{.Grade}} {{end}}
 			<textarea class="editor">{{ .Code }}</textarea>
+			{{if eq .Grade ""}}
 			<div class="columns">
 				<div class="column is-three-quarters"><input  class="input is-info" id="{{.ID}}" type="text" placeholder="Provide your feedback!"></div>
 				<div class="column"><button  class="button is-success" onclick="sendGrade({{.ID}}, {{.SnapshotID}}, 'correct')">Correct</button></div>
 				<div class="column"><button  class="button is-danger" onclick="sendGrade({{.ID}}, {{.SnapshotID}}, 'incorrect')">Incorrect</button></div>
 			</div>
+			{{end}}
 			{{end}}
 		</div>
 		<script>
