@@ -222,7 +222,7 @@ func studentDashboardSubmissionHandler(w http.ResponseWriter, r *http.Request, w
 	var submissions = make([]*SubmissionInfo, 0)
 	_, ok := HelpEligibleStudents[problemID][uid]
 	if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok) {
-		rows, err := Database.Query("select id, snapshot_id, code, code_submitted_at, verdict from submission where student_id = ? and problem_id = ?", studentID, problemID)
+		rows, err := Database.Query("select id, snapshot_id, student_code, code_submitted_at, verdict from submission where student_id = ? and problem_id = ?", studentID, problemID)
 		defer rows.Close()
 		if err != nil {
 			log.Fatal(err)
