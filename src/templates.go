@@ -639,6 +639,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+	<script type="text/javascript" src="/node_modules/bulma-accordion/dist/js/bulma-accordion.min.js"></script>
 	</head>
 	<body>
 	<div class="container">
@@ -667,7 +668,19 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 							{{.Message}}
 						</div>
 						<div style="margin-left:20px;">
-							<textarea class="editor">{{ .Code }}</textarea>
+							<section class="accordions">
+								<article class="accordion is-active">
+									<div class="accordion-header toggle">
+										<p>Code Snapshot</p>
+									</div>
+									<div class="accordion-body">
+										<div class="accordion-content">
+											<textarea class="editor">{{ .Code }}</textarea>
+										</div>
+									</div>
+								</article>
+							</section>
+							
 							{{range .Feedbacks}}
 								<article class="message" style="margin-left: 25px;">
 									<div class="message-header">
@@ -690,6 +703,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 			</section>
 		</div>
 		<script>
+			var accordions = bulmaAccordion.attach();
 			var snapshotEditors = document.getElementsByClassName("editor");
 				
 			for (let i = 0; i<snapshotEditors.length; i++){
