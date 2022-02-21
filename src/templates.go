@@ -740,7 +740,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 				}
 			}
 			{{range .Messages}}
-				const {{getJoinedString "bulmaCollapsible" .ID | print}} = new bulmaCollapsible("#snapshot-{{.ID}}");
+				new bulmaCollapsible("#snapshot-{{.ID}}");
 			{{end}}
 
 		</script>
