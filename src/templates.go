@@ -701,7 +701,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 			var snapshotEditors = document.getElementsByClassName("editor");
 				
 			for (let i = 0; i<snapshotEditors.length; i++){
-				CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
+				CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor", height: "50%"});
 			}
 			
 			$(document).ready(function(){

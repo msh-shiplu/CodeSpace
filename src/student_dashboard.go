@@ -136,16 +136,12 @@ func getStudentName(studentID int) string {
 	return name
 }
 
-func getJoinedString(s string, id int) string {
-	return s + strconv.Itoa(id)
-}
-
 func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	role := r.FormValue("role")
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
 	studentID, _ := strconv.Atoi(r.FormValue("student_id"))
 	temp := template.New("")
-	ownFuncs := template.FuncMap{"getEditorMode": getEditorMode, "getJoinedString": getJoinedString}
+	ownFuncs := template.FuncMap{"getEditorMode": getEditorMode}
 	t, err := temp.Funcs(ownFuncs).Parse(FEEDBACK_PROVISION_TEMPLATE)
 	if err != nil {
 		log.Fatal(err)
