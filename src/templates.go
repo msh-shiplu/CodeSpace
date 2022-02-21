@@ -639,7 +639,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
-	<script src = "https://cdn.jsdelivr.net/npm/bulma-accordion@2.0.1/dist/js/bulma-accordion.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-collapsible"></script>
 	</head>
 	<body>
 	<div class="container">
@@ -668,18 +668,15 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 							{{.Message}}
 						</div>
 						<div style="margin-left:20px;">
-							<section class="accordions">
-								<article class="accordion is-active">
-									<div class="accordion-header toggle">
-										<p>Code Snapshot</p>
-									</div>
-									<div class="accordion-body">
-										<div class="accordion-content">
-											<textarea class="editor">{{ .Code }}</textarea>
-										</div>
-									</div>
-								</article>
-							</section>
+							
+							<article class="message">
+								<div data-action="collapse" data-target="#snapshot-{{.ID}}" class="message-header">
+									<p>Code Snapshot</p>
+								</div>
+								<div class="message-body is-collapsible" id="snapshot-{{.ID}}">
+										<textarea class="editor">{{ .Code }}</textarea>
+								</div>
+							</article>
 							
 							{{range .Feedbacks}}
 								<article class="message" style="margin-left: 25px;">
@@ -743,6 +740,9 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 					});
 				}
 			}
+			{{range .Messages}}
+				const bulmaCollapsible{{.ID}} = new bulmaCollapsible("#snapshot-{{.ID}}");
+			{{end}}
 
 		</script>
 
