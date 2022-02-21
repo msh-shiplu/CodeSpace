@@ -700,7 +700,6 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 			</section>
 		</div>
 		<script>
-			var accordions = bulmaAccordion.attach();
 			var snapshotEditors = document.getElementsByClassName("editor");
 				
 			for (let i = 0; i<snapshotEditors.length; i++){
@@ -741,7 +740,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 				}
 			}
 			{{range .Messages}}
-				const {{getJoinedString "bulmaCollapsible" .ID}} = new bulmaCollapsible("#snapshot-{{.ID}}");
+				const {{getJoinedString "bulmaCollapsible" .ID | print}} = new bulmaCollapsible("#snapshot-{{.ID}}");
 			{{end}}
 
 		</script>
