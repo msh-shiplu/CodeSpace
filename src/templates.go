@@ -670,8 +670,8 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 						<div style="margin-left:20px;">
 							
 							<article class="message">
-								<div data-action="collapse" data-target="#snapshot-{{.ID}}" class="message-header">
-									<p>Code Snapshot</p>
+								<div class="message-header">
+									<p><a href="#snapshot-{{.ID}}" data-action="collapse">Code Snapshot</a></p>
 								</div>
 								<div class="message-body is-collapsible" id="snapshot-{{.ID}}">
 										<textarea class="editor">{{ .Code }}</textarea>
