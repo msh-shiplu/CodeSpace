@@ -669,14 +669,12 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 						</div>
 						<div style="margin-left:20px;">
 							
-							<article class="message">
-								<div class="message-header">
-									<p><a href="#snapshot-{{.ID}}" data-action="collapse">Code Snapshot</a></p>
+							<div class="accordions">
+								<h3>Code Snapshot</h3>
+								<div>
+									<textarea class="editor">{{ .Code }}</textarea>
 								</div>
-								<div class="message-body is-collapsible" id="snapshot-{{.ID}}">
-										<textarea class="editor">{{ .Code }}</textarea>
-								</div>
-							</article>
+							</div>
 							
 							{{range .Feedbacks}}
 								<article class="message" style="margin-left: 25px;">
@@ -739,9 +737,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 					});
 				}
 			}
-			{{range .Messages}}
-				new bulmaCollapsible("#snapshot-{{.ID}}");
-			{{end}}
+			$(".accordions").accordion({ header: "h3", active: false, collapsible: true });
 
 		</script>
 
