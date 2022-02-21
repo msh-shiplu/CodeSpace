@@ -741,7 +741,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 				}
 			}
 			{{range .Messages}}
-				const bulmaCollapsible{{.ID}} = new bulmaCollapsible("#snapshot-{{.ID}}");
+				const bulmaCollapsible_{{.ID}} = new bulmaCollapsible("#snapshot-{{.ID}}");
 			{{end}}
 
 		</script>
