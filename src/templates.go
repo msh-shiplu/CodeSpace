@@ -682,7 +682,29 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 									<p>Reply from {{.Name}} given at {{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}} </p>
 									</div>
 									<div class="message-body">
-										{{.Feedback}}
+										<div class="columns">
+											<div class="column is-three-quarters">{{.Feedback}}</div>
+											<div class="column">
+												<a onclick="autoFeedbackSubmit('yes', {{.FeedbackID}})">
+													<span style="font-size: 1.5em; {{if eq .CurrentUserVote "yes"}} color: green; {{end}}">
+														<i class="fas fa-thumbs-up"></i>
+													</span>
+												</a>
+												<span>
+														{{.Upvote}}
+												</span>
+											</div>
+											<div class="column">
+												<a onclick="autoFeedbackSubmit('no', {{.FeedbackID}})">
+													<span style="font-size: 1.5em; {{if eq .CurrentUserVote "no"}} color: red; {{end}}">
+														<i class="fas fa-thumbs-down"></i>
+													</span>
+												</a>
+												<span>
+													{{.Downvote}}
+												</span>
+											</div>
+										</div>
 									</div>
 								</article>
 							{{end}}
@@ -739,7 +761,24 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 				}
 			}
 			$(".accordions").accordion({ header: "h3", active: false, collapsible: true });
-
+			function autoFeedbackSubmit(backFeedback, fID) {
+				$.ajax({
+					url: "/save_snapshot_back_feedback",
+					type: "POST",
+					data:  {
+						feedback: backFeedback,
+						feedback_id: fID,
+						uid: {{.UserID}},
+						role: "{{.UserRole}}",
+						password: "{{.Password}}",
+					},
+					success: function(data){
+						console.log("Success!")
+					}
+				});
+				
+				location.reload();
+			}
 		</script>
 
 	</body>

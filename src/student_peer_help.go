@@ -124,19 +124,19 @@ func studentSendBackFeedbackHandler(w http.ResponseWriter, r *http.Request, who 
 	backFeedback := r.FormValue("feedback")
 	feedbackID, _ := strconv.Atoi(r.FormValue("feedback_id"))
 	authorRole := r.FormValue("role")
-	rows, err := Database.Query("select * from snapshot_back_feedback where snapshot_feedback_id = ? and author_id = ? and author_role = ?", feedbackID, uid, authorRole)
+	rows, err := Database.Query("select * from message_back_feedback where message_feedback_id = ? and author_id = ? and author_role = ?", feedbackID, uid, authorRole)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
 	if rows.Next() {
 		rows.Close()
-		_, err = UpdateSnapshotBackFeedbackSQL.Exec(backFeedback, time.Now(), feedbackID, uid, authorRole)
+		_, err = UpdateMessageBackFeedbackSQL.Exec(backFeedback, time.Now(), feedbackID, uid, authorRole)
 		if err != nil {
 			log.Fatal(err)
 		}
 	} else {
 		rows.Close()
-		AddSnapshotBackFeedbackSQL.Exec(feedbackID, uid, authorRole, backFeedback, time.Now())
+		AddMessageBackFeedbackSQL.Exec(feedbackID, uid, authorRole, backFeedback, time.Now())
 	}
 }

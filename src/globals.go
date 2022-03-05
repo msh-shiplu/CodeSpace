@@ -68,6 +68,8 @@ var IncProblemStatSubmissionSQL *sql.Stmt
 var IncProblemStatHelpSQL *sql.Stmt
 var IncProblemStatGradedCorrectSQL *sql.Stmt
 var IncProblemStatGradedIncorrectSQL *sql.Stmt
+var AddMessageBackFeedbackSQL *sql.Stmt
+var UpdateMessageBackFeedbackSQL *sql.Stmt
 
 //---------------------------------------------------------
 // Authentication

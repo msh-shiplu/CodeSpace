@@ -9,10 +9,14 @@ import (
 )
 
 type FeedbackDashBaord struct {
-	Name     string
-	Role     string
-	Feedback string
-	GivenAt  time.Time
+	Name            string
+	Role            string
+	Feedback        string
+	FeedbackID      int
+	CurrentUserVote string
+	Downvote        int
+	Upvote          int
+	GivenAt         time.Time
 }
 
 type MessageDashBoard struct {
@@ -58,20 +62,34 @@ type SubmissionDashboard struct {
 	Password    string
 }
 
-func getMessageFeedbacks(messageID int) []*FeedbackDashBaord {
-	rows, err := Database.Query("select feedback, author_id, author_role, given_at from message_feedback where message_id = ?", messageID)
+func getCurrentUserVote(feedbackID int, userID int, userRole string) string {
+	var vote string
+	row, err := Database.Query("select useful from message_back_feedback where message_feedback_id=? and author_id=? and author_role=?", feedbackID, userID, userRole)
+	defer row.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for row.Next() {
+		row.Scan(&vote)
+	}
+	row.Close()
+	return vote
+}
+
+func getMessageFeedbacks(messageID int, userID int, userRole string) []*FeedbackDashBaord {
+	rows, err := Database.Query("select id, feedback, author_id, author_role, given_at from message_feedback where message_id = ?", messageID)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
 	var feedback, authorRole string
-	var authorID int
+	var authorID, feedbackID int
 	var givenAt time.Time
 
 	feedbacks := make([]*FeedbackDashBaord, 0)
 
 	for rows.Next() {
-		rows.Scan(&feedback, &authorID, &authorRole, &givenAt)
+		rows.Scan(&feedbackID, &feedback, &authorID, &authorRole, &givenAt)
 		name := ""
 		if authorRole == "teacher" {
 			name = getTeacherName(authorID)
@@ -79,10 +97,14 @@ func getMessageFeedbacks(messageID int) []*FeedbackDashBaord {
 			name = getStudentName(authorID)
 		}
 		feedbacks = append(feedbacks, &FeedbackDashBaord{
-			Name:     name,
-			Role:     authorRole,
-			Feedback: feedback,
-			GivenAt:  givenAt,
+			Name:            name,
+			Role:            authorRole,
+			Feedback:        feedback,
+			FeedbackID:      feedbackID,
+			CurrentUserVote: getCurrentUserVote(feedbackID, userID, userRole),
+			Downvote:        getBackFeedbackCount(feedbackID, "no"),
+			Upvote:          getBackFeedbackCount(feedbackID, "yes"),
+			GivenAt:         givenAt,
 		})
 	}
 	rows.Close()
@@ -136,6 +158,19 @@ func getStudentName(studentID int) string {
 	return name
 }
 
+func getBackFeedbackCount(feedbackID int, backFeedbackType string) int {
+	vote := 0
+	rows, err := Database.Query("select count(*) from message_back_feedback where useful = ? and snapshot_feedback_id = ?", backFeedbackType, feedbackID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for rows.Next() {
+		rows.Scan(&vote)
+	}
+	return vote
+}
+
 func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	role := r.FormValue("role")
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
@@ -175,7 +210,7 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 				GivenAt:    givenAt,
 				SnapshotID: snapshotID,
 				Code:       code,
-				Feedbacks:  getMessageFeedbacks(messageID),
+				Feedbacks:  getMessageFeedbacks(messageID, uid, role),
 			})
 		}
 	} else {
