@@ -12,6 +12,8 @@ import random
 import shutil
 import datetime
 import webbrowser
+import pickle
+import threading
 
 gemsUpdateIntervalLong = 20000		# Update interval
 gemsUpdateIntervalShort = 10000		# When submission is being looked at
@@ -40,6 +42,16 @@ gemsSnapshotTracking = False
 gemsActiveFiles = {}
 lastSentCodes = {}
 isRegistered = False
+
+# Set of filename: to check whether the student got a feedback against a problem
+gotFeedback = {}
+# Set of filename: to check whether the student already submitted for this problem.
+submitted = set()
+# Stores the submitted and gotFeedback in case sublime text exits
+gemsSubFile = os.path.join(os.path.dirname(
+    os.path.realpath(__file__)), "sub.p")
+gemsBackFeedbackTimeout = 60*10  # 10 minutes
+
 # ------------------------------------------------------------------
 
 
@@ -269,6 +281,7 @@ def gems_share(self, edit, priority):
         sublime.message_dialog('Cannot share unsaved content.')
         return
     content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
+    filename = os.path.basename(fname)
     items = content.rsplit(gemsAnswerTag, 1)
     if len(items) == 2:
         answer = items[1].strip()
@@ -290,6 +303,14 @@ def gems_share(self, edit, priority):
     )
     response = gemsRequest('student_shares', data)
     sublime.message_dialog(response)
+    if priority == 1:
+        if filename in gotFeedback:
+            for feedback_filename in gotFeedback[filename]:
+                ask_for_back_feedback(filename, feedback_filename)
+
+        with open(gemsSubFile, "wb+") as f:
+            pickle.dump({"gotFeedback": gotFeedback,
+                        "submitted": submitted}, f)
     if gemsTracking == False:
         gemsTracking = True
         sublime.set_timeout_async(gems_periodic_update, 5000)
@@ -372,16 +393,21 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
             self.filename = filename
             mesg = ''
             if board['Type'] in ['feedback', 'peer_feedback']:
+                global gemsBackFeedbackTimers
+                global gemsBackFeedbackStatus
+                problem_filename = filename[filename.find("-", 9)+1:]
                 local_file = os.path.join(feedback_dir, filename)
                 mesg = 'You have feedback'
-
-                if board['Type'] == "peer_feedback":
-                    self.message_id = board['Pid']
-                    sublime.set_timeout_async(
-                        self.force_for_thank_you, 1000*10)
-            # elif board['Type'] == 'peer_feedback':
-            # 	local_file = os.path.join(feedback_dir, filename)
-            # 	mesg = 'You have feedback'
+                if problem_filename not in gotFeedback:
+                    gotFeedback[problem_filename] = []
+                gotFeedback[problem_filename].append(local_file)
+                gemsBackFeedbackTimers[(problem_filename, local_file)] = threading.Timer(
+                    gemsBackFeedbackTimeout, ask_for_back_feedback, [problem_filename, local_file])
+                gemsBackFeedbackTimers[(problem_filename, local_file)].start()
+                gemsBackFeedbackStatus[(problem_filename, local_file)] = True
+                with open(gemsSubFile, "wb+") as f:
+                    pickle.dump({"gotFeedback": gotFeedback,
+                                "submitted": submitted}, f)
             else:
                 local_file = os.path.join(gemsFOLDER, filename)
                 if os.path.exists(local_file):
@@ -962,6 +988,25 @@ class gemsGetFriendCode(sublime_plugin.TextCommand):
 # 		self.window.run_command("close")
 # 		self.window.run_command("hide_panel", {"cancel": True})
 
+# class gemsEventListeners(sublime_plugin.EventListener):
+
+#     def on_pre_close(self, view):
+#         if isRegistered == False:
+#             return
+#         filename = os.path.basename(view.file_name())
+#         fn_splits = filename.split("-")
+#         if filename is not None and len(fn_splits) > 2 and fn_splits[0] == "feedback" and fn_splits[1].isdigit():
+#             view.window().focus_view(view)
+#             resp = sublime.yes_no_cancel_dialog(
+#                 "Thank you, this helps!!!", "Yes", "No")
+#             data = {"feedback_id": int(fn_splits[1])}
+#             if resp == sublime.DIALOG_YES:
+#                 data["feedback"] = "yes"
+#             else:
+#                 data["feedback"] = "no"
+#             data["role"] = "student"
+#             gemsRequest("save_snapshot_back_feedback", data)
+
 class gemsEventListeners(sublime_plugin.EventListener):
 
     def on_pre_close(self, view):
@@ -971,15 +1016,45 @@ class gemsEventListeners(sublime_plugin.EventListener):
         fn_splits = filename.split("-")
         if filename is not None and len(fn_splits) > 2 and fn_splits[0] == "feedback" and fn_splits[1].isdigit():
             view.window().focus_view(view)
-            resp = sublime.yes_no_cancel_dialog(
-                "Thank you, this helps!!!", "Yes", "No")
-            data = {"feedback_id": int(fn_splits[1])}
-            if resp == sublime.DIALOG_YES:
-                data["feedback"] = "yes"
-            else:
-                data["feedback"] = "no"
-            data["role"] = "student"
-            gemsRequest("save_snapshot_back_feedback", data)
+            feedback_dir = os.path.join(gemsFOLDER, 'FEEDBACK')
+            local_file = os.path.join(feedback_dir, filename)
+            fname = "".join(fn_splits[2:])
+            if (fname, local_file) in gemsBackFeedbackStatus and gemsBackFeedbackStatus[(fname, local_file)] == True:
+                ask_for_back_feedback(fname, local_file, True)
+
+
+def ask_for_back_feedback(filename, feedback_filename, fromEvent=False):
+    sublime.active_window().open_file(feedback_filename)
+    resp = sublime.yes_no_cancel_dialog(
+        "Was this feedback helpful? Please answer Yes or No", "Yes", "No")
+    if resp == sublime.DIALOG_YES:
+        send_student_back_feedback(filename, "yes", feedback_filename)
+    elif resp == sublime.DIALOG_NO:
+        send_student_back_feedback(filename, "no", feedback_filename)
+    elif resp == sublime.DIALOG_CANCEL:
+        ask_for_back_feedback(filename, feedback_filename)
+    if fromEvent == False:
+        sublime.active_window().active_view().close()
+
+
+def send_student_back_feedback(filename, response, feedback_filename):
+    global gemsBackFeedbackTimers
+    global gotFeedback
+    global gemsBackFeedbackStatus
+
+    if (filename, feedback_filename) in gemsBackFeedbackTimers:
+        gemsBackFeedbackTimers[(filename, feedback_filename)].cancel()
+        gemsBackFeedbackStatus[(filename, feedback_filename)] = False
+    gotFeedback[filename].remove(feedback_filename)
+    feedback_filename = os.path.basename(feedback_filename)
+    feedback_id = feedback_filename.split("-")[1]
+    data = dict(
+        filename=filename,
+        response=response,
+        feedback_id=feedback_id,
+        role='student',
+    )
+    gemsRequest('save_snapshot_back_feedback', data)
 
 # ------------------------------------------------------------------
 
