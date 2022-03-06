@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -296,5 +297,19 @@ func studentDashboardSubmissionHandler(w http.ResponseWriter, r *http.Request, w
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Fatal(err)
+	}
+}
+
+func hasMessageBackFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	feedbackID, _ := strconv.Atoi(r.FormValue("feedback_id"))
+	row, err := Database.Query("select * from message_back_feedback where message_feedback_id=?", feedbackID)
+	defer row.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if row.Next() {
+		fmt.Fprint(w, "yes")
+	} else {
+		fmt.Fprint(w, "no")
 	}
 }

@@ -1,6 +1,7 @@
 # GEMStudent
 # Author: Vinhthuy Phan, 2018
 #
+from urllib import response
 import sublime
 import sublime_plugin
 import urllib.parse
@@ -1007,6 +1008,14 @@ class gemsGetFriendCode(sublime_plugin.TextCommand):
 #             data["role"] = "student"
 #             gemsRequest("save_snapshot_back_feedback", data)
 
+
+def check_message_feedback(feedback_id):
+    response = gemsRequest("has_message_feedback", {feedback_id: feedback_id})
+    if response == "yes":
+        return True
+    return False
+
+
 class gemsEventListeners(sublime_plugin.EventListener):
 
     def on_pre_close(self, view):
@@ -1019,11 +1028,13 @@ class gemsEventListeners(sublime_plugin.EventListener):
             feedback_dir = os.path.join(gemsFOLDER, 'FEEDBACK')
             local_file = os.path.join(feedback_dir, filename)
             fname = "".join(fn_splits[2:])
-            if (fname, local_file) in gemsBackFeedbackStatus and gemsBackFeedbackStatus[(fname, local_file)] == True:
-                ask_for_back_feedback(fname, local_file, True)
+            ask_for_back_feedback(fname, local_file, True)
 
 
 def ask_for_back_feedback(filename, feedback_filename, fromEvent=False):
+    feedback_id = os.path.basename(feedback_filename).split("-1")[1]
+    if check_message_feedback(feedback_id):
+        return
     sublime.active_window().open_file(feedback_filename)
     resp = sublime.yes_no_cancel_dialog(
         "Was this feedback helpful? Please answer Yes or No", "Yes", "No")
