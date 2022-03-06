@@ -52,6 +52,8 @@ submitted = set()
 gemsSubFile = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), "sub.p")
 gemsBackFeedbackTimeout = 60*10  # 10 minutes
+gemsBackFeedbackStatus = {}
+gemsBackFeedbackTimers = {}
 
 # ------------------------------------------------------------------
 
