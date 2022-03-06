@@ -160,7 +160,7 @@ func messageFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, 
 		Feedback:    feedback,
 		ProblemName: filename,
 	})
-	fmt.Println("Feedback on code snapshot saved!")
+	fmt.Println("Feedback on message saved!")
 	// http.Redirect(w, r, "/get_codespace?uid="+strconv.Itoa(authorID)+"&role="+authorRole+"&password="+r.FormValue("password"), http.StatusSeeOther)
 }
 

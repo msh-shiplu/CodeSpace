@@ -160,7 +160,7 @@ func getStudentName(studentID int) string {
 
 func getBackFeedbackCount(feedbackID int, backFeedbackType string) int {
 	vote := 0
-	rows, err := Database.Query("select count(*) from message_back_feedback where useful = ? and snapshot_feedback_id = ?", backFeedbackType, feedbackID)
+	rows, err := Database.Query("select count(*) from message_back_feedback where useful = ? and message_feedback_id = ?", backFeedbackType, feedbackID)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
