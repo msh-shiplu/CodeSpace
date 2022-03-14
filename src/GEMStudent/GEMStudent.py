@@ -501,6 +501,7 @@ def gemsRequest(path, data, authenticated=True, method='POST', verbal=True):
         data['name'] = info['Name']
         data['password'] = info['Password']
         data['uid'] = info['Uid']
+        data['role'] = 'student'
         gemsFOLDER = info['Folder']
 
     url = urllib.parse.urljoin(gemsSERVER, path)
@@ -1012,7 +1013,8 @@ class gemsGetFriendCode(sublime_plugin.TextCommand):
 
 
 def check_message_feedback(feedback_id):
-    response = gemsRequest("has_message_feedback", {feedback_id: feedback_id})
+    response = gemsRequest("has_message_feedback", {
+                           "feedback_id": feedback_id})
     if response == "yes":
         return True
     return False
@@ -1034,7 +1036,7 @@ class gemsEventListeners(sublime_plugin.EventListener):
 
 
 def ask_for_back_feedback(filename, feedback_filename, fromEvent=False):
-    feedback_id = os.path.basename(feedback_filename).split("-1")[1]
+    feedback_id = os.path.basename(feedback_filename).split("-")[1]
     if check_message_feedback(feedback_id):
         return
     sublime.active_window().open_file(feedback_filename)
