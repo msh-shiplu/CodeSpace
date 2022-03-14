@@ -302,7 +302,9 @@ func studentDashboardSubmissionHandler(w http.ResponseWriter, r *http.Request, w
 
 func hasMessageBackFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	feedbackID, _ := strconv.Atoi(r.FormValue("feedback_id"))
-	row, err := Database.Query("select * from message_back_feedback where message_feedback_id=?", feedbackID)
+	userRole := r.FormValue("role")
+	fmt.Print(feedbackID, uid, userRole)
+	row, err := Database.Query("select * from message_back_feedback where message_feedback_id=? and author_id = ? and author_role = ?", feedbackID, uid, userRole)
 	defer row.Close()
 	if err != nil {
 		log.Fatal(err)
