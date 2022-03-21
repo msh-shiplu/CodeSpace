@@ -181,8 +181,13 @@ func addOrUpdateStudentStatus(studentID int, problemID int, codingStat string, h
 	}
 	if rows.Next() {
 		now := time.Now()
+		fmt.Println(codingStat, "--", helpStat, "--", submissionStat, "--", tutoringStat)
 		if codingStat != "" {
-			UpdateStudentCodingStatSQL.Exec(codingStat, now, studentID, problemID)
+			_, err = UpdateStudentCodingStatSQL.Exec(codingStat, now, studentID, problemID)
+			fmt.Println(codingStat, studentID, problemID)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 		if helpStat != "" {
 			UpdateStudentHelpStatSQL.Exec(helpStat, now, studentID, problemID)

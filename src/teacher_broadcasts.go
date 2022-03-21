@@ -107,7 +107,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 			Type:         "new",
 		}
 		Students[student_id].Boards = append(Students[student_id].Boards, b)
-		if b.Pid != 0 {
+		if b.Pid != 0 && student_id != 0 {
 			// Add student coding status as idle
 			addOrUpdateStudentStatus(student_id, b.Pid, "Idle", "Not seeking help", "Not submitted", "Not qualified")
 		}
