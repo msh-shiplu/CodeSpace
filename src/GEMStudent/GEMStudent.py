@@ -1039,7 +1039,7 @@ def ask_for_back_feedback(filename, feedback_filename, fromEvent=False):
     feedback_id = os.path.basename(feedback_filename).split("-")[1]
     if check_message_feedback(feedback_id):
         return
-    sublime.active_window().open_file(feedback_filename)
+    # sublime.active_window().open_file(feedback_filename)
     resp = sublime.yes_no_cancel_dialog(
         "Was this feedback helpful? Please answer Yes or No", "Yes", "No")
     if resp == sublime.DIALOG_YES:

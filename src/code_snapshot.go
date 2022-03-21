@@ -118,6 +118,10 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 		Feedback:    feedback,
 		ProblemName: filename,
 	})
+	addOrUpdateStudentStatus(studentID, problemID, "", "Been helped", "", "")
+	if authorRole == "student" {
+		addOrUpdateStudentStatus(authorID, problemID, "", "", "", "Tutoring")
+	}
 	fmt.Println("Feedback on code snapshot saved!")
 	// http.Redirect(w, r, "/get_codespace?uid="+strconv.Itoa(authorID)+"&role="+authorRole+"&password="+r.FormValue("password"), http.StatusSeeOther)
 }
@@ -149,7 +153,10 @@ func messageFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, 
 	}
 	rows.Close()
 	if messageType == 0 {
-		addOrUpdateStudentStatus(studentID, problemID, "", "-", "", "")
+		addOrUpdateStudentStatus(studentID, problemID, "", "Been helped", "", "")
+		if authorRole == "student" {
+			addOrUpdateStudentStatus(authorID, problemID, "", "", "", "Tutoring")
+		}
 	}
 	idx := StudentSnapshot[studentID][problemID]
 	Snapshots[idx].NumFeedback++

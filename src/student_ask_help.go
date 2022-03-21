@@ -43,7 +43,7 @@ func studentAskHelpHandler(w http.ResponseWriter, r *http.Request, who string, u
 				log.Fatal(err)
 			}
 			sid, _ = result.LastInsertId()
-			addOrUpdateStudentStatus(uid, pid, "", "Waiting for help", "", "")
+			addOrUpdateStudentStatus(uid, pid, "", "Asked for help", "", "")
 		}
 	} else {
 		msg = "Invalid filename"

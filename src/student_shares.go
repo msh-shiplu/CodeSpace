@@ -52,6 +52,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			attempt_number = prob.Info.Attempts - ActiveProblems[filename].Attempts[uid]
 			// Autograding if possible
 			correct_answer = ActiveProblems[filename].Info.Answer
+			addOrUpdateStudentStatus(uid, pid, "", "", "submitted", "")
 			if answer != "" {
 				scoring_mesg := ""
 				if correct_answer == answer {
@@ -59,10 +60,12 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 					ActiveProblems[filename].Attempts[uid] = 0 // This prevents further submission
 					complete = true
 					IncProblemStatGradedCorrectSQL.Exec(pid)
+					addOrUpdateStudentStatus(uid, pid, "", "", "Graded Correct", "")
 				} else if ActiveProblems[filename].Info.ExactAnswer {
 					scoring_mesg = add_or_update_score("incorrect", pid, uid, 0, -1)
 					complete = true
 					IncProblemStatGradedIncorrectSQL.Exec(pid)
+					addOrUpdateStudentStatus(uid, pid, "", "", "Graded Incorrect", "")
 				} else {
 					scoring_mesg = "Answer appears to be incorrect. It will be looked at."
 				}
@@ -85,8 +88,6 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 				log.Fatal(err)
 			}
 			sid, _ = result.LastInsertId()
-
-			addOrUpdateStudentStatus(uid, pid, "", "", "submitted", "")
 
 			IncProblemStatSubmissionSQL.Exec(pid)
 
@@ -114,7 +115,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 						msg = msg + "\nYou are now elligible to help you friends. To help please click on 'Help Friends' button."
 
 						AddHelpEligibleSQL.Exec(pid, uid, now)
-						addOrUpdateStudentStatus(uid, pid, "", "", "", "Eligible")
+						addOrUpdateStudentStatus(uid, pid, "", "", "", "Qualified")
 					}
 				}
 			}
