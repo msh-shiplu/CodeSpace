@@ -832,7 +832,7 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 				{{range .StudentInfo}}
 				<tr>
 					<td><a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">{{.StudentName}}</a></td>
-					<td>{{ formatTimeSince .LastUpdatedAt }} ago</td>
+					<td>{{if ne .CodingStat "Idle"}}{{ formatTimeSince .LastUpdatedAt }} ago{{end}}</td>
 					<td>{{.CodingStat}}</td>
 					<td>{{.HelpStat}}</td>
 					<td>{{.SubmissionStat}}</td>

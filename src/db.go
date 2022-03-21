@@ -181,13 +181,9 @@ func addOrUpdateStudentStatus(studentID int, problemID int, codingStat string, h
 	}
 	if rows.Next() {
 		now := time.Now()
-		fmt.Println(codingStat, "--", helpStat, "--", submissionStat, "--", tutoringStat)
+		rows.Close()
 		if codingStat != "" {
-			_, err = UpdateStudentCodingStatSQL.Exec(codingStat, now, studentID, problemID)
-			fmt.Println(codingStat, studentID, problemID)
-			if err != nil {
-				fmt.Println(err)
-			}
+			UpdateStudentCodingStatSQL.Exec(codingStat, now, studentID, problemID)
 		}
 		if helpStat != "" {
 			UpdateStudentHelpStatSQL.Exec(helpStat, now, studentID, problemID)
@@ -199,9 +195,9 @@ func addOrUpdateStudentStatus(studentID int, problemID int, codingStat string, h
 			UpdateStudentTutoringStatSQL.Exec(tutoringStat, now, studentID, problemID)
 		}
 	} else {
+		rows.Close()
 		AddStudentStatusSQL.Exec(studentID, problemID, codingStat, helpStat, submissionStat, tutoringStat, time.Now())
 	}
-	rows.Close()
 }
 
 //-----------------------------------------------------------------

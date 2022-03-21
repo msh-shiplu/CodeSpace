@@ -22,7 +22,6 @@ func student_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 		for _, b := range Students[uid].Boards {
 			if b.Pid != 0 {
 				addOrUpdateStudentStatus(uid, b.Pid, "Working", "", "", "")
-				fmt.Println("Student gets board!")
 				IncProblemStatActiveSQL.Exec(b.Pid)
 			}
 		}

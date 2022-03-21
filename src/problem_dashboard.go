@@ -110,9 +110,13 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 	var lastUpdateMap = make(map[int]time.Time)
 
 	var studentID int
+	var lastUpdateString string
 	var lastUpdate time.Time
+	layout := "2006-01-02 15:04:05-07:00"
 	for rows.Next() {
-		rows.Scan(&studentID, &lastUpdate)
+		rows.Scan(&studentID, &lastUpdateString)
+		fmt.Println(lastUpdateString)
+		lastUpdate, _ = time.Parse(layout, lastUpdateString)
 		lastUpdateMap[studentID] = lastUpdate
 		fmt.Println(lastUpdate)
 	}
