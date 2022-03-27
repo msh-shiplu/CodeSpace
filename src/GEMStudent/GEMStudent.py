@@ -306,14 +306,14 @@ def gems_share(self, edit, priority):
     )
     response = gemsRequest('student_shares', data)
     sublime.message_dialog(response)
-    if priority == 1:
-        if filename in gotFeedback:
-            for feedback_filename in gotFeedback[filename]:
-                ask_for_back_feedback(filename, feedback_filename)
+    # if priority == 1:
+    #     if filename in gotFeedback:
+    #         for feedback_filename in gotFeedback[filename]:
+    #             ask_for_back_feedback(filename, feedback_filename)
 
-        with open(gemsSubFile, "wb+") as f:
-            pickle.dump({"gotFeedback": gotFeedback,
-                        "submitted": submitted}, f)
+    #     with open(gemsSubFile, "wb+") as f:
+    #         pickle.dump({"gotFeedback": gotFeedback,
+    #                     "submitted": submitted}, f)
     if gemsTracking == False:
         gemsTracking = True
         sublime.set_timeout_async(gems_periodic_update, 5000)
@@ -401,16 +401,16 @@ class gemsGetBoardContent(sublime_plugin.ApplicationCommand):
                 problem_filename = filename[filename.find("-", 9)+1:]
                 local_file = os.path.join(feedback_dir, filename)
                 mesg = 'You have feedback'
-                if problem_filename not in gotFeedback:
-                    gotFeedback[problem_filename] = []
-                gotFeedback[problem_filename].append(local_file)
+                # if problem_filename not in gotFeedback:
+                #     gotFeedback[problem_filename] = []
+                # gotFeedback[problem_filename].append(local_file)
                 gemsBackFeedbackTimers[(problem_filename, local_file)] = threading.Timer(
                     gemsBackFeedbackTimeout, ask_for_back_feedback, [problem_filename, local_file])
                 gemsBackFeedbackTimers[(problem_filename, local_file)].start()
                 gemsBackFeedbackStatus[(problem_filename, local_file)] = True
-                with open(gemsSubFile, "wb+") as f:
-                    pickle.dump({"gotFeedback": gotFeedback,
-                                "submitted": submitted}, f)
+                # with open(gemsSubFile, "wb+") as f:
+                #     pickle.dump({"gotFeedback": gotFeedback,
+                #                 "submitted": submitted}, f)
             else:
                 local_file = os.path.join(gemsFOLDER, filename)
                 if os.path.exists(local_file):
@@ -1054,18 +1054,18 @@ def ask_for_back_feedback(filename, feedback_filename, fromEvent=False):
 
 def send_student_back_feedback(filename, response, feedback_filename):
     global gemsBackFeedbackTimers
-    global gotFeedback
+    # global gotFeedback
     global gemsBackFeedbackStatus
 
     if (filename, feedback_filename) in gemsBackFeedbackTimers:
         gemsBackFeedbackTimers[(filename, feedback_filename)].cancel()
         gemsBackFeedbackStatus[(filename, feedback_filename)] = False
-    gotFeedback[filename].remove(feedback_filename)
+    # gotFeedback[filename].remove(feedback_filename)
     feedback_filename = os.path.basename(feedback_filename)
     feedback_id = feedback_filename.split("-")[1]
     data = dict(
         filename=filename,
-        response=response,
+        feedback=response,
         feedback_id=feedback_id,
         role='student',
     )
@@ -1083,3 +1083,12 @@ class gemsViewHelpRequests(sublime_plugin.ApplicationCommand):
         webbrowser.open(gemsSERVER + '/help_requests?'+p)
 
 # ------------------------------------------------------------------
+
+class gemsViewExercises(sublime_plugin.ApplicationCommand):
+    def run(self):
+        global gemsSERVER
+        with open(gemsFILE, 'r') as f:
+            info = json.loads(f.read())
+        p = urllib.parse.urlencode(
+            {'password': info['Password'], 'uid': info['Uid'], 'role': 'student'})
+        webbrowser.open(gemsSERVER + '/view_exercises?'+p)

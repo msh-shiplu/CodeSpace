@@ -9,6 +9,11 @@
                 "command": "gems_get_board_content",
             },
             {
+                "caption": "Exercises",
+                "id": "gemsViewExercises",
+                "command": "gems_view_exercises"
+            },
+            {
                 "caption": "Ask for help 🤔",
                 "id": "gemsNeedHelp",
                 "command": "gems_need_help",

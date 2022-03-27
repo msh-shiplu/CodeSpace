@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -97,10 +96,6 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 	role := r.FormValue("role")
 	password := r.FormValue("password")
 	students := getAllStudents()
-	if role != "teacher" {
-		http.Error(w, "Unauthorized access", http.StatusUnauthorized)
-		return
-	}
 	rows, err := Database.Query("select student_id, max(last_updated_at) from code_snapshot where problem_id=? group by student_id", problemID)
 	defer rows.Close()
 	if err != nil {
@@ -113,12 +108,14 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 	var lastUpdateString string
 	var lastUpdate time.Time
 	layout := "2006-01-02 15:04:05-07:00"
+
+	_, ok := HelpEligibleStudents[problemID][uid]
 	for rows.Next() {
 		rows.Scan(&studentID, &lastUpdateString)
-		fmt.Println(lastUpdateString)
-		lastUpdate, _ = time.Parse(layout, lastUpdateString)
-		lastUpdateMap[studentID] = lastUpdate
-		fmt.Println(lastUpdate)
+		if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok){
+			lastUpdate, _ = time.Parse(layout, lastUpdateString)
+			lastUpdateMap[studentID] = lastUpdate
+		}
 	}
 	rows.Close()
 	rows, err = Database.Query("select student_id, coding_stat, help_stat, submission_stat, tutoring_stat from student_status where problem_id=?", problemID)
@@ -130,16 +127,17 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 	var studentInfo []*DashBoardStudentInfo
 	for rows.Next() {
 		rows.Scan(&studentID, &codingStat, &helpStat, &submissionStat, &tutoringStat)
-
-		studentInfo = append(studentInfo, &DashBoardStudentInfo{
-			StudentID:      studentID,
-			StudentName:    students[studentID],
-			LastUpdatedAt:  lastUpdateMap[studentID],
-			CodingStat:     codingStat,
-			HelpStat:       helpStat,
-			SubmissionStat: submissionStat,
-			TutoringStat:   tutoringStat,
-		})
+		if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok){
+			studentInfo = append(studentInfo, &DashBoardStudentInfo{
+				StudentID:      studentID,
+				StudentName:    students[studentID],
+				LastUpdatedAt:  lastUpdateMap[studentID],
+				CodingStat:     codingStat,
+				HelpStat:       helpStat,
+				SubmissionStat: submissionStat,
+				TutoringStat:   tutoringStat,
+			})
+		}
 	}
 	rows.Close()
 

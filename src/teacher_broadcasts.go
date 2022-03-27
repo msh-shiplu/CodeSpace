@@ -109,7 +109,7 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 		Students[student_id].Boards = append(Students[student_id].Boards, b)
 		if b.Pid != 0 && student_id != 0 {
 			// Add student coding status as idle
-			addOrUpdateStudentStatus(student_id, b.Pid, "Idle", "Not seeking help", "Not submitted", "Not qualified")
+			addOrUpdateStudentStatus(student_id, b.Pid, "Idle", "", "", "")
 		}
 	}
 	fmt.Fprintf(w, "Content copied to white boards.")
