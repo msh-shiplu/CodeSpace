@@ -10,7 +10,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	// "io/ioutil"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
@@ -90,6 +90,9 @@ func init_handlers() {
 	http.HandleFunc("/save_message_feedback", Authorize(messageFeedbackHandler))
 	http.HandleFunc("/student_dashboard_submissions", Authorize(studentDashboardSubmissionHandler))
 	http.HandleFunc("/has_message_feedback", Authorize(hasMessageBackFeedbackHandler))
+	http.HandleFunc("/teacher_signin_complete", teacherSigninCompleteHandler)
+	http.HandleFunc("/teacher_signin", teacherSigninHandler)
+	http.HandleFunc("/teacher_web_broadcast", Authorize(teacherWebBroadcastHandler))
 }
 
 //-----------------------------------------------------------------
@@ -151,6 +154,20 @@ func inform_name_server() {
 	}
 }
 
+func get_course_specific_address(nameserver string, course string) {
+	resp, err := http.Get(fmt.Sprintf("%s/ask?who=%s", nameserver, course))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	address := string(bodyBytes)
+	fmt.Println(address)
+}
+
 //-----------------------------------------------------------------
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -185,6 +202,7 @@ func main() {
 	}
 	fmt.Printf("*   GEM %s\n", VERSION)
 	fmt.Println("**************************************************\n")
+	get_course_specific_address(Config.NameServer, Config.CourseId)
 	err := http.ListenAndServe(Config.Address, nil)
 	if err != nil {
 		log.Fatal("Unable to serve gem server at " + Config.Address)

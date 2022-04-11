@@ -201,8 +201,10 @@ func addOrUpdateStudentStatus(studentID int, problemID int, codingStat string, h
 }
 
 //-----------------------------------------------------------------
-func init_teacher(id int, password string) {
+func init_teacher(id int, name string, password string) {
 	Teacher[id] = password
+	TeacherPass[name] = password
+	TeacherNameToId[name] = id
 }
 
 //-----------------------------------------------------------------

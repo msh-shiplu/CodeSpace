@@ -5,6 +5,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strconv"
@@ -116,3 +117,17 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 }
 
 //-----------------------------------------------------------------------------------
+
+func teacherWebBroadcastHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	temp := template.New("")
+	t, err := temp.Parse(PROBLEM_FILE_UPLOAD_VIEW)
+	if err != nil {
+		log.Fatal(err)
+	}
+	w.Header().Set("Content-Type", "text/html")
+	err = t.Execute(w, "")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Fatal(err)
+	}
+}

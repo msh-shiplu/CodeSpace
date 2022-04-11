@@ -16,17 +16,26 @@ func add_multiple(filename, role string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	password := ""
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		name := strings.TrimSpace(scanner.Text())
 		if name != "" {
-			add_user(name, role)
+			if role == "teacher" {
+				scanner.Scan()
+				password = strings.TrimSpace(scanner.Text())
+				if password == "" {
+					fmt.Printf("Password can not be empty!")
+					log.Fatal("Password can not be empty!")
+				}
+			}
+			add_user(name, role, password)
 		}
 	}
 }
 
 //-----------------------------------------------------------------
-func add_user(name, role string) {
+func add_user(name, role string, password string) {
 	var err error
 	var rows *sql.Rows
 	var result sql.Result
@@ -48,7 +57,9 @@ func add_user(name, role string) {
 		fmt.Printf("%s already exists. Choose a different name.\n", name)
 		return
 	}
-	password := RandStringRunes(12)
+	if role != "teacher" {
+		password = RandStringRunes(12)
+	}
 	if role == "teacher" {
 		result, err = AddTeacherSQL.Exec(name, password)
 	} else {
@@ -62,7 +73,7 @@ func add_user(name, role string) {
 		log.Fatal(err)
 	}
 	if role == "teacher" {
-		init_teacher(int(id), password)
+		init_teacher(int(id), name, password)
 	} else {
 		init_student(int(id), name, password)
 	}

@@ -647,7 +647,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 		<div class="tabs">
 			<ul>
 				<li class="is-active"><a>Feedback Provision</a></li>
-				<li><a href="/student_dashboard_submissions?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}&password={{.Password}}">Submissions</a></li>
+				<li><a href="/student_dashboard_submissions?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}">Submissions</a></li>
 			</ul>
 		</div>
 		<div>
@@ -733,7 +733,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 					if(feedback == "") {
 						alert("Please write a feedback!");
 					} else {
-						$.post("/save_snapshot_feedback", {feedback: feedback, snapshot_id: {{.LastSnapshot.ID}}, uid: {{.UserID}}, role: {{.UserRole}}, password: {{.Password}}  }, function(data, status){
+						$.post("/save_snapshot_feedback", {feedback: feedback, snapshot_id: {{.LastSnapshot.ID}}, uid: {{.UserID}}, role: {{.UserRole}}{{if ne .Password ""}}, password: {{.Password}}{{end}}  }, function(data, status){
 							if (status == "success"){
 								alert("Feedback posted successfully!");
 								window.location.reload();
@@ -750,7 +750,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 				if(feedback == "") {
 					alert("Please write a feedback!");
 				} else {
-					$.post("/save_message_feedback", {feedback: feedback, message_id: message_id, uid: {{.UserID}}, role: {{.UserRole}}, password: {{.Password}}  }, function(data, status){
+					$.post("/save_message_feedback", {feedback: feedback, message_id: message_id, uid: {{.UserID}}, role: {{.UserRole}}{{if ne .Password ""}}, password: {{.Password}}{{end}}  }, function(data, status){
 						if (status == "success"){
 							alert("Feedback posted successfully!");
 							window.location.reload();
@@ -770,7 +770,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 						feedback_id: fID,
 						uid: {{.UserID}},
 						role: "{{.UserRole}}",
-						password: "{{.Password}}",
+						{{if ne .Password ""}}password: "{{.Password}}",{{end}}
 					},
 					success: function(data){
 						console.log("Success!")
@@ -831,7 +831,7 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			<tbody>
 				{{range .StudentInfo}}
 				<tr>
-					<td><a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">{{.StudentName}}</a></td>
+					<td><a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.StudentName}}</a></td>
 					<td>{{if ne .CodingStat "Idle"}}{{ formatTimeSince .LastUpdatedAt }} ago{{end}}</td>
 					<td>{{.CodingStat}}</td>
 					<td>{{.HelpStat}}</td>
@@ -853,11 +853,17 @@ var PROBLEM_LIST_TEMPLATE = `
 <meta http-equiv="refresh" content="120" >
 <script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 </head>
 <body>
 <div class="container">
 	<h2 class="title is-2">Exercises</h2>
-
+	<a id="new-problem" class="button is-success" href="">
+		<span class="icon is-small">
+		<i class="fa-solid fa-plus"></i>
+		</span>
+		<span>Broadcast New Exercise</span>
+	</a>
 	<table class="table">
 			<thead>
 				<tr>
@@ -874,7 +880,7 @@ var PROBLEM_LIST_TEMPLATE = `
 			<tbody>
 				{{range .Problems}}
 				<tr {{if eq .IsActive true}}class="is-selected"{{end}}>
-					<td><a href="/problem_dashboard?problem_id={{.ID}}&uid={{$.UserID}}&role={{$.UserRole}}&password={{$.Password}}">{{.Filename}}</a></td>
+					<td><a href="/problem_dashboard?problem_id={{.ID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.Filename}}</a></td>
 					<td>{{ .UploadedAt.Format "Jan 02, 2006 3:04:05 PM" }}</td>
 					<td>{{.Attendance}}</td>
 					<td>{{.NumActive}}</td>
@@ -886,7 +892,12 @@ var PROBLEM_LIST_TEMPLATE = `
 				{{end}}
 			</tbody>
 	</table>
-
+<script>
+$(document).ready(function(){
+	$('#new-problem').attr("href", "/teacher_web_broadcast"+window.location.search);
+	
+});
+</script>
 </body>
 </html>
 `
@@ -914,7 +925,7 @@ var SUBMISSION_VIEW_TEMPLATE = `
 		<h2 class="title is-2">{{.StudentName}}'s Submissions for {{.ProblemName}}</h2>
 		<div class="tabs">
 			<ul>
-				<li><a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}&password={{.Password}}" >Feedback Provision</a></li>
+				<li><a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}" >Feedback Provision</a></li>
 				<li class="is-active"><a>Submissions</a></li>
 			</ul>
 		</div>
@@ -950,10 +961,10 @@ var SUBMISSION_VIEW_TEMPLATE = `
 			function sendGrade(submission_id, snapshot_id, grade) {
 				var feedback = $('#'+submission_id).val().trim();
 				var code = $('#editor-'+submission_id).val();
-				$.post("/teacher_grades", {content: code, changed: "", decision: grade, sid: submission_id, uid: {{.UserID}}, role: {{.UserRole}}, password: {{.Password}}  }, function(data, status){
+				$.post("/teacher_grades", {content: code, changed: "", decision: grade, sid: submission_id, uid: {{.UserID}}, role: {{.UserRole}}{{if ne .Password ""}}, password: {{.Password}}{{end}}  }, function(data, status){
 					if (status == "success"){
 						if (feedback != "") {
-							$.post("/save_snapshot_feedback", {snapshot_id: snapshot_id, feedback: feedback, uid: {{.UserID}}, role: {{.UserRole}}, password: {{.Password}} }, function(data1, status1){
+							$.post("/save_snapshot_feedback", {snapshot_id: snapshot_id, feedback: feedback, uid: {{.UserID}}, role: {{.UserRole}}{{if ne .Password ""}}, password: {{.Password}}{{end}} }, function(data1, status1){
 							});
 						}
 						alert("Graded successfully!");
@@ -968,4 +979,211 @@ var SUBMISSION_VIEW_TEMPLATE = `
 
 	</body>
 	</html>
+`
+var TEACHER_LOGIN = `
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Teacher Login</title>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.0/css/bulma.min.css">
+	  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+   </head>
+   <body>
+      <section class="section">      
+       <div class="columns">
+       <div class="column is-4 is-offset-4">
+		  <div class="field">
+		  <p class="control has-icons-left has-icons-right">
+		    <input id="name" class="input" type="email" placeholder="Name">
+		    <span class="icon is-small is-left">
+		      <i class="fa fa-user"></i>
+		    </span>
+		    <span class="icon is-small is-right">
+		      <i class="fa fa-check"></i>
+		    </span>
+		  </p>
+		</div>
+		<div class="field">
+		  <p class="control has-icons-left">
+		    <input id="password" class="input" type="password" placeholder="Password">
+		    <span class="icon is-small is-left">
+		      <i class="fa fa-lock"></i>
+		    </span>
+		  </p>
+		</div>
+		<div class="field">
+		  <p class="control">
+		    <button id="login" class="button is-success">
+		      Login
+		    </button>
+		  </p>
+		</div>
+      </div>         
+       </div>
+      </section>
+	  <script>
+	  	$(document).ready(function(){
+			$('#login').click(function(){
+				var name = $('#name').val().trim();
+				var pass = $('#password').val().trim();
+				if(name == "" || pass == "") {
+					alert("Please enter both name and password!");
+				} else {
+					$.post("/teacher_signin_complete", {username: name, password: pass}, function(data, status){
+						if (status == "success"){
+							window.location.replace("/view_exercises?role=teacher&uid="+data);
+						} else {
+							alert("Unauthorized access");
+						}
+					});
+				}
+			});
+		});
+	  </script>
+   </body>
+</html>
+`
+var PROBLEM_FILE_UPLOAD_VIEW = `
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Broadcast Problem</title>
+      <script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js" integrity="sha512-hGVnilhYD74EGnPbzyvje74/Urjrg5LSNGx0ARG1Ucqyiaz+lFvtsXk/1jCwT9/giXP0qoXSlVDjxNxjLvmqAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/python/python.min.js" integrity="sha512-/mavDpedrvPG/0Grj2Ughxte/fsm42ZmZWWpHz1jCbzd5ECv8CB7PomGtw0NAnhHmE/lkDFkRMupjoohbKNA1Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/clike/clike.min.js" integrity="sha512-GAled7oA9WlRkBaUQlUEgxm37hf43V2KEMaEiWlvBO/ueP2BLvBLKN5tIJu4VZOTwo6Z4XvrojYngoN9dJw2ug==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css" integrity="sha512-6sALqOPMrNSc+1p5xOhPwGIzs6kIlST+9oGWlI4Wwcbj1saaX9J3uzO3Vub016dmHV7hM+bMi/rfXLiF5DNIZg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/theme/monokai.min.css" integrity="sha512-R6PH4vSzF2Yxjdvb2p2FA06yWul+U0PDDav4b/od/oXf9Iw37zl10plvwOXelrjV2Ai7Eo3vyHeyFUjhXdBCVQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+   </head>
+   <body>
+   <div id="problem" class="file is-centered is-boxed is-success has-name">
+		<label class="file-label">
+			<input class="file-input" type="file" name="resume">
+			<span class="file-cta">
+			<span class="file-icon">
+				<i class="fas fa-upload"></i>
+			</span>
+			<span class="file-label">
+				Select Exercise File
+			</span>
+			</span>
+		</label>
+	</div>
+   <div style="visibility:hidden;" id="editor-area">
+	<article class="message">
+			<div class="message-header">
+				<p><span id="filename"></span></p>
+			</div>
+			<div class="message-body">
+				<div>
+					<textarea id="editor"></textarea>
+				</div>
+			</div>
+		</article>
+   </div>
+   <button style="visibility:hidden" id="submit" class="button is-success is-rounded">
+		<span class="icon is-small">
+			<i class="fas fa-check"></i>
+		</span>
+		<span>Broadcast</span>
+	</button>
+	<input type="hidden" id="points" value="">
+	<input type="hidden" id="effort" value="">
+	<input type="hidden" id="attempt" value="">
+	<input type="hidden" id="tag" value="">
+	<script>
+	document.querySelector('#problem input[type=file]').onchange = function(){
+		document.querySelector('#problem').style.visibility = "hidden";
+		var file = this.files[0];
+		document.querySelector('#filename').textContent = file.name;
+		var reader = new FileReader();
+		reader.onload = function(progressEvent){
+	  
+		  // By lines
+		  var lines = this.result.split('\n');
+		  var firstLine = lines[0];
+		  lines.splice(0, 1);
+		  var content = lines.join('\n');
+		  if (firstLine.length == 0 || (firstLine[0]!='#' && !firstLine.startsWith('//') )){
+			  alert("Invalid problem header!");
+			return;
+		  }
+		  var prefix = '';
+		  if (firstLine[0] == '#') {
+			  prefix = '#';
+			firstLine.replace("#", '');
+		  } else {
+			  prefix = '//';
+			firstLine.replace("//", '');
+		  }
+		  params = get_problem_info(firstLine);
+		//   alert(params[1]+" Points, "+params[2]+" for effort. Maximum attempts: " + params[3]);
+		 $('#editor-area').css('visibility', 'visible');
+		  document.querySelector('#editor').textContent = prefix + ' ' + params[1]+" Points, "+params[2]+" for effort. Maximum attempts: " + params[3] + "\n" + content;
+		  var editor = document.getElementById("editor");
+		  var myCodeMirror = CodeMirror.fromTextArea(editor, {lineNumbers: true, mode: get_editor_mode(file.name), theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
+		  myCodeMirror.setSize("100%", 400)
+		  $('#submit').css('visibility', 'visible');
+		  $('#points').val(params[1]);
+		  $('#effort').val(params[2]);
+		  $('#attempt').val(params[3]);
+		  $('#tag').val(params[4]);
+		};
+		reader.readAsText(file);
+	  };
+	  
+	  function get_problem_info(content) {
+		  let regexpNames =  /\s*(\d+)\s+(\d+)\s+(\d+)(?:\s+(\w.*))?/mg;
+		let match = regexpNames.exec(content);
+		return match;
+	  }
+	  function get_editor_mode(filename) {
+		filename = filename.toLowerCase();
+		if (filename.endsWith('.py')) {
+			return "python";
+		}
+		if (filename.endsWith('.java')) {
+			return "text/x-java";
+		}
+		if (filename.endsWith('.cpp') || filename.endsWith('.c++') || filename.endsWith('.c')) {
+			return "text/x-c++src";
+		}
+		return "text";
+	}
+	$(document).ready(function() {
+		$.ajaxSetup({
+			xhrFields: {
+			  withCredentials: true
+			}
+		});
+		$('#submit').click(function() {
+			var editor = document.querySelector('.CodeMirror').CodeMirror;
+			var uid = new URLSearchParams(window.location.search).get('uid');
+			var points = $('#points').val();
+			var effort = $('#effort').val();
+			var attempt = $('#attempt').val();
+			var tag = $('#tag').val();
+			var filename = $('#filename').text();
+			$.post("/teacher_broadcasts", {role: "teacher", uid: uid, content: editor.getValue(), answer: "", merit: points, effort: effort, attempts: attempt, tag: tag, filename: filename, exact_answer: true}, function(data, status){
+				if (status == "success"){
+					alert("Exercise broadcasted successfully!");
+					window.location.replace("/view_exercises?role=teacher&uid="+uid);
+				} else {
+					alert("Failed to broadcast. Try agian!");
+				}
+			});
+		});
+	});
+	
+	</script>
+   </body>
+</html>
 `

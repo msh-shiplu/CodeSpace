@@ -76,6 +76,8 @@ var UpdateMessageBackFeedbackSQL *sql.Stmt
 //---------------------------------------------------------
 
 var Teacher = make(map[int]string)
+var TeacherPass = make(map[string]string)
+var TeacherNameToId = make(map[string]int)
 var Passcode string
 
 //---------------------------------------------------------

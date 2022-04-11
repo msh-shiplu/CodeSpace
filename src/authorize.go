@@ -36,6 +36,21 @@ func Authorize(fn func(http.ResponseWriter, *http.Request, string, int)) http.Ha
 				if ok && password != r.FormValue("password") {
 					ok = false
 				}
+				if !ok {
+					c, err := r.Cookie("session_token")
+					if err != nil {
+						ok = false
+						fmt.Println("No Token")
+					} else {
+						sessionToken := c.Value
+						userSession, exists := sessions[sessionToken]
+						if !exists || userSession.isExpired() {
+							ok = false
+						} else {
+							ok = true
+						}
+					}
+				}
 			} else {
 				_, ok = Students[uid]
 				if !ok {
