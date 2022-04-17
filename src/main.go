@@ -93,6 +93,7 @@ func init_handlers() {
 	http.HandleFunc("/teacher_signin_complete", teacherSigninCompleteHandler)
 	http.HandleFunc("/teacher_signin", teacherSigninHandler)
 	http.HandleFunc("/teacher_web_broadcast", Authorize(teacherWebBroadcastHandler))
+	http.HandleFunc("/student_dashboard_code_snapshot", Authorize(studentDashboardCodeSnapshotHandler))
 }
 
 //-----------------------------------------------------------------

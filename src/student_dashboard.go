@@ -315,3 +315,38 @@ func hasMessageBackFeedbackHandler(w http.ResponseWriter, r *http.Request, who s
 		fmt.Fprint(w, "no")
 	}
 }
+
+func studentDashboardCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	role := r.FormValue("role")
+	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
+	studentID, _ := strconv.Atoi(r.FormValue("student_id"))
+	temp := template.New("")
+	ownFuncs := template.FuncMap{"getEditorMode": getEditorMode}
+	t, err := temp.Funcs(ownFuncs).Parse(CODE_SNAPSHOT_TAB_TEMPLATE)
+	if err != nil {
+		log.Fatal(err)
+	}
+	students := getAllStudents()
+	latestSnapshot := &Snapshot{}
+	if _, ok := StudentSnapshot[studentID][problemID]; ok {
+		latestSnapshot = Snapshots[StudentSnapshot[studentID][problemID]]
+	} else {
+		latestSnapshot = getLatestSnapshot(studentID, problemID)
+	}
+	data := &FeedbackProvisionDashBoard{
+		StudentName:  students[studentID],
+		ProblemName:  latestSnapshot.ProblemName,
+		LastSnapshot: latestSnapshot,
+		StudentID:    studentID,
+		ProblemID:    problemID,
+		UserID:       uid,
+		UserRole:     role,
+		Password:     r.FormValue("password"),
+	}
+	w.Header().Set("Content-Type", "text/html")
+	err = t.Execute(w, data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Fatal(err)
+	}
+}

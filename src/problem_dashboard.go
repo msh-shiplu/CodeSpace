@@ -21,6 +21,7 @@ type DashBoardStudentInfo struct {
 type DashBoardInfo struct {
 	StudentInfo        []*DashBoardStudentInfo
 	ProblemName        string
+	Code               string
 	ProblemID          int
 	NumActive          int
 	NumHelpRequest     int
@@ -112,10 +113,20 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 	_, ok := HelpEligibleStudents[problemID][uid]
 	for rows.Next() {
 		rows.Scan(&studentID, &lastUpdateString)
-		if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok){
+		if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok) {
 			lastUpdate, _ = time.Parse(layout, lastUpdateString)
 			lastUpdateMap[studentID] = lastUpdate
 		}
+	}
+	rows.Close()
+	rows, err = Database.Query("select problem_description from problem where id=?", problemID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var code string
+	if rows.Next() {
+		rows.Scan(&code)
 	}
 	rows.Close()
 	rows, err = Database.Query("select student_id, coding_stat, help_stat, submission_stat, tutoring_stat from student_status where problem_id=?", problemID)
@@ -127,7 +138,7 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 	var studentInfo []*DashBoardStudentInfo
 	for rows.Next() {
 		rows.Scan(&studentID, &codingStat, &helpStat, &submissionStat, &tutoringStat)
-		if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok){
+		if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok) {
 			studentInfo = append(studentInfo, &DashBoardStudentInfo{
 				StudentID:      studentID,
 				StudentName:    students[studentID],
@@ -147,6 +158,7 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 		StudentInfo:        studentInfo,
 		ProblemID:          problemID,
 		ProblemName:        getProblemNameFromID(problemID),
+		Code:               code,
 		NumActive:          nActive,
 		NumHelpRequest:     nHelp,
 		NumGradedCorrect:   nCorrect,

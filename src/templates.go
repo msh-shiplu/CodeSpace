@@ -643,21 +643,43 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 	</head>
 	<body>
 	<div class="container">
+	<nav class="breadcrumb" aria-label="breadcrumbs">
+	<ul>
+	  <li>
+		<a id="view-exercise-link" href="#">
+		  <span class="icon is-small">
+			<i class="fas fa-home" aria-hidden="true"></i>
+		  </span>
+		  <span>Exercises</span>
+		</a>
+	  </li>
+	  <li>
+		<a id="problem-dashboard-link" href="#">
+		<span class="icon is-small">
+			<i class="fas fa-book" aria-hidden="true"></i>
+		  </span>
+			<span>Problem Dashboard ({{.ProblemName}})</span>
+		</a>
+	   </li>
+	  <li class="is-active">
+		<a href="#">
+			<span class="icon is-small">
+				<i class="fas fa-puzzle-piece" aria-hidden="true"></i>
+			</span>
+		  <span>Student Dashboard</span>
+		</a>
+	  </li>
+	</ul>
+	</nav>
 		<h2 class="title is-2">{{.StudentName}}'s Dashboard for {{.ProblemName}}</h2>
 		<div class="tabs">
 			<ul>
-				<li class="is-active"><a>Feedback Provision</a></li>
+			<li><a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}">Code Snapshot</a></li>
+				<li class="is-active"><a>Feedback</a></li>
 				<li><a href="/student_dashboard_submissions?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}">Submissions</a></li>
 			</ul>
 		</div>
 		<div>
-			<h3 class="title is-3">Latest Code Snapshot at {{.LastSnapshot.LastUpdated.Format "Jan 02, 2006 3:04:05 PM"}}</h3>
-			<textarea class="editor">{{ .LastSnapshot.Code }}</textarea>
-			<div class="columns">
-				<div class="column is-three-quarters"><input id="snapshot-feedback-input" class="input is-info" type="text" placeholder="Provide your feedback!"></div>
- 				 <div class="column"><button id="snapshot-feedback-submit" class="button is-primary">Post</button></div>
-			
-			</div>
 			<section class="section">
 				{{range .Messages}}
 					<article class="message">
@@ -720,30 +742,16 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 			</section>
 		</div>
 		<script>
+			$(document).ready(function(){
+				$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
+				$('#problem-dashboard-link').attr("href", "/problem_dashboard"+window.location.search+"&problem_id={{.ProblemID}}");
+		  	});
 			var snapshotEditors = document.getElementsByClassName("editor");
 				
 			for (let i = 0; i<snapshotEditors.length; i++){
 				var code = CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
 				code.setSize("100%", 500);
 			}
-			
-			$(document).ready(function(){
-				$('#snapshot-feedback-submit').click(function(){
-					var feedback = $('#snapshot-feedback-input').val().trim();
-					if(feedback == "") {
-						alert("Please write a feedback!");
-					} else {
-						$.post("/save_snapshot_feedback", {feedback: feedback, snapshot_id: {{.LastSnapshot.ID}}, uid: {{.UserID}}, role: {{.UserRole}}{{if ne .Password ""}}, password: {{.Password}}{{end}}  }, function(data, status){
-							if (status == "success"){
-								alert("Feedback posted successfully!");
-								window.location.reload();
-							} else {
-								alert("Could not post the feedback. Please try again!");
-							}
-						});
-					}
-				});
-			});
 
 			function sendMessageFeedback(message_id) {
 				var feedback = $('#'+message_id).val();
@@ -790,16 +798,50 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 <head>
 <title>Problem Dashboard</title>
 <meta http-equiv="refresh" content="120" >
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js" integrity="sha512-hGVnilhYD74EGnPbzyvje74/Urjrg5LSNGx0ARG1Ucqyiaz+lFvtsXk/1jCwT9/giXP0qoXSlVDjxNxjLvmqAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/python/python.min.js" integrity="sha512-/mavDpedrvPG/0Grj2Ughxte/fsm42ZmZWWpHz1jCbzd5ECv8CB7PomGtw0NAnhHmE/lkDFkRMupjoohbKNA1Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/clike/clike.min.js" integrity="sha512-GAled7oA9WlRkBaUQlUEgxm37hf43V2KEMaEiWlvBO/ueP2BLvBLKN5tIJu4VZOTwo6Z4XvrojYngoN9dJw2ug==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css" integrity="sha512-6sALqOPMrNSc+1p5xOhPwGIzs6kIlST+9oGWlI4Wwcbj1saaX9J3uzO3Vub016dmHV7hM+bMi/rfXLiF5DNIZg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/theme/monokai.min.css" integrity="sha512-R6PH4vSzF2Yxjdvb2p2FA06yWul+U0PDDav4b/od/oXf9Iw37zl10plvwOXelrjV2Ai7Eo3vyHeyFUjhXdBCVQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
 </head>
 <body>
 <div class="container">
+<nav class="breadcrumb" aria-label="breadcrumbs">
+<ul>
+  <li>
+	<a id="view-exercise-link" href="#">
+	  <span class="icon is-small">
+		<i class="fas fa-home" aria-hidden="true"></i>
+	  </span>
+	  <span>Exercises</span>
+	</a>
+  </li>
+  <li class="is-active">
+	<a href="#">
+	  <span class="icon is-small">
+		<i class="fas fa-book" aria-hidden="true"></i>
+	  </span>
+	  <span>Problem Dashboard</span>
+	</a>
+  </li>
+</ul>
+</nav>
 	<h2 class="title is-2">Dashboard for {{.ProblemName}}</h2>
+	<div class="accordions">
+		<h3>{{.ProblemName}}</h3>
+		<div>
+			<textarea id="editor">{{ .Code }}</textarea>
+		</div>
+	</div>
 	<table class="table">
 			<thead>
 				<tr>
-					<th>Students</th>
+					<th>Active Students</th>
 					<th>Help Requests</th>
 					<th>Not Graded</th>
 					<th>Correct</th>
@@ -831,17 +873,39 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			<tbody>
 				{{range .StudentInfo}}
 				<tr>
-					<td><a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.StudentName}}</a></td>
-					<td>{{if ne .CodingStat "Idle"}}{{ formatTimeSince .LastUpdatedAt }} ago{{end}}</td>
+					<td><a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.StudentName}}</a></td>
+					<td>{{if ne .CodingStat "Idle"}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{ formatTimeSince .LastUpdatedAt }} ago</a>{{end}}</td>
 					<td>{{.CodingStat}}</td>
-					<td>{{.HelpStat}}</td>
-					<td>{{.SubmissionStat}}</td>
+					<td>{{if ne .HelpStat ""}}<a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.HelpStat}}</a>{{end}}</td>
+					<td>{{if ne .SubmissionStat ""}}<a href="/student_dashboard_submissions?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.SubmissionStat}}</a>{{end}}</td>
 					<td>{{.TutoringStat}}</td>
 				</tr>
 				{{end}}
 			</tbody>
 	</table>
-
+	<script>
+		var editor = document.getElementById("editor");
+		var myCodeMirror = CodeMirror.fromTextArea(editor, {lineNumbers: true, mode: get_editor_mode({{.ProblemName}}), theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
+		myCodeMirror.setSize("100%", 400)
+		function get_editor_mode(filename) {
+			filename = filename.toLowerCase();
+			if (filename.endsWith('.py')) {
+				return "python";
+			}
+			if (filename.endsWith('.java')) {
+				return "text/x-java";
+			}
+			if (filename.endsWith('.cpp') || filename.endsWith('.c++') || filename.endsWith('.c')) {
+				return "text/x-c++src";
+			}
+			return "text";
+		  }
+		  $(document).ready(function(){
+			$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
+		  });
+		  $(".accordions").accordion({ header: "h3", active: false, collapsible: true });
+		  $(".accordions").show();
+	</script>
 </body>
 </html>
 `
@@ -857,6 +921,18 @@ var PROBLEM_LIST_TEMPLATE = `
 </head>
 <body>
 <div class="container">
+	<nav class="breadcrumb" aria-label="breadcrumbs">
+	<ul>
+		<li class="is-active">
+		<a href="#">
+			<span class="icon is-small">
+			<i class="fas fa-home" aria-hidden="true"></i>
+			</span>
+			<span>Exercises</span>
+		</a>
+		</li>
+	</ul>
+	</nav>
 	<h2 class="title is-2">Exercises</h2>
 	<a id="new-problem" class="button is-success" href="">
 		<span class="icon is-small">
@@ -922,10 +998,39 @@ var SUBMISSION_VIEW_TEMPLATE = `
 	</head>
 	<body>
 	<div class="container">
+	<nav class="breadcrumb" aria-label="breadcrumbs">
+		<ul>
+		<li>
+			<a id="view-exercise-link" href="#">
+			<span class="icon is-small">
+				<i class="fas fa-home" aria-hidden="true"></i>
+			</span>
+			<span>Exercises</span>
+			</a>
+		</li>
+		<li>
+			<a id="problem-dashboard-link" href="#">
+			<span class="icon is-small">
+				<i class="fas fa-book" aria-hidden="true"></i>
+			</span>
+				<span>Problem Dashboard ({{.ProblemName}})</span>
+			</a>
+		</li>
+		<li class="is-active">
+			<a href="#">
+				<span class="icon is-small">
+					<i class="fas fa-puzzle-piece" aria-hidden="true"></i>
+				</span>
+			<span>Student Dashboard</span>
+			</a>
+		</li>
+		</ul>
+	</nav>
 		<h2 class="title is-2">{{.StudentName}}'s Submissions for {{.ProblemName}}</h2>
 		<div class="tabs">
 			<ul>
-				<li><a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}" >Feedback Provision</a></li>
+				<li><a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}">Code Snapshot</a></li>
+				<li><a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}" >Feedback</a></li>
 				<li class="is-active"><a>Submissions</a></li>
 			</ul>
 		</div>
@@ -950,6 +1055,10 @@ var SUBMISSION_VIEW_TEMPLATE = `
 			{{end}}
 		</div>
 		<script>
+			$(document).ready(function(){
+				$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
+				$('#problem-dashboard-link').attr("href", "/problem_dashboard"+window.location.search+"&problem_id={{.ProblemID}}");
+			});
 			var snapshotEditors = document.getElementsByClassName("editor");
 				
 			for (let i = 0; i<snapshotEditors.length; i++){
@@ -992,6 +1101,7 @@ var TEACHER_LOGIN = `
 	  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
    </head>
    <body>
+   <div class="container">
       <section class="section">      
        <div class="columns">
        <div class="column is-4 is-offset-4">
@@ -1024,6 +1134,7 @@ var TEACHER_LOGIN = `
       </div>         
        </div>
       </section>
+	</div>
 	  <script>
 	  	$(document).ready(function(){
 			$('#login').click(function(){
@@ -1064,6 +1175,27 @@ var PROBLEM_FILE_UPLOAD_VIEW = `
 	  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
    </head>
    <body>
+   <div class="container">
+   <nav class="breadcrumb" aria-label="breadcrumbs">
+	<ul>
+		<li>
+			<a id="view-exercise-link" href="#">
+			<span class="icon is-small">
+				<i class="fas fa-home" aria-hidden="true"></i>
+			</span>
+			<span>Exercises</span>
+			</a>
+		</li>
+		<li class="is-active">
+			<a href="#">
+			<span class="icon is-small">
+				<i class="fas fa-book" aria-hidden="true"></i>
+			</span>
+			<span>Problem Broadcast</span>
+			</a>
+		</li>
+		</ul>
+		</nav>
    <div id="problem" class="file is-centered is-boxed is-success has-name">
 		<label class="file-label">
 			<input class="file-input" type="file" name="resume">
@@ -1099,7 +1231,11 @@ var PROBLEM_FILE_UPLOAD_VIEW = `
 	<input type="hidden" id="effort" value="">
 	<input type="hidden" id="attempt" value="">
 	<input type="hidden" id="tag" value="">
+  </div>
 	<script>
+	$(document).ready(function(){
+		$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
+	  });
 	document.querySelector('#problem input[type=file]').onchange = function(){
 		document.querySelector('#problem').style.visibility = "hidden";
 		var file = this.files[0];
@@ -1157,7 +1293,7 @@ var PROBLEM_FILE_UPLOAD_VIEW = `
 			return "text/x-c++src";
 		}
 		return "text";
-	}
+	  }
 	$(document).ready(function() {
 		$.ajaxSetup({
 			xhrFields: {
@@ -1186,4 +1322,104 @@ var PROBLEM_FILE_UPLOAD_VIEW = `
 	</script>
    </body>
 </html>
+`
+var CODE_SNAPSHOT_TAB_TEMPLATE = `
+	<!DOCTYPE html>
+	<html>
+	<head>
+	<title>Student Dashboard</title>
+	<meta http-equiv="refresh" content="120" >
+	<script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.js" integrity="sha512-hGVnilhYD74EGnPbzyvje74/Urjrg5LSNGx0ARG1Ucqyiaz+lFvtsXk/1jCwT9/giXP0qoXSlVDjxNxjLvmqAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/python/python.min.js" integrity="sha512-/mavDpedrvPG/0Grj2Ughxte/fsm42ZmZWWpHz1jCbzd5ECv8CB7PomGtw0NAnhHmE/lkDFkRMupjoohbKNA1Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/mode/clike/clike.min.js" integrity="sha512-GAled7oA9WlRkBaUQlUEgxm37hf43V2KEMaEiWlvBO/ueP2BLvBLKN5tIJu4VZOTwo6Z4XvrojYngoN9dJw2ug==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css" integrity="sha512-6sALqOPMrNSc+1p5xOhPwGIzs6kIlST+9oGWlI4Wwcbj1saaX9J3uzO3Vub016dmHV7hM+bMi/rfXLiF5DNIZg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/theme/monokai.min.css" integrity="sha512-R6PH4vSzF2Yxjdvb2p2FA06yWul+U0PDDav4b/od/oXf9Iw37zl10plvwOXelrjV2Ai7Eo3vyHeyFUjhXdBCVQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+	<script src="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-collapsible"></script>
+	</head>
+	<body>
+	<div class="container">
+	<nav class="breadcrumb" aria-label="breadcrumbs">
+	<ul>
+	  <li>
+		<a id="view-exercise-link" href="#">
+		  <span class="icon is-small">
+			<i class="fas fa-home" aria-hidden="true"></i>
+		  </span>
+		  <span>Exercises</span>
+		</a>
+	  </li>
+	  <li>
+		<a id="problem-dashboard-link" href="#">
+		<span class="icon is-small">
+			<i class="fas fa-book" aria-hidden="true"></i>
+		  </span>
+			<span>Problem Dashboard ({{.ProblemName}})</span>
+		</a>
+	   </li>
+	  <li class="is-active">
+		<a href="#">
+			<span class="icon is-small">
+				<i class="fas fa-puzzle-piece" aria-hidden="true"></i>
+			</span>
+		  <span>Student Dashboard</span>
+		</a>
+	  </li>
+	</ul>
+	</nav>
+		<h2 class="title is-2">{{.StudentName}}'s Dashboard for {{.ProblemName}}</h2>
+		<div class="tabs">
+			<ul>
+				<li class="is-active"><a>Code Snapshot</a></li>
+				<li><a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}">Feedback</a></li>
+				<li><a href="/student_dashboard_submissions?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}">Submissions</a></li>
+			</ul>
+		</div>
+		<div>
+			<h3 class="title is-3">Latest Code Snapshot at {{.LastSnapshot.LastUpdated.Format "Jan 02, 2006 3:04:05 PM"}}</h3>
+			<textarea class="editor">{{ .LastSnapshot.Code }}</textarea>
+			<div class="columns">
+				<div class="column is-three-quarters"><input id="snapshot-feedback-input" class="input is-info" type="text" placeholder="Provide your feedback!"></div>
+ 				 <div class="column"><button id="snapshot-feedback-submit" class="button is-primary">Post</button></div>
+			
+			</div>
+		</div>
+		<script>
+			$(document).ready(function(){
+				$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
+				$('#problem-dashboard-link').attr("href", "/problem_dashboard"+window.location.search+"&problem_id={{.ProblemID}}");
+		  	});
+			var snapshotEditors = document.getElementsByClassName("editor");
+				
+			for (let i = 0; i<snapshotEditors.length; i++){
+				var code = CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
+				code.setSize("100%", 500);
+			}
+			
+			$(document).ready(function(){
+				$('#snapshot-feedback-submit').click(function(){
+					var feedback = $('#snapshot-feedback-input').val().trim();
+					if(feedback == "") {
+						alert("Please write a feedback!");
+					} else {
+						$.post("/save_snapshot_feedback", {feedback: feedback, snapshot_id: {{.LastSnapshot.ID}}, uid: {{.UserID}}, role: {{.UserRole}}{{if ne .Password ""}}, password: {{.Password}}{{end}}  }, function(data, status){
+							if (status == "success"){
+								alert("Feedback posted successfully!");
+								window.location.replace("/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}");
+							} else {
+								alert("Could not post the feedback. Please try again!");
+							}
+						});
+					}
+				});
+			});
+		</script>
+
+	</body>
+	</html>
 `
