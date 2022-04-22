@@ -1,3 +1,2 @@
-instructor
-ta1
-ta2
+Dr. Charles Xavier
+123456

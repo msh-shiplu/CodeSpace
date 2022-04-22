@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -92,6 +93,26 @@ func getProblemNameFromID(problemID int) string {
 	return problemName
 }
 
+func getLatestSubmissionTime(problemID int) map[int]time.Time {
+	var latestSubmissions = make(map[int]time.Time)
+	rows, err := Database.Query("select student_id, max(code_submitted_at) from submission where problem_id=? group by student_id", problemID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var studentID int
+	var submissionTimeStr string
+	var submissionTime time.Time
+	layout := "2006-01-02 15:04:05-07:00"
+	for rows.Next() {
+		rows.Scan(&studentID, &submissionTimeStr)
+		submissionTime, _ = time.Parse(layout, submissionTimeStr)
+		latestSubmissions[studentID] = submissionTime
+	}
+	rows.Close()
+	return latestSubmissions
+}
+
 func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
 	role := r.FormValue("role")
@@ -129,6 +150,7 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 		rows.Scan(&code)
 	}
 	rows.Close()
+	latestSubmissionTime := getLatestSubmissionTime(problemID)
 	rows, err = Database.Query("select student_id, coding_stat, help_stat, submission_stat, tutoring_stat from student_status where problem_id=?", problemID)
 	defer rows.Close()
 	if err != nil {
@@ -151,6 +173,25 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 		}
 	}
 	rows.Close()
+
+	sort.SliceStable(studentInfo, func(i, j int) bool {
+		if studentInfo[i].SubmissionStat == "submitted" && studentInfo[j].SubmissionStat == "submitted" {
+			return latestSubmissionTime[studentInfo[i].StudentID].Before(latestSubmissionTime[studentInfo[j].StudentID])
+		}
+		if studentInfo[i].SubmissionStat == "submitted" {
+			return true
+		}
+		if studentInfo[j].SubmissionStat == "submitted" {
+			return false
+		}
+		if studentInfo[i].HelpStat == "Asked for help" {
+			return true
+		}
+		if studentInfo[j].HelpStat == "Asked for help" {
+			return false
+		}
+		return true
+	})
 
 	nActive, nHelp, nNotGraded, nCorrect, nIncorrect := getProblemStats(problemID)
 

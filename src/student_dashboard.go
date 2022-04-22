@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -277,6 +278,18 @@ func studentDashboardSubmissionHandler(w http.ResponseWriter, r *http.Request, w
 				SubmittedAt: submittedAt,
 			})
 		}
+		sort.SliceStable(submissions, func(i, j int) bool {
+			if submissions[i].Grade == "" && submissions[j].Grade == "" {
+				return submissions[i].SubmittedAt.Before(submissions[j].SubmittedAt)
+			}
+			if submissions[i].Grade == "" {
+				return true
+			}
+			if submissions[j].Grade == "" {
+				return false
+			}
+			return submissions[i].SubmittedAt.Before(submissions[j].SubmittedAt)
+		})
 	} else {
 		http.Error(w, "You are not authorized to access!", http.StatusUnauthorized)
 	}
