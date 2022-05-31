@@ -32,7 +32,7 @@ func studentAskHelpHandler(w http.ResponseWriter, r *http.Request, who string, u
 				ActiveProblems[filename].Attempts[uid] = prob.Info.Attempts
 			}
 			now := time.Now()
-			snapshotID = addCodeSnapshot(uid, pid, content, 0, now)
+			snapshotID = addCodeSnapshot(uid, pid, content, 0, now, "at_ask_for_help")
 			var result sql.Result
 			// result, err = AddHelpSubmissionSQL.Exec(pid, uid, snapshotID, "", need_help_with, now)
 			result, err = AddMessageSQL.Exec(snapshotID, need_help_with, uid, "student", now, 0)

@@ -75,7 +75,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			}
 
 			// Add submitted but not graded code to code snapshot.
-			snapshotID = addCodeSnapshot(uid, pid, content, 1, now)
+			snapshotID = addCodeSnapshot(uid, pid, content, 1, now, "at_submission")
 
 			var result sql.Result
 			if complete {

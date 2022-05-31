@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-func addCodeSnapshot(studentID int, problemID int, code string, status int, lastUpdate time.Time) int {
-	result, err := AddCodeSnapshotSQL.Exec(studentID, problemID, code, status, lastUpdate)
+func addCodeSnapshot(studentID int, problemID int, code string, status int, lastUpdate time.Time, event string) int {
+	result, err := AddCodeSnapshotSQL.Exec(studentID, problemID, code, status, lastUpdate, event)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,7 +76,11 @@ func codeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid
 	code := r.FormValue("code")
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
 	studentID, _ := strconv.Atoi(r.FormValue("uid"))
-	addCodeSnapshot(studentID, problemID, code, 0, time.Now())
+	snapshotEvent := r.FormValue("event")
+	if snapshotEvent == "" {
+		snapshotEvent = "at_regular_interval"
+	}
+	addCodeSnapshot(studentID, problemID, code, 0, time.Now(), snapshotEvent)
 }
 
 func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {

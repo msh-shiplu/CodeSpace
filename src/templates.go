@@ -684,7 +684,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 				{{range .Messages}}
 					<article class="message">
 						<div class="message-header">
-						<p>{{if eq .Type 0}}{{.Name}} asked for help{{else}} Snapshot taken {{end}} at ({{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}})</p>
+						<p>{{if eq .Type 0}}{{.Name}} asked for help{{else if eq .Event "at_submission"}} Submission Snapshot taken {{else}} Regular Snapshot taken {{end}} at ({{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}})</p>
 						</div>
 						<div class="message-body">
 							{{.Message}}
@@ -831,7 +831,8 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
   </li>
 </ul>
 </nav>
-	<h2 class="title is-2">Dashboard for {{.ProblemName}}</h2>
+	<h2 class="title is-2">Dashboard for {{.ProblemName}}</h2> 
+	{{if eq .IsActive true}}<button id="deactivate-button" class="button is-danger">Deactivate!</button>{{end}}
 	<div class="accordions">
 		<h3>{{.ProblemName}}</h3>
 		<div>
@@ -873,7 +874,7 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			<tbody>
 				{{range .StudentInfo}}
 				<tr>
-					<td><a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.StudentName}}</a></td>
+					<td>{{if ne .CodingStat "Idle"}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.StudentName}}</a>{{else}}{{.StudentName}}{{end}}</td>
 					<td>{{if ne .CodingStat "Idle"}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{ formatTimeSince .LastUpdatedAt }} ago</a>{{end}}</td>
 					<td>{{.CodingStat}}</td>
 					<td>{{if ne .HelpStat ""}}<a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.HelpStat}}</a>{{end}}</td>
@@ -902,6 +903,22 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 		  }
 		  $(document).ready(function(){
 			$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
+			$('#deactivate-button').click(function(){
+				if (confirm("Deactivate the problem?") == true) {
+					$.post("/teacher_deactivates_problems", {filename: {{.ProblemName}}, uid: {{.UserID}}, role: {{.UserRole}}{{if ne .Password ""}}, password: {{.Password}}{{end}} })
+					.done(function(data){
+						if (data == "-1"){
+							alert("Couldn't deactivate the problem! Please try again!");
+						} else {
+							alert("Problem deactiavated!");
+							window.location.reload();
+						}
+					})
+					.fail(function(){
+						alert("Couldn't deactivate the problem! Please try again!");
+					});
+				}
+			});
 		  });
 		  $(".accordions").accordion({ header: "h3", active: false, collapsible: true });
 		  $(".accordions").show();
@@ -1036,8 +1053,9 @@ var SUBMISSION_VIEW_TEMPLATE = `
 		</div>
 		<div>
 			{{range .Submissions}}
-			<h3 class="title is-3">Submitted at {{.SubmittedAt.Format "Jan 02, 2006 3:04:05 PM"}}</h3>
-			{{if eq .Grade ""}} Not Graded {{else}} Graded {{.Grade}} {{end}}
+			<div class="box">
+			<h4 class="title is-4">Submitted at {{.SubmittedAt.Format "Jan 02, 2006 3:04:05 PM"}}</h4>
+			{{if eq .Grade ""}} Not Graded {{else}} Graded {{if eq .Grade "correct"}} <span class="tag is-success">correct</span> {{else if eq .Grade "incorrect"}} <span class="tag is-danger">incorrect</span> {{else}} {{.Grade}} {{end}} {{end}}
 			<div class="accordions">
 				<h3>Code</h3>
 				<div>
@@ -1052,6 +1070,7 @@ var SUBMISSION_VIEW_TEMPLATE = `
 				<div class="column"><button  class="button is-danger" onclick="sendGrade({{.ID}}, {{.SnapshotID}}, 'incorrect')">Incorrect</button></div>
 			</div>
 			{{end}}
+			</div>
 			{{end}}
 		</div>
 		<script>

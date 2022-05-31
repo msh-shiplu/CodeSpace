@@ -111,7 +111,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			Students[sub.Uid].SubmissionStatus = append(Students[sub.Uid].SubmissionStatus, subStat)
 
 			// Add the correct submission to codesnapshot.
-			addCodeSnapshot(sub.Uid, pid, content, 3, now)
+			// addCodeSnapshot(sub.Uid, pid, content, 3, now)
 			IncProblemStatGradedCorrectSQL.Exec(pid)
 			addOrUpdateStudentStatus(sub.Uid, pid, "", "", "Graded Correct", "")
 
@@ -125,7 +125,7 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			Students[sub.Uid].SubmissionStatus = append(Students[sub.Uid].SubmissionStatus, subStat)
 
 			// Add the incorrect submission to codesnapshot.
-			addCodeSnapshot(sub.Uid, sub.Pid, content, 2, time.Now())
+			// addCodeSnapshot(sub.Uid, sub.Pid, content, 2, time.Now())
 			IncProblemStatGradedIncorrectSQL.Exec(sub.Pid)
 			addOrUpdateStudentStatus(sub.Uid, sub.Pid, "", "", "Graded Incorrect", "")
 		}

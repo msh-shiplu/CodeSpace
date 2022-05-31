@@ -27,6 +27,7 @@ type MessageDashBoard struct {
 	Role       string
 	Message    string
 	Type       int // 0 = help request, 1 = unsolicited
+	Event	   string
 	GivenAt    time.Time
 	Code       string
 	SnapshotID int
@@ -187,16 +188,16 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 	var messages = make([]*MessageDashBoard, 0)
 	_, ok := HelpEligibleStudents[problemID][uid]
 	if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok) {
-		rows, err := Database.Query("select M.id, M.snapshot_id, M.message, M.author_id, M.author_role, M.given_at, M.type, C.Code from message M, code_snapshot C where M.snapshot_id = C.id and C.problem_id = ? and C.student_id = ?", problemID, studentID)
+		rows, err := Database.Query("select M.id, M.snapshot_id, M.message, M.author_id, M.author_role, M.given_at, M.type, C.Code, C.event from message M, code_snapshot C where M.snapshot_id = C.id and C.problem_id = ? and C.student_id = ?", problemID, studentID)
 		defer rows.Close()
 		if err != nil {
 			log.Fatal(err)
 		}
 		var snapshotID, authorID, messageType, messageID int
-		var message, authorRole, code string
+		var message, authorRole, code, event string
 		var givenAt time.Time
 		for rows.Next() {
-			rows.Scan(&messageID, &snapshotID, &message, &authorID, &authorRole, &givenAt, &messageType, &code)
+			rows.Scan(&messageID, &snapshotID, &message, &authorID, &authorRole, &givenAt, &messageType, &code, &event)
 			name := ""
 			if authorRole == "teacher" {
 				name = getTeacherName(authorID)
@@ -209,6 +210,7 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 				Role:       authorRole,
 				Message:    message,
 				Type:       messageType,
+				Event:		event,
 				GivenAt:    givenAt,
 				SnapshotID: snapshotID,
 				Code:       code,
@@ -268,6 +270,7 @@ func studentDashboardSubmissionHandler(w http.ResponseWriter, r *http.Request, w
 		var verdict, code string
 		var submittedAt time.Time
 		for rows.Next() {
+			verdict = ""
 			rows.Scan(&submissionID, &snapshotID, &code, &submittedAt, &verdict)
 
 			submissions = append(submissions, &SubmissionInfo{
