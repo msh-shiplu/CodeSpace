@@ -80,6 +80,7 @@ def sendCodeSnapshot():
                     data = {
                         'code': code,
                         'problem_id': problem_id,
+                        'event': 'at_regular_interval',
                     }
                     gemsRequest('code_snapshot', data)
                     lastSentCodes[problem_id] = code
@@ -872,11 +873,11 @@ class gemsUpdate(sublime_plugin.WindowCommand):
             menu_file = os.path.join(package_path, "Main.sublime-menu")
             version_file = os.path.join(package_path, "version.go")
             urllib.request.urlretrieve(
-                "https://raw.githubusercontent.com/vtphan/GEM/alina/src/GEMStudent/GEMStudent.py", module_file)
+                "https://raw.githubusercontent.com/msh-shiplu/CodeSpace/master/src/GEMStudent/GEMStudent.py", module_file)
             urllib.request.urlretrieve(
-                "https://raw.githubusercontent.com/vtphan/GEM/alina/src/GEMStudent/Main.sublime-menu", menu_file)
+                "https://raw.githubusercontent.com/msh-shiplu/CodeSpace/master/src/GEMStudent/Main.sublime-menu", menu_file)
             urllib.request.urlretrieve(
-                "https://raw.githubusercontent.com/vtphan/GEM/alina/src/version.go", version_file)
+                "https://raw.githubusercontent.com/msh-shiplu/CodeSpace/master/src/GEMStudent/version.go", version_file)
             with open(version_file) as f:
                 lines = f.readlines()
             for line in lines:
