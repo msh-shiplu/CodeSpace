@@ -25,13 +25,20 @@ func AuthorizeLocalhost(fn func(http.ResponseWriter, *http.Request)) http.Handle
 }
 
 //-----------------------------------------------------------------
-func Authorize(fn func(http.ResponseWriter, *http.Request, string, int)) http.HandlerFunc {
+func Authorize(fn func(http.ResponseWriter, *http.Request, string, int), userRole string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		givenRole := r.FormValue("role")
+		if userRole != "" && userRole != givenRole {
+			w.WriteHeader(http.StatusUnauthorized)
+			fmt.Println("Unauthorized access:", r.FormValue("name"))
+			fmt.Fprint(w, "Unauthorized access. Please register again.")
+			return
+		}
 		uid, err := strconv.Atoi(r.FormValue("uid"))
 		if err == nil {
 			ok := false
 			var password string
-			if r.FormValue("role") == "teacher" {
+			if givenRole == "teacher" {
 				password, ok = Teacher[uid]
 				if ok && password != r.FormValue("password") {
 					ok = false
