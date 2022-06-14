@@ -832,7 +832,7 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 </ul>
 </nav>
 	<h2 class="title is-2">Dashboard for {{.ProblemName}}</h2> 
-	{{if eq .IsActive true}}<button id="deactivate-button" class="button is-danger">Deactivate!</button>{{end}}
+	{{if eq .UserRole "teacher"}} {{if eq .IsActive true}}<button id="deactivate-button" class="button is-danger">Deactivate!</button>{{end}}{{end}}
 	<div class="accordions">
 		<h3>{{.ProblemName}}</h3>
 		<div>
@@ -875,7 +875,7 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 				{{range .StudentInfo}}
 				<tr>
 					<td>{{if ne .CodingStat "Idle"}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.StudentName}}</a>{{else}}{{.StudentName}}{{end}}</td>
-					<td>{{if ne .CodingStat "Idle"}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{ formatTimeSince .LastUpdatedAt }} ago</a>{{end}}</td>
+					<td>{{if and (eq $.IsActive true) (ne .CodingStat "Idle") (ne .LastUpdatedAt.IsZero true) }}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{ formatTimeSince .LastUpdatedAt }} ago</a>{{end}}</td>
 					<td>{{.CodingStat}}</td>
 					<td>{{if ne .HelpStat ""}}<a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.HelpStat}}</a>{{end}}</td>
 					<td>{{if ne .SubmissionStat ""}}<a href="/student_dashboard_submissions?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.SubmissionStat}}</a>{{end}}</td>
@@ -932,6 +932,67 @@ var PROBLEM_LIST_TEMPLATE = `
 <head>
 <title>Exercises</title>
 <meta http-equiv="refresh" content="120" >
+<style>
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+</style>
 <script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
@@ -957,6 +1018,11 @@ var PROBLEM_LIST_TEMPLATE = `
 		</span>
 		<span>Broadcast New Exercise</span>
 	</a>
+	Peer Tutoring: 
+	<label class="switch">
+		<input id="peer_tutoring_button" type="checkbox">
+		<span class="slider round"></span>
+	</label>
 	<table class="table">
 			<thead>
 				<tr>
@@ -987,7 +1053,16 @@ var PROBLEM_LIST_TEMPLATE = `
 	</table>
 <script>
 $(document).ready(function(){
+	{{if eq .PeerTutorAllowed true}}$('#peer_tutoring_button').prop('checked', true);{{end}}
 	$('#new-problem').attr("href", "/teacher_web_broadcast"+window.location.search);
+	$('#peer_tutoring_button').change(function(){
+		var val = document.getElementById('peer_tutoring_button').checked;
+		var valInt = 0;
+		if (val == true)
+			valInt = 1;
+		$.post("/set_peer_tutor", {turn_on: valInt, uid: {{.UserID}}, role: {{.UserRole}}{{if ne .Password ""}}, password: {{.Password}}{{end}} }, function(data, status){
+		});
+	});
 	
 });
 </script>

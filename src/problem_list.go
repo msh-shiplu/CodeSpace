@@ -21,10 +21,11 @@ type ProblemData struct {
 }
 
 type ProblemListData struct {
-	Problems []*ProblemData
-	UserID   int
-	UserRole string
-	Password string
+	Problems         []*ProblemData
+	PeerTutorAllowed bool
+	UserID           int
+	UserRole         string
+	Password         string
 }
 
 func problemListHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
@@ -37,16 +38,17 @@ func problemListHandler(w http.ResponseWriter, r *http.Request, who string, uid 
 	}
 	var problemID int
 	var filename string
-	var problemUploadedAt, problemEndedAt time.Time
+	var problemUploadedAt time.Time
 	var problems = make([]*ProblemData, 0)
 	for rows.Next() {
+		var problemEndedAt time.Time
 		rows.Scan(&problemID, &filename, &problemUploadedAt, &problemEndedAt)
 		nActive, nHelp, nNotGraded, nCorrect, nIncorrect := getProblemStats(problemID)
 		problems = append(problems, &ProblemData{
 			ID:                 problemID,
 			Filename:           filename,
 			UploadedAt:         problemUploadedAt,
-			IsActive:           problemEndedAt.Year() < 2000,
+			IsActive:           problemEndedAt.IsZero(),
 			Attendance:         len(getCurrentStudents()),
 			NumActive:          nActive,
 			NumHelpRequest:     nHelp,
@@ -56,10 +58,11 @@ func problemListHandler(w http.ResponseWriter, r *http.Request, who string, uid 
 		})
 	}
 	problemListData := &ProblemListData{
-		Problems: problems,
-		UserID:   uid,
-		UserRole: role,
-		Password: password,
+		Problems:         problems,
+		PeerTutorAllowed: PeerTutorAllowed,
+		UserID:           uid,
+		UserRole:         role,
+		Password:         password,
 	}
 	temp := template.New("")
 	t, err := temp.Parse(PROBLEM_LIST_TEMPLATE)
