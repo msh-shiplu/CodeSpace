@@ -680,8 +680,8 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 		</div>
 		<div>
 			<section class="section">
-				{{range .Messages}}
-					<article class="message">
+				{{range $index, $el := .Messages}}
+					<article class="message message-feedback" style="margin-left: 25px; padding-bottom: 20px;">
 						<div class="message-header">
 						<p>{{if eq .Type 0}}{{.Name}} asked for help{{else if eq .Event "at_submission"}} Submission Snapshot taken {{else}} Regular Snapshot taken {{end}} at ({{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}})</p>
 						</div>
@@ -690,16 +690,12 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 						</div>
 						<div style="margin-left:20px;">
 							
-						<!--
-							<div class="accordions">
-								<h3>Code Snapshot</h3>
 								<div>
-									<textarea class="editor">{{ .Code }}</textarea>
+									<textarea id="message-editor-{{ $index }}" style="display: none;" >{{ .Code }}</textarea>
 								</div>
-							</div>
-						-->
+
 							
-							{{range $index, $el := .Feedbacks}}
+							{{range .Feedbacks}}
 								<article class="message" style="margin-left: 25px;">
 									<div class="message-header">
 									<p>Reply from {{.Name}} given at {{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}} </p>
@@ -707,7 +703,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 									<div class="message-body">
 										<div class="columns">
 											<div class="column is-three-quarters">
-												<textarea class="editor">{{ .Feedback }}</textarea>
+												<textarea id="feedback-editor-{{ $index }}">{{ .Feedback }}</textarea>
 											</div>
 											<div class="column">
 												<a onclick="autoFeedbackSubmit('yes', {{.FeedbackID}})">
@@ -722,11 +718,13 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 											
 										</div>
 
-										<div id="feedback-block-{{ $index }}"></div>
+										
 										
 									</div>
 								</article>
 							{{end}}
+
+							<div id="feedback-block-{{ $index }}"></div>
 
 						</div>
 					</article>
@@ -738,15 +736,65 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 			$(document).ready(function(){
 				$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
 				$('#problem-dashboard-link').attr("href", "/problem_dashboard"+window.location.search+"&problem_id={{.ProblemID}}");
-		  	});
-			var snapshotEditors = document.getElementsByClassName("editor");
-				
-			for (let i = 0; i<snapshotEditors.length; i++){
-				var code = CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
-				code.setSize("100%", 500);
-			}
+			
+				var MessageFeedbackBlocks = document.getElementsByClassName("message-feedback");
+				console.log("No. of message block: ", MessageFeedbackBlocks.length )
+				var write = "";
+					
+				for (let i = 0; i<MessageFeedbackBlocks.length; i++){
+					console.log("Doing for: ", "feedback-editor-"+i)
+					if (document.getElementById("feedback-editor-"+i) != null) {
 
-			// TODO Get inline feedbacks and their labels.
+						var code = CodeMirror.fromTextArea(document.getElementById("feedback-editor-"+i), {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
+						code.setSize("100%", 500);
+						
+						$.ajax({
+							url: "http://127.0.0.1:5000/feedback_classify",
+							type: "POST",
+							data: JSON.stringify({
+									student_code: document.getElementById("message-editor-"+i).value,
+									ta_code: document.getElementById("feedback-editor-"+i).value,
+									user_id: 1
+							}),
+							"headers": {
+								"Content-Type": "application/json"
+							},
+							success: function(data){
+							
+								write = "#feedback-block-"+i;
+								// console.log(write);
+								var pre = ''
+								var str = '';
+								data.results.forEach(function(item){
+									pre += '<div class="card" style="background-color: lightgray; margin-top: 15px; margin-bottom: 5px"><div class="card-content"><ul style="margin:5px">'
+									for (const key in item) {
+										if (key == "output") {
+											str = '<li><ul style="list-style-type:square">'
+											item.output.forEach(function(suggestion){
+												str += '<li>' + suggestion + '</li>'
+											});
+											str += '</ul></li>'
+											pre += str
+										} else {
+											pre += '<li>' + key + ' : ' + item[key] + '</li>'
+										}
+									}
+									pre += '</ul></div></div>'
+								})
+
+								$(write).html("");
+								$('<div class="wrapper">' + pre +  '</div>').appendTo( write )
+
+							},
+							error: function(err) {
+								alert(JSON.stringify(err));
+							}
+						});
+					}
+					
+				}
+			});
+
 
 
 			function autoFeedbackSubmit(backFeedback, fID) {
@@ -854,11 +902,11 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			<tbody>
 				{{range .StudentInfo}}
 				<tr>
-					<td>{{if ne .CodingStat "Idle"}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.StudentName}}</a>{{else}}{{.StudentName}}{{end}}</td>
+					<td>{{if ne .CodingStat "Idle"}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}#code-snapshot{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.StudentName}}</a>{{else}}{{.StudentName}}{{end}}</td>
 					<td>{{if and (eq $.IsActive true) (ne .CodingStat "Idle") (ne .LastUpdatedAt.IsZero true) }}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{ formatTimeSince .LastUpdatedAt }} ago</a>{{end}}</td>
 					<td>{{.CodingStat}}</td>
-					<td>{{if ne .HelpStat ""}}<a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.HelpStat}}</a>{{end}}</td>
-					<td>{{if ne .SubmissionStat ""}}<a href="/student_dashboard_submissions?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.SubmissionStat}}</a>{{end}}</td>
+					<td>{{if ne .HelpStat ""}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}#ask-for-help{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.StudentName}}</a>{{end}}</td>
+					<td>{{if ne .SubmissionStat ""}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}#submission{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.StudentName}}</a>{{end}}</td>
 					<td>{{.TutoringStat}}</td>
 				</tr>
 				{{end}}
@@ -1527,7 +1575,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 					</div>
 				
 				{{if eq .Grade ""}}
-					<div class="columns">
+					<div class="columns" style="margin: 1px;">
 						<div class="column is-three-quarters">Grade this Submissions.</div>
 						<div class="column"><button  class="button is-success" onclick="sendGrade( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }}, 'correct')">Correct</button></div>
 						<div class="column"><button  class="button is-danger" onclick="sendGrade( {{ $index }}, {{.ID}}, {{.SnapshotID}}, {{ .Code }}, 'incorrect')">Incorrect</button></div>
@@ -1617,7 +1665,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 						$('<div class="wrapper">' + pre +  '</div>').appendTo( write )
 
 						if (counter == 0 ){
-							alert("Feedback is not sent to student yet. Click on Send Feedback again.");
+							alert("Feedback is not sent to student yet. Revise & Click on Send Feedback again.");
 						}
 					},
 					error: function(err) {
@@ -1627,6 +1675,8 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			}
 
 			function codeSnapshotFeedback(code, user_id) {
+				// Check if the code is changed.
+
 				runNLP(code, snapshotCodeChanged, user_id, '#code-snapshot-feedback-block',snapshotCounter);
 
 				if (snapshotCounter !== 0) {
@@ -1643,6 +1693,8 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			}
 
 			function messageFeedback(i,code,message_id){
+				// Check if the code is changed.
+
 				runNLP(code, feedbackChangedCode[i], {{ .Feedback.UserID }}, '#feedback-block-'+i, feedbackCounter );
 				if (feedbackCounter != 0 ) {
 					$.post("/save_message_feedback", {feedback: feedbackChangedCode[i], message_id: message_id, uid: {{ .Feedback.UserID}}, role: {{ .Feedback.UserRole}}{{if ne .Feedback.Password ""}}, password: {{ .Feedback.Password}}{{end}}  }, function(data, status){

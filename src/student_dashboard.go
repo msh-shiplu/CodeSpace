@@ -225,6 +225,12 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 	} else {
 		http.Error(w, "You are not authorized to access!", http.StatusUnauthorized)
 	}
+
+	// Sort the messages by descding order of GivenAt
+	sort.Slice(messages, func(i, j int) bool {
+		return messages[i].GivenAt.After(messages[j].GivenAt)
+	})
+
 	// TODO(shiplu): sort the messages array
 	// sort.Slice(helpRequests, func(i, j int) bool { return helpRequests[i].GivenAt.Before(helpRequests[j].GivenAt) })
 	latestSnapshot := &Snapshot{}
