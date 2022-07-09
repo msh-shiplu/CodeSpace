@@ -674,9 +674,8 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 		<h2 class="title is-2">{{.StudentName}}'s Dashboard for {{.ProblemName}}</h2>
 		<div class="tabs">
 			<ul>
-			<li><a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}">Code Snapshot</a></li>
+			<li><a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}">CodeSpace</a></li>
 				<li class="is-active"><a>Feedback</a></li>
-				<li><a href="/student_dashboard_submissions?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}">Submissions</a></li>
 			</ul>
 		</div>
 		<div>
@@ -691,21 +690,25 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 						</div>
 						<div style="margin-left:20px;">
 							
+						<!--
 							<div class="accordions">
 								<h3>Code Snapshot</h3>
 								<div>
 									<textarea class="editor">{{ .Code }}</textarea>
 								</div>
 							</div>
+						-->
 							
-							{{range .Feedbacks}}
+							{{range $index, $el := .Feedbacks}}
 								<article class="message" style="margin-left: 25px;">
 									<div class="message-header">
 									<p>Reply from {{.Name}} given at {{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}} </p>
 									</div>
 									<div class="message-body">
 										<div class="columns">
-											<div class="column is-three-quarters">{{.Feedback}}</div>
+											<div class="column is-three-quarters">
+												<textarea class="editor">{{ .Feedback }}</textarea>
+											</div>
 											<div class="column">
 												<a onclick="autoFeedbackSubmit('yes', {{.FeedbackID}})">
 													<span style="font-size: 1.5em; {{if eq .CurrentUserVote "yes"}} color: green; {{end}}">
@@ -716,25 +719,15 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 														{{.Upvote}}
 												</span>
 											</div>
-											<div class="column">
-												<a onclick="autoFeedbackSubmit('no', {{.FeedbackID}})">
-													<span style="font-size: 1.5em; {{if eq .CurrentUserVote "no"}} color: red; {{end}}">
-														<i class="fas fa-thumbs-down"></i>
-													</span>
-												</a>
-												<span>
-													{{.Downvote}}
-												</span>
-											</div>
+											
 										</div>
+
+										<div id="feedback-block-{{ $index }}"></div>
+										
 									</div>
 								</article>
 							{{end}}
-							<div class="columns">
-								<div class="column is-three-quarters"><input  class="input is-info" id="{{.ID}}" type="text" placeholder="Provide your feedback!"></div>
-								<div class="column"><button  class="button is-primary" onclick="sendMessageFeedback({{.ID}})">Post</button></div>
-							
-							</div>
+
 						</div>
 					</article>
 					
@@ -753,22 +746,9 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 				code.setSize("100%", 500);
 			}
 
-			function sendMessageFeedback(message_id) {
-				var feedback = $('#'+message_id).val();
-				if(feedback == "") {
-					alert("Please write a feedback!");
-				} else {
-					$.post("/save_message_feedback", {feedback: feedback, message_id: message_id, uid: {{.UserID}}, role: {{.UserRole}}{{if ne .Password ""}}, password: {{.Password}}{{end}}  }, function(data, status){
-						if (status == "success"){
-							alert("Feedback posted successfully!");
-							window.location.reload();
-						} else {
-							alert("Could not post the feedback. Please try again!");
-						}
-					});
-				}
-			}
-			$(".accordions").accordion({ header: "h3", active: false, collapsible: true });
+			// TODO Get inline feedbacks and their labels.
+
+
 			function autoFeedbackSubmit(backFeedback, fID) {
 				$.ajax({
 					url: "/save_snapshot_back_feedback",
@@ -1435,6 +1415,27 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
 	<script src="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-collapsible"></script>
+	<style>
+		#code-snapshot {
+			background: darkseagreen;
+			padding: 20px;
+			margin: 30px;
+		}
+		#ask-for-help {
+			background: cornflowerblue;
+			margin: 30px;
+		}
+		#submission {
+			background: greenyellow;
+			padding: 20px;
+			margin: 30px;
+		}
+		.wrapper {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 20px;
+		}
+	</style>
 	</head>
 	<body>
 	<div class="container">
@@ -1453,7 +1454,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 		<span class="icon is-small">
 			<i class="fas fa-book" aria-hidden="true"></i>
 		  </span>
-			<span>Problem Dashboard ({{.ProblemName}})</span>
+			<span>Problem Dashboard ({{ .Feedback.ProblemName}})</span>
 		</a>
 	   </li>
 	  <li class="is-active">
@@ -1466,52 +1467,219 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 	  </li>
 	</ul>
 	</nav>
-		<h2 class="title is-2">{{.StudentName}}'s Dashboard for {{.ProblemName}}</h2>
+		<h2 class="title is-2">{{ .Feedback.StudentName}}'s Dashboard for {{ .Feedback.ProblemName}}</h2>
 		<div class="tabs">
 			<ul>
-				<li class="is-active"><a>Code Snapshot</a></li>
-				<li><a href="/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}">Feedback</a></li>
-				<li><a href="/student_dashboard_submissions?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}">Submissions</a></li>
+				<li class="is-active"><a>CodeSpace</a></li>
+				<li><a href="/student_dashboard_feedback_provision?student_id={{.Feedback.StudentID}}&problem_id={{.Feedback.ProblemID}}&uid={{.Feedback.UserID}}&role={{.Feedback.UserRole}}{{if ne .Feedback.Password ""}}&password={{.Feedback.Password}}{{end}}">Feedback</a></li>
 			</ul>
 		</div>
-		<div>
-			<h3 class="title is-3">Latest Code Snapshot at {{.LastSnapshot.LastUpdated.Format "Jan 02, 2006 3:04:05 PM"}}</h3>
-			<textarea class="editor">{{ .LastSnapshot.Code }}</textarea>
-			<div class="columns">
-				<div class="column is-three-quarters"><input id="snapshot-feedback-input" class="input is-info" type="text" placeholder="Provide your feedback!"></div>
- 				 <div class="column"><button id="snapshot-feedback-submit" class="button is-primary">Post</button></div>
-			
-			</div>
+		<div id="code-snapshot">
+			<div class="message-header">
+				<p>Latest Code Snapshot at {{.Feedback.LastSnapshot.LastUpdated.Format "Jan 02, 2006 3:04:05 PM"}}</p>
+				<button class="button is-info" onclick="codeSnapshotFeedback({{ .Feedback.LastSnapshot.Code }}, {{ .Feedback.UserID }})" style="margin-right:10px;" >Send Feedback</button>
+			</div>	
+			<textarea id="snapshot-editor"> {{ .Feedback.LastSnapshot.Code }} </textarea>
+			<div id="code-snapshot-feedback-block"></div> 
 		</div>
+
+		<div id="ask-for-help">
+			<section class="section" style="padding: 20px;">
+				{{range $index, $el := .Feedback.Messages}}
+					<article class="message">
+						<div class="message-header">
+							<p>{{if eq .Type 0}}{{.Name}} asked for help{{else if eq .Event "at_submission"}} Submission Snapshot taken {{else}} Regular Snapshot taken {{end}} at ({{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}})</p>
+							<button class="button is-info" onclick="messageFeedback( {{ $index }} ,{{ .Code }} , {{ .ID }})" style="margin-right:10px;" >Send Feedback</button>
+						</div>
+						<div class="message-body">
+							<h3>Student says: </h3> {{.Message}}
+						</div>
+						<div style="background: cornflowerblue;">
+							
+							<div class="accordions">
+								
+								<div>
+									<textarea class="feedback-editor">{{ .Code }}</textarea>
+								</div>
+							</div>
+							<div id="feedback-block-{{ $index }}"></div>
+
+						</div>
+					</article>
+					
+				{{end}}
+			</section>
+		</div>
+
+		<div id="submission">
+			{{range $index, $el := .Submission.Submissions}}
+				<div class="box" style="padding: 0px">
+					<div class="message-header">
+						<p>Submitted at {{.SubmittedAt.Format "Jan 02, 2006 3:04:05 PM"}}</p>
+					</div>
+					<div class="message-body">
+					{{if eq .Grade ""}} Not Graded {{else}} Graded {{if eq .Grade "correct"}} <span class="tag is-success">correct</span> {{else if eq .Grade "incorrect"}} <span class="tag is-danger">incorrect</span> {{else}} {{.Grade}} {{end}} {{end}}
+					<h3>Code</h3>
+					</div>
+					
+					<div>
+						<textarea class="submission-editor" id="editor-{{.ID}}">{{ .Code }}</textarea>
+					</div>
+				
+				{{if eq .Grade ""}}
+					<div class="columns">
+						<div class="column is-three-quarters">Grade this Submissions.</div>
+						<div class="column"><button  class="button is-success" onclick="sendGrade( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }}, 'correct')">Correct</button></div>
+						<div class="column"><button  class="button is-danger" onclick="sendGrade( {{ $index }}, {{.ID}}, {{.SnapshotID}}, {{ .Code }}, 'incorrect')">Incorrect</button></div>
+					</div>
+				{{end}}
+				</div>
+			{{end}}
+		</div>
+
+
 		<script>
 			$(document).ready(function(){
 				$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
-				$('#problem-dashboard-link').attr("href", "/problem_dashboard"+window.location.search+"&problem_id={{.ProblemID}}");
+				$('#problem-dashboard-link').attr("href", "/problem_dashboard"+window.location.search+"&problem_id={{.Feedback.ProblemID}}");
 		  	});
-			var snapshotEditors = document.getElementsByClassName("editor");
-				
-			for (let i = 0; i<snapshotEditors.length; i++){
-				var code = CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
-				code.setSize("100%", 500);
-			}
+
+			var snapshotCodeChanged = "";
+			var snapshotcode = CodeMirror.fromTextArea(document.getElementById("snapshot-editor"), {
+				lineNumbers: true, 
+				mode: "{{getEditorMode .Feedback.ProblemName}}", 
+				theme: "monokai", 
+				matchBrackets: true, 
+				indentUnit: 4, 
+				indentWithTabs: true, 
+				readOnly: false
+			});
+			snapshotcode.setSize("100%", 500);
+			snapshotcode.on('change', (snapshotcode) => {
+				snapshotCodeChanged = snapshotcode.doc.getValue()
+			});
+			var snapshotCounter = 0;
+			var feedbackCounter = 0;
 			
-			$(document).ready(function(){
-				$('#snapshot-feedback-submit').click(function(){
-					var feedback = $('#snapshot-feedback-input').val().trim();
-					if(feedback == "") {
-						alert("Please write a feedback!");
-					} else {
-						$.post("/save_snapshot_feedback", {feedback: feedback, snapshot_id: {{.LastSnapshot.ID}}, uid: {{.UserID}}, role: {{.UserRole}}{{if ne .Password ""}}, password: {{.Password}}{{end}}  }, function(data, status){
-							if (status == "success"){
-								alert("Feedback posted successfully!");
-								window.location.replace("/student_dashboard_feedback_provision?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}");
-							} else {
-								alert("Could not post the feedback. Please try again!");
+			var feedbackEditors = document.getElementsByClassName("feedback-editor");
+			var feedbackChangedCode = []
+			for (let i = 0; i<feedbackEditors.length; i++){
+				var code = CodeMirror.fromTextArea(feedbackEditors[i], {lineNumbers: true, mode: "{{getEditorMode .Feedback.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: false});
+				code.setSize("100%", 500);
+				code.on('change', (code) => {
+					feedbackChangedCode[i] = code.doc.getValue()
+				});
+			}
+
+			var submissionEditors = document.getElementsByClassName("submission-editor");
+			var submissionChangedCode = []
+			for (let i = 0; i<submissionEditors.length; i++){
+				var code = CodeMirror.fromTextArea(submissionEditors[i], {lineNumbers: true, mode: "{{getEditorMode .Feedback.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: false});
+				code.setSize("100%", 500);
+				code.on('change', (code) => {
+					submissionChangedCode[i] = code.doc.getValue()
+				});
+			}
+
+			function runNLP(student_code, ta_code, user_id, write, counter) {
+				console.log("Insert here: ", write);
+				return $.ajax({
+					url: "http://127.0.0.1:5000/feedback_classify",
+					type: "POST",
+					data: JSON.stringify({
+							student_code: student_code,
+							ta_code: ta_code,
+							user_id: user_id
+					}),
+					"headers": {
+						"Content-Type": "application/json"
+					},
+					success: function(data){
+						var pre = ''
+						var str = '';
+						data.results.forEach(function(item){
+							pre += '<div class="card" style="background-color: lightgray; margin-top: 15px"><div class="card-content"><ul style="margin:5px">'
+							for (const key in item) {
+								if (key == "output") {
+									str = '<li><ul style="list-style-type:square">'
+									item.output.forEach(function(suggestion){
+										str += '<li>' + suggestion + '</li>'
+									});
+									str += '</ul></li>'
+									pre += str
+								} else {
+									pre += '<li>' + key + ' : ' + item[key] + '</li>'
+								}
 							}
-						});
+							pre += '</ul></div></div>'
+						})
+						$(write).html("");
+						$('<div class="wrapper">' + pre +  '</div>').appendTo( write )
+
+						if (counter == 0 ){
+							alert("Feedback is not sent to student yet. Click on Send Feedback again.");
+						}
+					},
+					error: function(err) {
+						alert(JSON.stringify(err));
 					}
 				});
-			});
+			}
+
+			function codeSnapshotFeedback(code, user_id) {
+				runNLP(code, snapshotCodeChanged, user_id, '#code-snapshot-feedback-block',snapshotCounter);
+
+				if (snapshotCounter !== 0) {
+					$.post("/save_snapshot_feedback", {feedback: snapshotCodeChanged, snapshot_id: {{.Feedback.LastSnapshot.ID}}, uid: {{ .Feedback.UserID}}, role: {{ .Feedback.UserRole}}{{if ne .Feedback.Password ""}}, password: {{ .Feedback.Password}}{{end}}  }, function(data, status){
+						if (status == "success"){
+							alert("Feedback posted successfully!");
+							window.location.replace("/student_dashboard_feedback_provision?student_id={{ .Feedback.StudentID}}&problem_id={{ .Feedback.ProblemID}}&uid={{ .Feedback.UserID}}&role={{.Feedback.UserRole}}{{if ne .Feedback.Password ""}}&password={{.Feedback.Password}}{{end}}");
+						} else {
+							alert("Could not post the feedback. Please try again!");
+						}
+					});
+				}
+				snapshotCounter ++;
+			}
+
+			function messageFeedback(i,code,message_id){
+				runNLP(code, feedbackChangedCode[i], {{ .Feedback.UserID }}, '#feedback-block-'+i, feedbackCounter );
+				if (feedbackCounter != 0 ) {
+					$.post("/save_message_feedback", {feedback: feedbackChangedCode[i], message_id: message_id, uid: {{ .Feedback.UserID}}, role: {{ .Feedback.UserRole}}{{if ne .Feedback.Password ""}}, password: {{ .Feedback.Password}}{{end}}  }, function(data, status){
+						if (status == "success"){
+							alert("Feedback posted successfully!");
+							window.location.reload();
+						} else {
+							alert("Could not post the feedback. Please try again!");
+						}
+					});
+				}
+				feedbackCounter ++
+			}
+
+			// Run NLP for submission also ?
+			
+			function sendGrade(i, submission_id, snapshot_id, code, grade) {
+				// var feedback = $('#'+submission_id).val().trim();
+				// var code = $('#editor-'+submission_id).val();
+				var feedbackCode = code;
+				var code = submissionChangedCode[i]
+				$.post("/teacher_grades", {content: feedbackCode, changed: "", decision: grade, sid: submission_id, uid: {{ .Submission.UserID}}, role: {{ .Submission.UserRole}}{{if ne .Submission.Password ""}}, password: {{ .Submission.Password}}{{end}}  }, function(data, status){
+					if (status == "success"){
+						// Save and send feedback if the code is changed
+						if (submissionChangedCode[i] != "") {
+							feedbackCode = submissionChangedCode[i]
+							$.post("/save_snapshot_feedback", {snapshot_id: snapshot_id, feedback: feedbackCode, uid: {{ .Submission.UserID}}, role: {{ .Submission.UserRole}}{{if ne .Submission.Password ""}}, password: {{ .Submission.Password}}{{end}} }, function(data1, status1){
+							});
+						}
+						alert("Graded successfully!");
+						window.location.reload();
+					} else {
+						alert("Could not grade the submission. Please try again!");
+					}
+				});
+			}
+			
 		</script>
 
 	</body>

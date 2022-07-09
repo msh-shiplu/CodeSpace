@@ -27,7 +27,7 @@ type MessageDashBoard struct {
 	Role       string
 	Message    string
 	Type       int // 0 = help request, 1 = unsolicited
-	Event	   string
+	Event      string
 	GivenAt    time.Time
 	Code       string
 	SnapshotID int
@@ -63,6 +63,11 @@ type SubmissionDashboard struct {
 	UserID      int
 	UserRole    string
 	Password    string
+}
+
+type TemplateDate struct {
+	Feedback   FeedbackProvisionDashBoard
+	Submission SubmissionDashboard
 }
 
 func getCurrentUserVote(feedbackID int, userID int, userRole string) string {
@@ -210,7 +215,7 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 				Role:       authorRole,
 				Message:    message,
 				Type:       messageType,
-				Event:		event,
+				Event:      event,
 				GivenAt:    givenAt,
 				SnapshotID: snapshotID,
 				Code:       code,
@@ -343,22 +348,125 @@ func studentDashboardCodeSnapshotHandler(w http.ResponseWriter, r *http.Request,
 		log.Fatal(err)
 	}
 	students := getAllStudents()
+
+	// Get latest snapshot from DB
 	latestSnapshot := &Snapshot{}
 	if _, ok := StudentSnapshot[studentID][problemID]; ok {
 		latestSnapshot = Snapshots[StudentSnapshot[studentID][problemID]]
 	} else {
 		latestSnapshot = getLatestSnapshot(studentID, problemID)
 	}
-	data := &FeedbackProvisionDashBoard{
+
+	// Get all student messages from DB
+	var messages = make([]*MessageDashBoard, 0)
+	_, ok := HelpEligibleStudents[problemID][uid]
+	if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok) {
+		rows, err := Database.Query("select M.id, M.snapshot_id, M.message, M.author_id, M.author_role, M.given_at, M.type, C.Code, C.event from message M, code_snapshot C where M.snapshot_id = C.id and C.problem_id = ? and C.student_id = ?", problemID, studentID)
+		defer rows.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+		var snapshotID, authorID, messageType, messageID int
+		var message, authorRole, code, event string
+		var givenAt time.Time
+		for rows.Next() {
+			rows.Scan(&messageID, &snapshotID, &message, &authorID, &authorRole, &givenAt, &messageType, &code, &event)
+			name := ""
+			if authorRole == "teacher" {
+				name = getTeacherName(authorID)
+			} else {
+				name = students[authorID]
+			}
+			messages = append(messages, &MessageDashBoard{
+				ID:         messageID,
+				Name:       name,
+				Role:       authorRole,
+				Message:    message,
+				Type:       messageType,
+				Event:      event,
+				GivenAt:    givenAt,
+				SnapshotID: snapshotID,
+				Code:       code,
+				Feedbacks:  getMessageFeedbacks(messageID, uid, role),
+			})
+		}
+	} else {
+		http.Error(w, "You are not authorized to access!", http.StatusUnauthorized)
+	}
+
+	// Sort the messages by descding order of GivenAt
+	sort.Slice(messages, func(i, j int) bool {
+		return messages[i].GivenAt.After(messages[j].GivenAt)
+	})
+
+	feedback := &FeedbackProvisionDashBoard{
 		StudentName:  students[studentID],
 		ProblemName:  latestSnapshot.ProblemName,
 		LastSnapshot: latestSnapshot,
+		Messages:     messages,
 		StudentID:    studentID,
 		ProblemID:    problemID,
 		UserID:       uid,
 		UserRole:     role,
 		Password:     r.FormValue("password"),
 	}
+
+	// Get all submissions from DB.
+	var submissions = make([]*SubmissionInfo, 0)
+	_, ok = HelpEligibleStudents[problemID][uid]
+	if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok) {
+		rows, err := Database.Query("select id, snapshot_id, student_code, code_submitted_at, verdict from submission where student_id = ? and problem_id = ?", studentID, problemID)
+		defer rows.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+		var snapshotID, submissionID int
+		var verdict, code string
+		var submittedAt time.Time
+		for rows.Next() {
+			verdict = ""
+			rows.Scan(&submissionID, &snapshotID, &code, &submittedAt, &verdict)
+
+			submissions = append(submissions, &SubmissionInfo{
+				ID:          submissionID,
+				SnapshotID:  snapshotID,
+				Code:        code,
+				Grade:       verdict,
+				SubmittedAt: submittedAt,
+			})
+		}
+		sort.SliceStable(submissions, func(i, j int) bool {
+			if submissions[i].Grade == "" && submissions[j].Grade == "" {
+				return submissions[i].SubmittedAt.After(submissions[j].SubmittedAt)
+			}
+			if submissions[i].Grade == "" {
+				return true
+			}
+			if submissions[j].Grade == "" {
+				return false
+			}
+			return submissions[i].SubmittedAt.After(submissions[j].SubmittedAt)
+		})
+	} else {
+		http.Error(w, "You are not authorized to access!", http.StatusUnauthorized)
+	}
+
+	submission := &SubmissionDashboard{
+		StudentName: getStudentName(studentID),
+		ProblemName: getProblemNameFromID(problemID),
+		Submissions: submissions,
+		StudentID:   studentID,
+		ProblemID:   problemID,
+		UserID:      uid,
+		UserRole:    role,
+		Password:    r.FormValue("password"),
+	}
+
+	data := TemplateDate{
+		Submission: *submission,
+		Feedback:   *feedback,
+	}
+
 	w.Header().Set("Content-Type", "text/html")
 	err = t.Execute(w, data)
 	if err != nil {
