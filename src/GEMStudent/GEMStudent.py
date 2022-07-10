@@ -253,11 +253,11 @@ def gems_periodic_update():
                 else:
                     comment = "//"
                 with open(filename, 'w', encoding='utf-8') as f:
-                    f.write(resp['Snapshot']+"\n\n"+comment +
-                            "Feedback: "+resp['Feedback'])
+                    f.write(resp['Feedback'])
                 if sublime.active_window().id() == 0:
                     sublime.run_command('new_window')
-                sublime.active_window().open_file(filename)
+                view = sublime.active_window().open_file(filename)
+                view.set_read_only(False)
                 print("Code snapshot feedback recieved!")
 
         # Open board pages and feedback automatically

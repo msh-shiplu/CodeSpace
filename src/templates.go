@@ -689,42 +689,35 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 							{{.Message}}
 						</div>
 						<div style="margin-left:20px;">
-							
+							{{if .Code }}
 								<div>
 									<textarea id="message-editor-{{ $index }}" style="display: none;" >{{ .Code }}</textarea>
 								</div>
 
-							
-							{{range .Feedbacks}}
-								<article class="message" style="margin-left: 25px;">
-									<div class="message-header">
-									<p>Reply from {{.Name}} given at {{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}} </p>
-									</div>
-									<div class="message-body">
-										<div class="columns">
-											<div class="column is-three-quarters">
-												<textarea id="feedback-editor-{{ $index }}">{{ .Feedback }}</textarea>
+								{{range .Feedbacks}}
+									<article class="message" style="margin-left: 25px;">
+										<div class="message-header">
+										<p>Reply from {{.Name}} given at {{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}} </p>
+										</div>
+										<div class="message-body">
+											<div class="columns">
+												<div class="column is-three-quarters">
+													<textarea id="feedback-editor-{{ $index }}">{{ .Feedback }}</textarea>
+												</div>
+												<div class="column">
+													<button class="button is-info" onclick="autoFeedbackSubmit('yes', {{.FeedbackID}})" style="margin-right:10px;" >Thank you <span style="margin:5px;"> ({{.Upvote}})</span> </button>
+												</div>
+												
 											</div>
-											<div class="column">
-												<a onclick="autoFeedbackSubmit('yes', {{.FeedbackID}})">
-													<span style="font-size: 1.5em; {{if eq .CurrentUserVote "yes"}} color: green; {{end}}">
-														<i class="fas fa-thumbs-up"></i>
-													</span>
-												</a>
-												<span>
-														{{.Upvote}}
-												</span>
-											</div>
+
+											
 											
 										</div>
+									</article>
+								{{end}}
 
-										
-										
-									</div>
-								</article>
-							{{end}}
-
-							<div id="feedback-block-{{ $index }}"></div>
+								<div id="feedback-block-{{ $index }}"></div>
+							{{ end }}
 
 						</div>
 					</article>
@@ -738,7 +731,6 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 				$('#problem-dashboard-link').attr("href", "/problem_dashboard"+window.location.search+"&problem_id={{.ProblemID}}");
 			
 				var MessageFeedbackBlocks = document.getElementsByClassName("message-feedback");
-				console.log("No. of message block: ", MessageFeedbackBlocks.length )
 				var write = "";
 					
 				for (let i = 0; i<MessageFeedbackBlocks.length; i++){
@@ -905,8 +897,8 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 					<td>{{if ne .CodingStat "Idle"}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}#code-snapshot{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.StudentName}}</a>{{else}}{{.StudentName}}{{end}}</td>
 					<td>{{if and (eq $.IsActive true) (ne .CodingStat "Idle") (ne .LastUpdatedAt.IsZero true) }}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{ formatTimeSince .LastUpdatedAt }} ago</a>{{end}}</td>
 					<td>{{.CodingStat}}</td>
-					<td>{{if ne .HelpStat ""}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}#ask-for-help{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.StudentName}}</a>{{end}}</td>
-					<td>{{if ne .SubmissionStat ""}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}#submission{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.StudentName}}</a>{{end}}</td>
+					<td>{{if ne .HelpStat ""}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}#ask-for-help{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.HelpStat}}</a>{{end}}</td>
+					<td>{{if ne .SubmissionStat ""}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}#submission{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.SubmissionStat}}</a>{{end}}</td>
 					<td>{{.TutoringStat}}</td>
 				</tr>
 				{{end}}
@@ -1566,14 +1558,23 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 						<p>Submitted at {{.SubmittedAt.Format "Jan 02, 2006 3:04:05 PM"}}</p>
 					</div>
 					<div class="message-body">
-					{{if eq .Grade ""}} Not Graded {{else}} Graded {{if eq .Grade "correct"}} <span class="tag is-success">correct</span> {{else if eq .Grade "incorrect"}} <span class="tag is-danger">incorrect</span> {{else}} {{.Grade}} {{end}} {{end}}
-					<h3>Code</h3>
+						<div class="columns" style="margin: 1px;">
+							<div class="column is-three-quarters">
+								{{if eq .Grade ""}} Not Graded {{else}} Graded {{if eq .Grade "correct"}} <span class="tag is-success">correct</span> {{else if eq .Grade "incorrect"}} <span class="tag is-danger">incorrect</span> {{else}} {{.Grade}} {{end}} {{end}}
+							</div>
+							{{if eq .Grade ""}}
+							<div class="column"><button  class="button is-success" onclick="sendGrade( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }}, 'correct')">Correct</button></div>
+							<div class="column"><button  class="button is-danger" onclick="sendGrade( {{ $index }}, {{.ID}}, {{.SnapshotID}}, {{ .Code }}, 'incorrect')">Incorrect</button></div>
+							{{end}}
+							</div>
+
+						<h3>Code</h3>
 					</div>
 					
 					<div>
 						<textarea class="submission-editor" id="editor-{{.ID}}">{{ .Code }}</textarea>
 					</div>
-				
+				<!--
 				{{if eq .Grade ""}}
 					<div class="columns" style="margin: 1px;">
 						<div class="column is-three-quarters">Grade this Submissions.</div>
@@ -1581,6 +1582,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 						<div class="column"><button  class="button is-danger" onclick="sendGrade( {{ $index }}, {{.ID}}, {{.SnapshotID}}, {{ .Code }}, 'incorrect')">Incorrect</button></div>
 					</div>
 				{{end}}
+				-->
 				</div>
 			{{end}}
 		</div>
@@ -1676,7 +1678,10 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 
 			function codeSnapshotFeedback(code, user_id) {
 				// Check if the code is changed.
-
+				if (snapshotCodeChanged == "" ) {
+					alert("Please provide in-line feedback!");
+					return
+				}
 				runNLP(code, snapshotCodeChanged, user_id, '#code-snapshot-feedback-block',snapshotCounter);
 
 				if (snapshotCounter !== 0) {
@@ -1694,6 +1699,10 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 
 			function messageFeedback(i,code,message_id){
 				// Check if the code is changed.
+				if (feedbackChangedCode[i] == "" ) {
+					alert("Please provide in-line feedback!");
+					return
+				}
 
 				runNLP(code, feedbackChangedCode[i], {{ .Feedback.UserID }}, '#feedback-block-'+i, feedbackCounter );
 				if (feedbackCounter != 0 ) {
