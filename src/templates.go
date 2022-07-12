@@ -680,8 +680,8 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 		</div>
 		<div>
 			<section class="section">
-				{{range $index, $el := .Messages}}
-					<article class="message message-feedback" style="margin-left: 25px; padding-bottom: 20px;">
+				{{range .Messages}}
+					<article class="message" style="margin-left: 25px; padding-bottom: 20px;">
 						<div class="message-header">
 						<p>{{if eq .Type 0}}{{.Name}} asked for help{{else if eq .Event "at_submission"}} Submission Snapshot taken {{else}} Regular Snapshot taken {{end}} at ({{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}})</p>
 						</div>
@@ -690,9 +690,6 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 						</div>
 						<div style="margin-left:20px;">
 							{{if .Code }}
-								<div>
-									<textarea id="message-editor-{{ $index }}" style="display: none;" >{{ .Code }}</textarea>
-								</div>
 
 								{{range .Feedbacks}}
 									<article class="message" style="margin-left: 25px;">
@@ -702,7 +699,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 										<div class="message-body">
 											<div class="columns">
 												<div class="column is-three-quarters">
-													<textarea id="feedback-editor-{{ $index }}">{{ .Feedback }}</textarea>
+													<textarea class="message-feedback">{{ .Feedback }}</textarea>
 												</div>
 												<div class="column">
 													<button class="button is-info" onclick="autoFeedbackSubmit('yes', {{.FeedbackID}})" style="margin-right:10px;" >Thank you <span style="margin:5px;"> ({{.Upvote}})</span> </button>
@@ -716,7 +713,6 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 									</article>
 								{{end}}
 
-								<div id="feedback-block-{{ $index }}"></div>
 							{{ end }}
 
 						</div>
@@ -730,61 +726,14 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 				$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
 				$('#problem-dashboard-link').attr("href", "/problem_dashboard"+window.location.search+"&problem_id={{.ProblemID}}");
 			
-				var MessageFeedbackBlocks = document.getElementsByClassName("message-feedback");
-				var write = "";
-					
-				for (let i = 0; i<MessageFeedbackBlocks.length; i++){
-					console.log("Doing for: ", "feedback-editor-"+i)
-					if (document.getElementById("feedback-editor-"+i) != null) {
 
-						var code = CodeMirror.fromTextArea(document.getElementById("feedback-editor-"+i), {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
-						code.setSize("100%", 500);
-						
-						$.ajax({
-							url: "http://127.0.0.1:5000/feedback_classify",
-							type: "POST",
-							data: JSON.stringify({
-									student_code: document.getElementById("message-editor-"+i).value,
-									ta_code: document.getElementById("feedback-editor-"+i).value,
-									user_id: 1
-							}),
-							"headers": {
-								"Content-Type": "application/json"
-							},
-							success: function(data){
-							
-								write = "#feedback-block-"+i;
-								// console.log(write);
-								var pre = ''
-								var str = '';
-								data.results.forEach(function(item){
-									pre += '<div class="card" style="background-color: lightgray; margin-top: 15px; margin-bottom: 5px"><div class="card-content"><ul style="margin:5px">'
-									for (const key in item) {
-										if (key == "output") {
-											str = '<li><ul style="list-style-type:square">'
-											item.output.forEach(function(suggestion){
-												str += '<li>' + suggestion + '</li>'
-											});
-											str += '</ul></li>'
-											pre += str
-										} else {
-											pre += '<li>' + key + ' : ' + item[key] + '</li>'
-										}
-									}
-									pre += '</ul></div></div>'
-								})
-
-								$(write).html("");
-								$('<div class="wrapper">' + pre +  '</div>').appendTo( write )
-
-							},
-							error: function(err) {
-								alert(JSON.stringify(err));
-							}
-						});
-					}
-					
+				var snapshotEditors = document.getElementsByClassName("message-feedback");
+				
+				for (let i = 0; i<snapshotEditors.length; i++){
+					var code = CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
+					code.setSize("100%", 500);
 				}
+
 			});
 
 
@@ -1516,8 +1465,13 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 		</div>
 		<div id="code-snapshot">
 			<div class="message-header">
-				<p>Latest Code Snapshot at {{.Feedback.LastSnapshot.LastUpdated.Format "Jan 02, 2006 3:04:05 PM"}}</p>
-				<button class="button is-info" onclick="codeSnapshotFeedback({{ .Feedback.LastSnapshot.Code }}, {{ .Feedback.UserID }})" style="margin-right:10px;" >Send Feedback</button>
+				<div class="column is-two-thirds">
+					<p>Latest Code Snapshot at {{.Feedback.LastSnapshot.LastUpdated.Format "Jan 02, 2006 3:04:05 PM"}}</p>
+				</div>
+				<div class="column">
+					<button class="button is-info" id="snapshot-check-feedback" onclick="codeSnapshotFeedback({{ .Feedback.LastSnapshot.Code }}, {{ .Feedback.UserID }})" style="margin-right:10px;" >Check For Suggestions</button>
+					<button class="button is-info" id="snapshot-send-feedback" onclick="sendSnapshotFeedback({{ .Feedback.LastSnapshot.Code }}, {{ .Feedback.UserID }})" style="margin-right:10px;" >Send Feedback</button>
+				</div>
 			</div>	
 			<textarea id="snapshot-editor"> {{ .Feedback.LastSnapshot.Code }} </textarea>
 			<div id="code-snapshot-feedback-block"></div> 
@@ -1526,26 +1480,34 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 		<div id="ask-for-help">
 			<section class="section" style="padding: 20px;">
 				{{range $index, $el := .Feedback.Messages}}
-					<article class="message">
-						<div class="message-header">
-							<p>{{if eq .Type 0}}{{.Name}} asked for help{{else if eq .Event "at_submission"}} Submission Snapshot taken {{else}} Regular Snapshot taken {{end}} at ({{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}})</p>
-							<button class="button is-info" onclick="messageFeedback( {{ $index }} ,{{ .Code }} , {{ .ID }})" style="margin-right:10px;" >Send Feedback</button>
-						</div>
-						<div class="message-body">
-							<h3>Student says: </h3> {{.Message}}
-						</div>
-						<div style="background: cornflowerblue;">
-							
-							<div class="accordions">
-								
-								<div>
-									<textarea class="feedback-editor">{{ .Code }}</textarea>
+					{{ if eq .Type 0 }} <!-- Don't show regular snapshots in this block -->
+						<article class="message">
+							<div class="message-header">
+								<div class="column is-two-thirds">
+									<p>{{if eq .Type 0}}{{.Name}} asked for help{{else if eq .Event "at_submission"}} Submission Snapshot taken {{else}} Regular Snapshot taken {{end}} at ({{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}})</p>
 								</div>
+								<div class="column">
+									<button class="button is-info help-check" id="help-check-feedback-{{ $index }}" onclick="messageFeedback( {{ $index }} ,{{ .Code }} , {{ .ID }})" style="margin-right:10px;" >Check For Suggestions</button>
+									<button class="button is-info help-send" id="help-send-feedback-{{ $index }}" onclick="sendMessageFeedback( {{ $index }} ,{{ .Code }} , {{ .ID }})" style="margin-right:10px;" >Send Feedback</button>
+								</div>
+								
 							</div>
-							<div id="feedback-block-{{ $index }}"></div>
+							<div class="message-body">
+								<h3>Student says: </h3> {{.Message}}
+							</div>
+							<div style="background: cornflowerblue;">
+								
+								<div class="accordions">
+									
+									<div>
+										<textarea class="feedback-editor" id="feedback-editor-{{ $index }}">{{ .Code }}</textarea>
+									</div>
+								</div>
+								<div id="feedback-block-{{ $index }}"></div>
 
-						</div>
-					</article>
+							</div>
+						</article>
+					{{ end }}
 					
 				{{end}}
 			</section>
@@ -1558,31 +1520,25 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 						<p>Submitted at {{.SubmittedAt.Format "Jan 02, 2006 3:04:05 PM"}}</p>
 					</div>
 					<div class="message-body">
-						<div class="columns" style="margin: 1px;">
-							<div class="column is-three-quarters">
+						<div class="columns">
+							<div class="column is-half">
 								{{if eq .Grade ""}} Not Graded {{else}} Graded {{if eq .Grade "correct"}} <span class="tag is-success">correct</span> {{else if eq .Grade "incorrect"}} <span class="tag is-danger">incorrect</span> {{else}} {{.Grade}} {{end}} {{end}}
 							</div>
+							<div class="buttons" style="margin-left: auto; padding-right: 15px">
 							{{if eq .Grade ""}}
-							<div class="column"><button  class="button is-success" onclick="sendGrade( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }}, 'correct')">Correct</button></div>
-							<div class="column"><button  class="button is-danger" onclick="sendGrade( {{ $index }}, {{.ID}}, {{.SnapshotID}}, {{ .Code }}, 'incorrect')">Incorrect</button></div>
+								<button  class="button is-success" id="correct-{{ $index }}" onclick="setGrade( {{ $index }}, 'correct')">Correct</button>
+								<button  class="button is-danger" id="incorrect-{{ $index }}" onclick="setGrade( {{ $index }}, 'incorrect')">Incorrect</button>
+								<button class="button is-info sub-check" id="sub-check-{{ $index }}" onclick="checkSubFeedback( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }})">Check For Suggestions</button>
+								<button class="button is-info sub-submit" id="sub-submit-{{ $index }}" onclick="sendGradeFeedback( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }})">Submit</button>
 							{{end}}
 							</div>
 
-						<h3>Code</h3>
 					</div>
 					
 					<div>
 						<textarea class="submission-editor" id="editor-{{.ID}}">{{ .Code }}</textarea>
 					</div>
-				<!--
-				{{if eq .Grade ""}}
-					<div class="columns" style="margin: 1px;">
-						<div class="column is-three-quarters">Grade this Submissions.</div>
-						<div class="column"><button  class="button is-success" onclick="sendGrade( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }}, 'correct')">Correct</button></div>
-						<div class="column"><button  class="button is-danger" onclick="sendGrade( {{ $index }}, {{.ID}}, {{.SnapshotID}}, {{ .Code }}, 'incorrect')">Incorrect</button></div>
-					</div>
-				{{end}}
-				-->
+					<div id="sub-feedback-block-{{ $index }}"></div>
 				</div>
 			{{end}}
 		</div>
@@ -1592,7 +1548,21 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			$(document).ready(function(){
 				$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
 				$('#problem-dashboard-link').attr("href", "/problem_dashboard"+window.location.search+"&problem_id={{.Feedback.ProblemID}}");
-		  	});
+				
+				// Disable all the Send Feedback buttons
+				// Snapshot feedback button
+				document.getElementById("snapshot-send-feedback").setAttribute("disabled","");
+				// Ask for help feedback button
+				document.querySelectorAll('.help-send').forEach(function(button) {
+					button.setAttribute("disabled","");
+				});
+
+				// Disable submit buttons
+				document.querySelectorAll('.sub-submit').forEach(function(button) {
+					button.setAttribute("disabled","");
+				});
+
+			});
 
 			var snapshotCodeChanged = "";
 			var snapshotcode = CodeMirror.fromTextArea(document.getElementById("snapshot-editor"), {
@@ -1610,29 +1580,37 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			});
 			var snapshotCounter = 0;
 			var feedbackCounter = 0;
+			var subfeedbackCounter = 0;
 			
-			var feedbackEditors = document.getElementsByClassName("feedback-editor");
+			// var feedbackEditors = document.getElementsByClassName("feedback-editor");
 			var feedbackChangedCode = []
-			for (let i = 0; i<feedbackEditors.length; i++){
-				var code = CodeMirror.fromTextArea(feedbackEditors[i], {lineNumbers: true, mode: "{{getEditorMode .Feedback.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: false});
-				code.setSize("100%", 500);
-				code.on('change', (code) => {
-					feedbackChangedCode[i] = code.doc.getValue()
-				});
+			for (let i = 0; i<{{ len .Feedback.Messages }}; i++){
+				var askHelpEditor = document.getElementById("feedback-editor-"+i)
+				if (askHelpEditor != null ) {
+					var code = CodeMirror.fromTextArea(askHelpEditor, {lineNumbers: true, mode: "{{getEditorMode .Feedback.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: false});
+					code.setSize("100%", 500);
+					code.on('change', (code) => {
+						feedbackChangedCode[i] = code.doc.getValue()
+					});
+				}
+
 			}
 
 			var submissionEditors = document.getElementsByClassName("submission-editor");
-			var submissionChangedCode = []
+			var submissionChangedCode = [];
+			var submissionsGrade = [];
 			for (let i = 0; i<submissionEditors.length; i++){
 				var code = CodeMirror.fromTextArea(submissionEditors[i], {lineNumbers: true, mode: "{{getEditorMode .Feedback.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: false});
 				code.setSize("100%", 500);
 				code.on('change', (code) => {
 					submissionChangedCode[i] = code.doc.getValue()
+					if (subfeedbackCounter === 0 ){
+						document.getElementById("sub-submit-"+i).setAttribute("disabled","");
+					}
 				});
 			}
 
-			function runNLP(student_code, ta_code, user_id, write, counter) {
-				console.log("Insert here: ", write);
+			function runNLP(student_code, ta_code, user_id, write) {
 				return $.ajax({
 					url: "http://127.0.0.1:5000/feedback_classify",
 					type: "POST",
@@ -1666,9 +1644,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 						$(write).html("");
 						$('<div class="wrapper">' + pre +  '</div>').appendTo( write )
 
-						if (counter == 0 ){
-							alert("Feedback is not sent to student yet. Revise & Click on Send Feedback again.");
-						}
+						alert("Feedback is not sent to student yet. Revise & Click on Send Feedback again.");
 					},
 					error: function(err) {
 						alert(JSON.stringify(err));
@@ -1682,63 +1658,123 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 					alert("Please provide in-line feedback!");
 					return
 				}
-				runNLP(code, snapshotCodeChanged, user_id, '#code-snapshot-feedback-block',snapshotCounter);
+				runNLP(code, snapshotCodeChanged, user_id, '#code-snapshot-feedback-block');
+				document.getElementById("snapshot-send-feedback").removeAttribute("disabled");
+				
+			}
 
-				if (snapshotCounter !== 0) {
-					$.post("/save_snapshot_feedback", {feedback: snapshotCodeChanged, snapshot_id: {{.Feedback.LastSnapshot.ID}}, uid: {{ .Feedback.UserID}}, role: {{ .Feedback.UserRole}}{{if ne .Feedback.Password ""}}, password: {{ .Feedback.Password}}{{end}}  }, function(data, status){
-						if (status == "success"){
-							alert("Feedback posted successfully!");
-							window.location.replace("/student_dashboard_feedback_provision?student_id={{ .Feedback.StudentID}}&problem_id={{ .Feedback.ProblemID}}&uid={{ .Feedback.UserID}}&role={{.Feedback.UserRole}}{{if ne .Feedback.Password ""}}&password={{.Feedback.Password}}{{end}}");
-						} else {
-							alert("Could not post the feedback. Please try again!");
-						}
-					});
-				}
-				snapshotCounter ++;
+			function sendSnapshotFeedback(code, user_id) {
+
+				$.post("/save_snapshot_feedback", {feedback: snapshotCodeChanged, snapshot_id: {{.Feedback.LastSnapshot.ID}}, uid: {{ .Feedback.UserID}}, role: {{ .Feedback.UserRole}}{{if ne .Feedback.Password ""}}, password: {{ .Feedback.Password}}{{end}}  }, function(data, status){
+					if (status == "success"){
+						alert("Feedback posted successfully!");
+						window.location.replace("/student_dashboard_feedback_provision?student_id={{ .Feedback.StudentID}}&problem_id={{ .Feedback.ProblemID}}&uid={{ .Feedback.UserID}}&role={{.Feedback.UserRole}}{{if ne .Feedback.Password ""}}&password={{.Feedback.Password}}{{end}}");
+					} else {
+						alert("Could not post the feedback. Please try again!");
+					}
+				});
 			}
 
 			function messageFeedback(i,code,message_id){
 				// Check if the code is changed.
-				if (feedbackChangedCode[i] == "" ) {
+				if (feedbackChangedCode[i] === undefined ) {
 					alert("Please provide in-line feedback!");
 					return
 				}
 
-				runNLP(code, feedbackChangedCode[i], {{ .Feedback.UserID }}, '#feedback-block-'+i, feedbackCounter );
-				if (feedbackCounter != 0 ) {
-					$.post("/save_message_feedback", {feedback: feedbackChangedCode[i], message_id: message_id, uid: {{ .Feedback.UserID}}, role: {{ .Feedback.UserRole}}{{if ne .Feedback.Password ""}}, password: {{ .Feedback.Password}}{{end}}  }, function(data, status){
-						if (status == "success"){
-							alert("Feedback posted successfully!");
-							window.location.reload();
-						} else {
-							alert("Could not post the feedback. Please try again!");
-						}
-					});
-				}
-				feedbackCounter ++
+				runNLP(code, feedbackChangedCode[i], {{ .Feedback.UserID }}, '#feedback-block-'+i );
+				document.getElementById("help-send-feedback-"+i).removeAttribute("disabled");
 			}
 
-			// Run NLP for submission also ?
-			
-			function sendGrade(i, submission_id, snapshot_id, code, grade) {
-				// var feedback = $('#'+submission_id).val().trim();
-				// var code = $('#editor-'+submission_id).val();
-				var feedbackCode = code;
-				var code = submissionChangedCode[i]
-				$.post("/teacher_grades", {content: feedbackCode, changed: "", decision: grade, sid: submission_id, uid: {{ .Submission.UserID}}, role: {{ .Submission.UserRole}}{{if ne .Submission.Password ""}}, password: {{ .Submission.Password}}{{end}}  }, function(data, status){
+			function sendMessageFeedback(i,code,message_id) {
+				$.post("/save_message_feedback", {feedback: feedbackChangedCode[i], message_id: message_id, uid: {{ .Feedback.UserID}}, role: {{ .Feedback.UserRole}}{{if ne .Feedback.Password ""}}, password: {{ .Feedback.Password}}{{end}}  }, function(data, status){
 					if (status == "success"){
-						// Save and send feedback if the code is changed
-						if (submissionChangedCode[i] != "") {
-							feedbackCode = submissionChangedCode[i]
-							$.post("/save_snapshot_feedback", {snapshot_id: snapshot_id, feedback: feedbackCode, uid: {{ .Submission.UserID}}, role: {{ .Submission.UserRole}}{{if ne .Submission.Password ""}}, password: {{ .Submission.Password}}{{end}} }, function(data1, status1){
-							});
-						}
-						alert("Graded successfully!");
-						window.location.reload();
+						alert("Feedback posted successfully!");
+						window.location.replace("/student_dashboard_feedback_provision?student_id={{ .Feedback.StudentID}}&problem_id={{ .Feedback.ProblemID}}&uid={{ .Feedback.UserID}}&role={{.Feedback.UserRole}}{{if ne .Feedback.Password ""}}&password={{.Feedback.Password}}{{end}}");
 					} else {
-						alert("Could not grade the submission. Please try again!");
+						alert("Could not post the feedback. Please try again!");
 					}
 				});
+
+			}
+
+			function setGrade(i, grade) {
+				submissionsGrade[i] = grade;
+				document.getElementById("sub-submit-"+i).removeAttribute("disabled");
+
+			}
+			function checkSubFeedback (i, submission_id, snapshot_id, submittedCode) {
+				// Check if the code is changed.
+				var code = submissionChangedCode[i]
+				if (code === undefined ) {
+					alert("Please provide in-line feedback!");
+					return
+				}
+
+				runNLP(submittedCode, code, {{ .Submission.UserID }}, '#sub-feedback-block-'+i );
+				subfeedbackCounter++;
+				document.getElementById("sub-submit-"+i).removeAttribute("disabled");
+			}
+			
+			function sendGradeFeedback(i, submission_id, snapshot_id, submittedCode) {
+				var code = submissionChangedCode[i]
+				var grade = submissionsGrade[i]
+
+				// if no grade, no code change, disable submit
+				// if grade but no code change, send grades only.
+				// if grade and  code change, disable submit to run it through nlp.
+				// if grade and code change and already run through nlp, enable submit. This will send both grade and feedback.
+				
+				if (subfeedbackCounter != 0 ) {
+					if (grade !== undefined ) {
+						$.post("/teacher_grades", {content: submittedCode, changed: "", decision: grade, sid: submission_id, uid: {{ .Submission.UserID}}, role: {{ .Submission.UserRole}}{{if ne .Submission.Password ""}}, password: {{ .Submission.Password}}{{end}}  }, function(data, status){
+							if (status == "success"){
+								// Save and send feedback if the code is changed
+								if (code !== undefined) {
+									$.post("/save_snapshot_feedback", {snapshot_id: snapshot_id, feedback: code, uid: {{ .Submission.UserID}}, role: {{ .Submission.UserRole}}{{if ne .Submission.Password ""}}, password: {{ .Submission.Password}}{{end}} }, function(data1, status1){
+										alert("Graded successfully! Feedback posted successfully! ");
+										window.location.reload();
+									});
+								} else {
+									alert("Graded successfully! ");
+									window.location.reload();
+								}
+							} else {
+								alert("Could not grade the submission. Please try again!");
+								return;
+							}
+						});
+					} else {
+						$.post("/save_snapshot_feedback", {snapshot_id: snapshot_id, feedback: code, uid: {{ .Submission.UserID}}, role: {{ .Submission.UserRole}}{{if ne .Submission.Password ""}}, password: {{ .Submission.Password}}{{end}} }, function(data1, status1){
+							alert("Feedback posted successfully! ");
+							window.location.reload();
+						});
+					}
+				}
+
+				if ( code === undefined ){
+					if (grade !== undefined ) {
+						$.post("/teacher_grades", {content: submittedCode, changed: "", decision: grade, sid: submission_id, uid: {{ .Submission.UserID}}, role: {{ .Submission.UserRole}}{{if ne .Submission.Password ""}}, password: {{ .Submission.Password}}{{end}}  }, function(data, status){
+							if (status == "success"){
+								alert("Graded successfully!");
+								window.location.reload();
+							} else {
+								alert("Could not grade the submission. Please try again!");
+								return;
+							}
+						});
+
+					} else {
+						alert("Please provide in-line feedback!");
+						return;
+					}
+				
+				}
+
+				
+
+				
+				
 			}
 			
 		</script>
