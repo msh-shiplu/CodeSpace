@@ -777,6 +777,8 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+
 </head>
 <body>
 <div class="container">
@@ -829,7 +831,7 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			</tbody>
 	</table>
 
-	<table class="table">
+	<table class="table sortable">
 			<thead>
 				<tr>
 					<th>Student</th>
@@ -1494,6 +1496,11 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 							</div>
 							<div class="message-body">
 								<h3>Student says: </h3> {{.Message}}
+
+								{{ if not (eq (len .Feedbacks) 0) }}
+									<span class="tag is-success">Responded</span>
+								{{ end }}
+								
 							</div>
 							<div style="background: cornflowerblue;">
 								
@@ -1627,18 +1634,15 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 						var str = '';
 						data.results.forEach(function(item){
 							pre += '<div class="card" style="background-color: lightgray; margin-top: 15px"><div class="card-content"><ul style="margin:5px">'
-							for (const key in item) {
-								if (key == "output") {
-									str = '<li><ul style="list-style-type:square">'
-									item.output.forEach(function(suggestion){
-										str += '<li>' + suggestion + '</li>'
-									});
-									str += '</ul></li>'
-									pre += str
-								} else {
-									pre += '<li>' + key + ' : ' + item[key] + '</li>'
-								}
-							}
+
+							pre += '<li><strong>' + "Feedback: " + '</strong>' + item.feedback + '</li>'
+
+							str = '<li><strong>Suggestions: </strong> <ul style="list-style-type:square">'
+							item.output.forEach(function(suggestion){
+								str += '<li>' + suggestion + '</li>'
+							});
+							str += '</ul></li>'
+							pre += str
 							pre += '</ul></div></div>'
 						})
 						$(write).html("");
