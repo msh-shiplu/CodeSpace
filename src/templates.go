@@ -1498,7 +1498,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 								<h3>Student says: </h3> {{.Message}}
 
 								{{ if not (eq (len .Feedbacks) 0) }}
-									<span class="tag is-success">Responded</span>
+									<span class="tag is-success">Responded ({{ len .Feedbacks}})</span>
 								{{ end }}
 								
 							</div>
@@ -1524,22 +1524,23 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			{{range $index, $el := .Submission.Submissions}}
 				<div class="box" style="padding: 0px">
 					<div class="message-header">
-						<p>Submitted at {{.SubmittedAt.Format "Jan 02, 2006 3:04:05 PM"}}</p>
-					</div>
-					<div class="message-body">
-						<div class="columns">
-							<div class="column is-half">
-								{{if eq .Grade ""}} Not Graded {{else}} Graded {{if eq .Grade "correct"}} <span class="tag is-success">correct</span> {{else if eq .Grade "incorrect"}} <span class="tag is-danger">incorrect</span> {{else}} {{.Grade}} {{end}} {{end}}
-							</div>
-							<div class="buttons" style="margin-left: auto; padding-right: 15px">
+						<div class="column is-half">
+							<p>Submitted at {{.SubmittedAt.Format "Jan 02, 2006 3:04:05 PM"}}</p>
+						</div>
+
+						<div class="column buttons" style="padding-left: 85px;">
 							{{if eq .Grade ""}}
 								<button  class="button is-success" id="correct-{{ $index }}" onclick="setGrade( {{ $index }}, 'correct')">Correct</button>
 								<button  class="button is-danger" id="incorrect-{{ $index }}" onclick="setGrade( {{ $index }}, 'incorrect')">Incorrect</button>
 								<button class="button is-info sub-check" id="sub-check-{{ $index }}" onclick="checkSubFeedback( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }})">Check For Suggestions</button>
 								<button class="button is-info sub-submit" id="sub-submit-{{ $index }}" onclick="sendGradeFeedback( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }})">Submit</button>
 							{{end}}
-							</div>
-
+						</div>
+					</div>
+					<div class="message-body">
+						<div class="columns">
+							{{if eq .Grade ""}} Not Graded {{else}} Graded {{if eq .Grade "correct"}} <span class="tag is-success">correct</span> {{else if eq .Grade "incorrect"}} <span class="tag is-danger">incorrect</span> {{else}} {{.Grade}} {{end}} {{end}}
+						</div>
 					</div>
 					
 					<div>
@@ -1581,7 +1582,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 				indentWithTabs: true, 
 				readOnly: false
 			});
-			snapshotcode.setSize("100%", 500);
+			snapshotcode.setSize("100%", "100%");
 			snapshotcode.on('change', (snapshotcode) => {
 				snapshotCodeChanged = snapshotcode.doc.getValue()
 			});
@@ -1595,7 +1596,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 				var askHelpEditor = document.getElementById("feedback-editor-"+i)
 				if (askHelpEditor != null ) {
 					var code = CodeMirror.fromTextArea(askHelpEditor, {lineNumbers: true, mode: "{{getEditorMode .Feedback.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: false});
-					code.setSize("100%", 500);
+					code.setSize("100%", "100%");
 					code.on('change', (code) => {
 						feedbackChangedCode[i] = code.doc.getValue()
 					});
@@ -1608,7 +1609,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			var submissionsGrade = [];
 			for (let i = 0; i<submissionEditors.length; i++){
 				var code = CodeMirror.fromTextArea(submissionEditors[i], {lineNumbers: true, mode: "{{getEditorMode .Feedback.ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: false});
-				code.setSize("100%", 500);
+				code.setSize("100%", "100%");
 				code.on('change', (code) => {
 					submissionChangedCode[i] = code.doc.getValue()
 					if (subfeedbackCounter === 0 ){
