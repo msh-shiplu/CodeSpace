@@ -253,11 +253,11 @@ def gems_periodic_update():
                 else:
                     comment = "//"
                 with open(filename, 'w', encoding='utf-8') as f:
-                    f.write(resp['Snapshot']+"\n\n"+comment +
-                            "Feedback: "+resp['Feedback'])
+                    f.write(resp['Feedback'])
                 if sublime.active_window().id() == 0:
                     sublime.run_command('new_window')
-                sublime.active_window().open_file(filename)
+                view = sublime.active_window().open_file(filename)
+                view.set_read_only(True)
                 print("Code snapshot feedback recieved!")
 
         # Open board pages and feedback automatically
@@ -1036,22 +1036,45 @@ class gemsEventListeners(sublime_plugin.EventListener):
             ask_for_back_feedback(fname, local_file, True)
 
 
+    # def on_deactivated_async(self, view):
+    #     if view.file_name() != None:
+    #         filename = os.path.basename(view.file_name())
+    #         fn_splits = filename.split("-")
+    #         if filename is not None and len(fn_splits) > 2 and fn_splits[0] == "feedback" and fn_splits[1].isdigit():
+    #             feedback_dir = os.path.join(gemsFOLDER, 'FEEDBACK')
+    #             local_file = os.path.join(feedback_dir, filename)
+    #             fname = "".join(fn_splits[2:])
+    #             if local_file not in feedback_resp:
+    #                 feedback_resp.append(local_file)
+                    # ask_for_back_feedback(view, fname, local_file, True)
+                    # sublime.active_window().open_file(view.file_name())
+                    # print("Filename: ",view.file_name())
+                    # print("Active window: ",sublime.active_window().id() )
+                    # if sublime.active_window().id() == 0:
+                    #     sublime.run_command('new_window')
+                    # view = sublime.active_window().open_file(view.file_name())
+                    # view.run_command('enter_insert_mode')
+                    
+
 def ask_for_back_feedback(filename, feedback_filename, fromEvent=False):
     feedback_id = os.path.basename(feedback_filename).split("-")[1]
+
     if check_message_feedback(feedback_id):
         return
-    # sublime.active_window().open_file(feedback_filename)
+        # sublime.active_window().open_file(feedback_filename)
+
+    # show Yes Option as first.        
     resp = sublime.yes_no_cancel_dialog(
-        "Was this feedback helpful? Please answer Yes or No", "Yes", "No")
-    if resp == sublime.DIALOG_YES:
+        "Was this feedback helpful? Please answer Yes or No", "No", "Yes")
+    # consider the first option as YES
+    if resp == sublime.DIALOG_NO:
         send_student_back_feedback(filename, "yes", feedback_filename)
-    elif resp == sublime.DIALOG_NO:
+    elif resp == sublime.DIALOG_YES:
         send_student_back_feedback(filename, "no", feedback_filename)
     elif resp == sublime.DIALOG_CANCEL:
-        ask_for_back_feedback(filename, feedback_filename)
+        ask_for_back_feedback(filename, feedback_filename, True)
     if fromEvent == False:
-        sublime.active_window().active_view().close()
-
+        sublime.active_window().active_view().close() 
 
 def send_student_back_feedback(filename, response, feedback_filename):
     global gemsBackFeedbackTimers
