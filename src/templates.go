@@ -640,6 +640,12 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
 	<script src="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-collapsible"></script>
+	<style>
+		.status {
+			display: flex;
+			justify-content: space-between;
+		}
+	</style>
 	</head>
 	<body>
 	<div class="container">
@@ -672,10 +678,17 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 	</ul>
 	</nav>
 		<h2 class="title is-2">{{.StudentName}}'s Dashboard for {{.ProblemName}}</h2>
+		<div class="column is-two-thirds status">
+			<span>Coding Status: <strong>{{ .Status.CodingStat }} </strong></span>
+			<span>Help Status: <strong>{{ .Status.HelpStat }} </strong></span>
+			<span>Submission Status: <strong> {{ .Status.SubmissionStat }} </strong></span>
+			<span>Tutoring Status: <strong>{{ .Status.TutoringStat }} </strong></span>
+		</div>
+
 		<div class="tabs">
 			<ul>
 			<li><a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}">CodeSpace</a></li>
-				<li class="is-active"><a>Feedback</a></li>
+				<li class="is-active"><a>Feedback History</a></li>
 			</ul>
 		</div>
 		<div>
@@ -902,7 +915,7 @@ var PROBLEM_LIST_TEMPLATE = `
 <html>
 <head>
 <title>Exercises</title>
-<meta http-equiv="refresh" content="120" >
+<meta http-equiv="refresh" content="10" >
 <style>
 .switch {
   position: relative;
@@ -1393,7 +1406,6 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 	<html>
 	<head>
 	<title>Student Dashboard</title>
-	<meta http-equiv="refresh" content="120" >
 	<script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
@@ -1425,6 +1437,13 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			display: grid;
 			grid-template-columns: repeat(2, 1fr);
 			gap: 20px;
+		}
+		.status {
+			display: flex;
+			justify-content: space-between;
+		}
+		input[type="radio"] {
+			margin-right: 5px;
 		}
 	</style>
 	</head>
@@ -1459,12 +1478,20 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 	</ul>
 	</nav>
 		<h2 class="title is-2">{{ .Feedback.StudentName}}'s Dashboard for {{ .Feedback.ProblemName}}</h2>
+		<div class="column is-two-thirds status">
+		<span>Coding Status: <strong>{{ .Status.CodingStat }} </strong></span>
+			<span>Help Status: <strong>{{ .Status.HelpStat }} </strong></span>
+			<span>Submission Status: <strong> {{ .Status.SubmissionStat }} </strong></span>
+			<span>Tutoring Status: <strong>{{ .Status.TutoringStat }} </strong></span>
+		</div>
+
 		<div class="tabs">
 			<ul>
 				<li class="is-active"><a>CodeSpace</a></li>
-				<li><a href="/student_dashboard_feedback_provision?student_id={{.Feedback.StudentID}}&problem_id={{.Feedback.ProblemID}}&uid={{.Feedback.UserID}}&role={{.Feedback.UserRole}}{{if ne .Feedback.Password ""}}&password={{.Feedback.Password}}{{end}}">Feedback</a></li>
+				<li><a href="/student_dashboard_feedback_provision?student_id={{.Feedback.StudentID}}&problem_id={{.Feedback.ProblemID}}&uid={{.Feedback.UserID}}&role={{.Feedback.UserRole}}{{if ne .Feedback.Password ""}}&password={{.Feedback.Password}}{{end}}">Feedback History</a></li>
 			</ul>
 		</div>
+		
 		<div id="code-snapshot">
 			<div class="message-header">
 				<div class="column is-two-thirds">
@@ -1483,10 +1510,14 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			<section class="section" style="padding: 20px;">
 				{{range $index, $el := .Feedback.Messages}}
 					{{ if eq .Type 0 }} <!-- Don't show regular snapshots in this block -->
+					{{ if eq (len .Feedbacks) 0 }}
 						<article class="message">
 							<div class="message-header">
 								<div class="column is-two-thirds">
-									<p>{{if eq .Type 0}}{{.Name}} asked for help{{else if eq .Event "at_submission"}} Submission Snapshot taken {{else}} Regular Snapshot taken {{end}} at ({{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}})</p>
+									<p>{{if eq .Type 0}}{{.Name}} asked for help{{else if eq .Event "at_submission"}} Submission Snapshot taken {{else}} Regular Snapshot taken {{end}} at {{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}}</p>
+									{{ if not (eq (len .Feedbacks) 0) }}
+										<span class="tag is-success">Responded ({{ len .Feedbacks}})</span>
+									{{ end }}
 								</div>
 								<div class="column">
 									<button class="button is-info help-check" id="help-check-feedback-{{ $index }}" onclick="messageFeedback( {{ $index }} ,{{ .Code }} , {{ .ID }})" style="margin-right:10px;" >Check For Suggestions</button>
@@ -1496,10 +1527,6 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 							</div>
 							<div class="message-body">
 								<h3>Student says: </h3> {{.Message}}
-
-								{{ if not (eq (len .Feedbacks) 0) }}
-									<span class="tag is-success">Responded ({{ len .Feedbacks}})</span>
-								{{ end }}
 								
 							</div>
 							<div style="background: cornflowerblue;">
@@ -1515,6 +1542,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 							</div>
 						</article>
 					{{ end }}
+					{{ end }}
 					
 				{{end}}
 			</section>
@@ -1522,32 +1550,39 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 
 		<div id="submission">
 			{{range $index, $el := .Submission.Submissions}}
+				{{ if eq .Grade "" }}
 				<div class="box" style="padding: 0px">
+				
 					<div class="message-header">
-						<div class="column is-half">
+						<div class="column is-two-fifths">
 							<p>Submitted at {{.SubmittedAt.Format "Jan 02, 2006 3:04:05 PM"}}</p>
+							{{if eq .Grade ""}} Not Graded {{else}} Graded {{if eq .Grade "correct"}} <span class="tag is-success">correct</span> {{else if eq .Grade "incorrect"}} <span class="tag is-danger">incorrect</span> {{else}} {{.Grade}} {{end}} {{end}}
 						</div>
 
-						<div class="column buttons" style="padding-left: 85px;">
+						<div class="column buttons" style="padding-left: 1px;">
 							{{if eq .Grade ""}}
-								<button  class="button is-success" id="correct-{{ $index }}" onclick="setGrade( {{ $index }}, 'correct')">Correct</button>
-								<button  class="button is-danger" id="incorrect-{{ $index }}" onclick="setGrade( {{ $index }}, 'incorrect')">Incorrect</button>
+								<button class="button"><label><input type="radio" name="grade"  value="correct" onchange="setGrade( {{ $index }}, 'correct')" />Correct </label></button>
+								<button  class="button"><label><input type="radio" name="grade"  value="incorrect" onchange="setGrade( {{ $index }}, 'incorrect')" />Incorrect </label></button>
+								<button  class="button"><label><input type="radio" name="grade" value="0" checked onchange="removeGrade( {{ $index }})" />Not Graded</label></button>
 								<button class="button is-info sub-check" id="sub-check-{{ $index }}" onclick="checkSubFeedback( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }})">Check For Suggestions</button>
 								<button class="button is-info sub-submit" id="sub-submit-{{ $index }}" onclick="sendGradeFeedback( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }})">Submit</button>
 							{{end}}
 						</div>
 					</div>
+					<!--
 					<div class="message-body">
 						<div class="columns">
 							{{if eq .Grade ""}} Not Graded {{else}} Graded {{if eq .Grade "correct"}} <span class="tag is-success">correct</span> {{else if eq .Grade "incorrect"}} <span class="tag is-danger">incorrect</span> {{else}} {{.Grade}} {{end}} {{end}}
 						</div>
 					</div>
+					-->
 					
 					<div>
 						<textarea class="submission-editor" id="editor-{{.ID}}">{{ .Code }}</textarea>
 					</div>
 					<div id="sub-feedback-block-{{ $index }}"></div>
 				</div>
+				{{ end }}
 			{{end}}
 		</div>
 
@@ -1620,7 +1655,8 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 
 			function runNLP(student_code, ta_code, user_id, write) {
 				return $.ajax({
-					url: "http://127.0.0.1:5000/feedback_classify",
+					// url: "http://127.0.0.1:5000/feedback_classify",
+					url: "http://delphinus.cs.memphis.edu:5000/feedback_classify",
 					type: "POST",
 					data: JSON.stringify({
 							student_code: student_code,
@@ -1648,8 +1684,6 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 						})
 						$(write).html("");
 						$('<div class="wrapper">' + pre +  '</div>').appendTo( write )
-
-						alert("Feedback is not sent to student yet. Revise & Click on Send Feedback again.");
 					},
 					error: function(err) {
 						alert(JSON.stringify(err));
@@ -1669,7 +1703,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			}
 
 			function sendSnapshotFeedback(code, user_id) {
-
+				runNLP(code, snapshotCodeChanged, user_id, '#code-snapshot-feedback-block');
 				$.post("/save_snapshot_feedback", {feedback: snapshotCodeChanged, snapshot_id: {{.Feedback.LastSnapshot.ID}}, uid: {{ .Feedback.UserID}}, role: {{ .Feedback.UserRole}}{{if ne .Feedback.Password ""}}, password: {{ .Feedback.Password}}{{end}}  }, function(data, status){
 					if (status == "success"){
 						alert("Feedback posted successfully!");
@@ -1692,6 +1726,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			}
 
 			function sendMessageFeedback(i,code,message_id) {
+				runNLP(code, feedbackChangedCode[i], {{ .Feedback.UserID }}, '#feedback-block-'+i );
 				$.post("/save_message_feedback", {feedback: feedbackChangedCode[i], message_id: message_id, uid: {{ .Feedback.UserID}}, role: {{ .Feedback.UserRole}}{{if ne .Feedback.Password ""}}, password: {{ .Feedback.Password}}{{end}}  }, function(data, status){
 					if (status == "success"){
 						alert("Feedback posted successfully!");
@@ -1706,7 +1741,9 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			function setGrade(i, grade) {
 				submissionsGrade[i] = grade;
 				document.getElementById("sub-submit-"+i).removeAttribute("disabled");
-
+			}
+			function removeGrade(index) {
+				submissionsGrade[index] = undefined;
 			}
 			function checkSubFeedback (i, submission_id, snapshot_id, submittedCode) {
 				// Check if the code is changed.
@@ -1736,6 +1773,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 							if (status == "success"){
 								// Save and send feedback if the code is changed
 								if (code !== undefined) {
+									runNLP(submittedCode, code, {{ .Submission.UserID }}, '#sub-feedback-block-'+i );
 									$.post("/save_snapshot_feedback", {snapshot_id: snapshot_id, feedback: code, uid: {{ .Submission.UserID}}, role: {{ .Submission.UserRole}}{{if ne .Submission.Password ""}}, password: {{ .Submission.Password}}{{end}} }, function(data1, status1){
 										alert("Graded successfully! Feedback posted successfully! ");
 										window.location.reload();
@@ -1750,6 +1788,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 							}
 						});
 					} else {
+						runNLP(submittedCode, code, {{ .Submission.UserID }}, '#sub-feedback-block-'+i );
 						$.post("/save_snapshot_feedback", {snapshot_id: snapshot_id, feedback: code, uid: {{ .Submission.UserID}}, role: {{ .Submission.UserRole}}{{if ne .Submission.Password ""}}, password: {{ .Submission.Password}}{{end}} }, function(data1, status1){
 							alert("Feedback posted successfully! ");
 							window.location.reload();
@@ -1775,10 +1814,6 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 					}
 				
 				}
-
-				
-
-				
 				
 			}
 			

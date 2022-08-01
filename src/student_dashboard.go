@@ -37,6 +37,7 @@ type MessageDashBoard struct {
 type FeedbackProvisionDashBoard struct {
 	StudentName  string
 	ProblemName  string
+	Status       DashBoardStudentInfo
 	LastSnapshot *Snapshot
 	Messages     []*MessageDashBoard
 	StudentID    int
@@ -68,6 +69,7 @@ type SubmissionDashboard struct {
 type TemplateDate struct {
 	Feedback   FeedbackProvisionDashBoard
 	Submission SubmissionDashboard
+	Status     DashBoardStudentInfo
 }
 
 func getCurrentUserVote(feedbackID int, userID int, userRole string) string {
@@ -239,6 +241,27 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 	} else {
 		latestSnapshot = getLatestSnapshot(studentID, problemID)
 	}
+
+	// Get student status
+	rows, err := Database.Query("select coding_stat, help_stat, submission_stat, tutoring_stat from student_status where problem_id=? and student_id=?", problemID, studentID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var codingStat, submissionStat, helpStat, tutoringStat string
+	// var studentInfo []*DashBoardStudentInfo
+	studentStats := DashBoardStudentInfo{}
+	for rows.Next() {
+		rows.Scan(&codingStat, &helpStat, &submissionStat, &tutoringStat)
+		if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok) {
+			studentStats.CodingStat = codingStat
+			studentStats.HelpStat = helpStat
+			studentStats.SubmissionStat = submissionStat
+			studentStats.TutoringStat = tutoringStat
+		}
+	}
+	rows.Close()
+
 	data := &FeedbackProvisionDashBoard{
 		StudentName:  students[studentID],
 		ProblemName:  latestSnapshot.ProblemName,
@@ -249,6 +272,7 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 		UserID:       uid,
 		UserRole:     role,
 		Password:     r.FormValue("password"),
+		Status:       studentStats,
 	}
 	w.Header().Set("Content-Type", "text/html")
 	err = t.Execute(w, data)
@@ -343,7 +367,7 @@ func hasMessageBackFeedbackHandler(w http.ResponseWriter, r *http.Request, who s
 	}
 }
 
-func studentDashboardCodeSnapshotHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+func studentDashboardCodeSpaceHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	role := r.FormValue("role")
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
 	studentID, _ := strconv.Atoi(r.FormValue("student_id"))
@@ -468,9 +492,30 @@ func studentDashboardCodeSnapshotHandler(w http.ResponseWriter, r *http.Request,
 		Password:    r.FormValue("password"),
 	}
 
+	// Get student status
+	rows, err := Database.Query("select coding_stat, help_stat, submission_stat, tutoring_stat from student_status where problem_id=? and student_id=?", problemID, studentID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var codingStat, submissionStat, helpStat, tutoringStat string
+	// var studentInfo []*DashBoardStudentInfo
+	studentStats := DashBoardStudentInfo{}
+	for rows.Next() {
+		rows.Scan(&codingStat, &helpStat, &submissionStat, &tutoringStat)
+		if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok) {
+			studentStats.CodingStat = codingStat
+			studentStats.HelpStat = helpStat
+			studentStats.SubmissionStat = submissionStat
+			studentStats.TutoringStat = tutoringStat
+		}
+	}
+	rows.Close()
+
 	data := TemplateDate{
 		Submission: *submission,
 		Feedback:   *feedback,
+		Status:     studentStats,
 	}
 
 	w.Header().Set("Content-Type", "text/html")
