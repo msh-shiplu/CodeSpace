@@ -16,6 +16,9 @@ func studentAskHelpHandler(w http.ResponseWriter, r *http.Request, who string, u
 	content, filename := r.FormValue("content"), r.FormValue("filename")
 	need_help_with := r.FormValue("need_help_with")
 	sid := int64(0)
+	if need_help_with == "" {
+		need_help_with = "None."
+	}
 
 	var err error
 	msg := "your help message has been sent"

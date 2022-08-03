@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"html/template"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func teacherSigninCompleteHandler(w http.ResponseWriter, r *http.Request) {
