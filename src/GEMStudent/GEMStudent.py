@@ -1,6 +1,7 @@
 # GEMStudent
 # Author: Vinhthuy Phan, 2018
 #
+import imp
 from urllib import response
 import sublime
 import sublime_plugin
@@ -9,12 +10,10 @@ import urllib.request
 import os
 import json
 import time
-import random
-import shutil
 import datetime
 import webbrowser
-import pickle
 import threading
+import re
 
 gemsUpdateIntervalLong = 20000		# Update interval
 gemsUpdateIntervalShort = 10000		# When submission is being looked at
@@ -257,7 +256,7 @@ def gems_periodic_update():
                 if sublime.active_window().id() == 0:
                     sublime.run_command('new_window')
                 view = sublime.active_window().open_file(filename)
-                view.set_read_only(True)
+                # view.set_read_only(True)
                 print("Code snapshot feedback recieved!")
 
         # Open board pages and feedback automatically
@@ -286,6 +285,9 @@ def gems_share(self, edit, priority):
         return
     content = self.view.substr(sublime.Region(0, self.view.size())).lstrip()
     filename = os.path.basename(fname)
+    match = re.search(r'feedback-\d+-(.*)', filename)
+    if match:
+        filename = match.group(1)
     items = content.rsplit(gemsAnswerTag, 1)
     if len(items) == 2:
         answer = items[1].strip()
@@ -302,7 +304,7 @@ def gems_share(self, edit, priority):
         content=content,
         answer=answer,
         testcases=testCases,
-        filename=os.path.basename(fname),
+        filename=filename,
         priority=priority,
     )
     response = gemsRequest('student_shares', data)
