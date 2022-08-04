@@ -9,7 +9,7 @@ To use this software to share code in class, you will need to (1) install [Subli
 
 (3) Copy this code:
 ```
-import os; package_path = os.path.join(sublime.packages_path(), "GEMStudent"); os.mkdir(package_path) if not os.path.isdir(package_path) else print("dir exists"); module_file = os.path.join(package_path, "GEMStudent.py") ; menu_file = os.path.join(package_path, "Main.sublime-menu"); version_file = os.path.join(package_path, "version.go"); import urllib.request; urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/CodeSpace/src/GEMStudent/GEMStudent.py", module_file); urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/CodeSpace/src/GEMStudent/Main.sublime-menu", menu_file); urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/CodeSpace/src/version.go", version_file)
+import os; package_path = os.path.join(sublime.packages_path(), "GEMStudent"); os.mkdir(package_path) if not os.path.isdir(package_path) else print("dir exists"); module_file = os.path.join(package_path, "GEMStudent.py") ; menu_file = os.path.join(package_path, "Main.sublime-menu"); version_file = os.path.join(package_path, "version.go"); import urllib.request; urllib.request.urlretrieve("https://raw.githubusercontent.com/msh-shiplu/CodeSpace/0.1/src/GEMStudent/GEMStudent.py", module_file); urllib.request.urlretrieve("https://raw.githubusercontent.com/msh-shiplu/CodeSpace/0.1/src/GEMStudent/Main.sublime-menu", menu_file); # urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/CodeSpace/src/version.go", version_file)
 ```
 
 (4) Paste copied code to Console and hit enter.
