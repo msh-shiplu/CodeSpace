@@ -996,6 +996,7 @@ input:checked + .slider:before {
 	</ul>
 	</nav>
 	<h2 class="title is-2">Exercises</h2>
+	{{if ne .UserRole "student"}}
 	<a id="new-problem" class="button is-success" href="">
 		<span class="icon is-small">
 		<i class="fa-solid fa-plus"></i>
@@ -1007,6 +1008,7 @@ input:checked + .slider:before {
 		<input id="peer_tutoring_button" type="checkbox">
 		<span class="slider round"></span>
 	</label>
+	{{end}}
 	<table class="table">
 			<thead>
 				<tr>
