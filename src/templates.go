@@ -715,7 +715,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 													<textarea class="message-feedback">{{ .Feedback }}</textarea>
 												</div>
 												<div class="column">
-													<button class="button is-info" onclick="autoFeedbackSubmit('yes', {{.FeedbackID}})" style="margin-right:10px;" >Thank you <span style="margin:5px;"> ({{.Upvote}})</span> </button>
+													<button class="button is-info" onclick="autoFeedbackSubmit('yes', {{.FeedbackID}})" style="margin-top:3px;" >Thank you <span style="margin:5px;"> ({{.Upvote}})</span> </button>
 												</div>
 												
 											</div>
@@ -1425,15 +1425,18 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			background: darkseagreen;
 			padding: 20px;
 			margin: 30px;
+			padding-bottom: 50px
 		}
 		#ask-for-help {
-			background: cornflowerblue;
+			background: #c1bb91;
 			margin: 30px;
+			// padding-bottom: 30px
 		}
 		#submission {
-			background: greenyellow;
+			background: #ada192;;
 			padding: 20px;
 			margin: 30px;
+			padding-bottom: 10px
 		}
 		.wrapper {
 			display: grid;
@@ -1447,11 +1450,31 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 		input[type="radio"] {
 			margin-right: 5px;
 		}
+		.menu {
+			padding: 10px;
+			padding-left: 100px;
+		}
+		.show {
+			top: 35px;
+			position: fixed;
+			z-index: 200;
+			background: white;
+		}
+		.content {
+			padding-top: 100px;
+		}
+		.actions {
+			// float: right;
+			margin-left: 1054px
+		}
+		.sub-actions {
+			margin-left: 995px
+		}
 	</style>
 	</head>
 	<body>
 	<div class="container">
-	<nav class="breadcrumb" aria-label="breadcrumbs">
+	<nav class="navbar is-fixed-top breadcrumb menu" role="navigation" aria-label="breadcrumbs">
 	<ul>
 	  <li>
 		<a id="view-exercise-link" href="#">
@@ -1479,41 +1502,55 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 	  </li>
 	</ul>
 	</nav>
-		<h2 class="title is-2">{{ .Feedback.StudentName}}'s Dashboard for {{ .Feedback.ProblemName}}</h2>
-		<div class="column is-two-thirds status">
-		<span>Coding Status: <strong>{{ .Status.CodingStat }} </strong></span>
+
+	<div class="column is-two-thirds show" style="width: 70%;">
+		<div class="row">
+			<h3 class="title is-2" style="margin-bottom: 0px;">{{ .Feedback.StudentName}}'s Dashboard for {{ .Feedback.ProblemName}}</h3>
+		</div>
+		<div class="row status">
+			<span>Coding Status: <strong>{{ .Status.CodingStat }} </strong></span>
 			<span>Help Status: <strong>{{ .Status.HelpStat }} </strong></span>
 			<span>Submission Status: <strong> {{ .Status.SubmissionStat }} </strong></span>
 			<span>Tutoring Status: <strong>{{ .Status.TutoringStat }} </strong></span>
 		</div>
+	</div>
 
+	<div class="content">
+		
 		<div class="tabs">
 			<ul>
 				<li class="is-active"><a>CodeSpace</a></li>
 				<li><a href="/student_dashboard_feedback_provision?student_id={{.Feedback.StudentID}}&problem_id={{.Feedback.ProblemID}}&uid={{.Feedback.UserID}}&role={{.Feedback.UserRole}}{{if ne .Feedback.Password ""}}&password={{.Feedback.Password}}{{end}}">Feedback History</a></li>
 			</ul>
 		</div>
-		
+
+		<h3>Student's latest code snapshot: </h3>
 		<div id="code-snapshot">
-			<div class="message-header">
-				<div class="column is-two-thirds">
-					<p>Latest Code Snapshot at {{.Feedback.LastSnapshot.LastUpdated.Format "Jan 02, 2006 3:04:05 PM"}}</p>
-				</div>
-				<div class="column">
-					<button class="button is-info" id="snapshot-check-feedback" onclick="codeSnapshotFeedback({{ .Feedback.LastSnapshot.Code }}, {{ .Feedback.UserID }})" style="margin-right:10px;" >Check For Suggestions</button>
-					<button class="button is-info" id="snapshot-send-feedback" onclick="sendSnapshotFeedback({{ .Feedback.LastSnapshot.Code }}, {{ .Feedback.UserID }})" style="margin-right:10px;" >Send Feedback</button>
-				</div>
-			</div>	
-			<textarea id="snapshot-editor"> {{ .Feedback.LastSnapshot.Code }} </textarea>
-			<div id="code-snapshot-feedback-block"></div> 
+			<div class="box" style="padding: 0px; margin-bottom: 3.5rem; border: 5px solid; border-radius: 10px;">
+				<div class="message-header">
+					<div class="column is-two-thirds">
+						<p>Latest Code Snapshot at {{.Feedback.LastSnapshot.LastUpdated.Format "Jan 02, 2006 3:04:05 PM"}}</p>
+					</div>
+				</div>	
+				<div style="background: darkseagreen;">
+					<textarea id="snapshot-editor"> {{ .Feedback.LastSnapshot.Code }} </textarea>
+					<div class="actions">
+							<button class="button is-info" id="snapshot-check-feedback" onclick="codeSnapshotFeedback({{ .Feedback.LastSnapshot.Code }}, {{ .Feedback.UserID }})" style="margin-top:3px;" >Check My Feedback</button>
+							<button class="button is-info" id="snapshot-send-feedback" onclick="sendSnapshotFeedback({{ .Feedback.LastSnapshot.Code }}, {{ .Feedback.UserID }})" style="margin-top:3px;" >Send Feedback</button>
+					</div>
+					<div id="code-snapshot-feedback-block"></div>
+				</div> 
+			</div>
 		</div>
 
+		{{ if .Feedback.Messages}}
+		<h3>Student's help requests: </h3>
 		<div id="ask-for-help">
-			<section class="section" style="padding: 20px;">
+			<section class="section" style="padding: 20px">
 				{{range $index, $el := .Feedback.Messages}}
 					{{ if eq .Type 0 }} <!-- Don't show regular snapshots in this block -->
 					{{ if eq (len .Feedbacks) 0 }}
-						<article class="message">
+						<div class="box" style="padding: 0px; margin-bottom: 3.5rem; border: 5px solid; border-radius: 10px;">
 							<div class="message-header">
 								<div class="column is-two-thirds">
 									<p>{{if eq .Type 0}}{{.Name}} asked for help{{else if eq .Event "at_submission"}} Submission Snapshot taken {{else}} Regular Snapshot taken {{end}} at {{.GivenAt.Format "Jan 02, 2006 3:04:05 PM"}}</p>
@@ -1521,53 +1558,51 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 										<span class="tag is-success">Responded ({{ len .Feedbacks}})</span>
 									{{ end }}
 								</div>
-								<div class="column">
-									<button class="button is-info help-check" id="help-check-feedback-{{ $index }}" onclick="messageFeedback( {{ $index }} ,{{ .Code }} , {{ .ID }})" style="margin-right:10px;" >Check For Suggestions</button>
-									<button class="button is-info help-send" id="help-send-feedback-{{ $index }}" onclick="sendMessageFeedback( {{ $index }} ,{{ .Code }} , {{ .ID }})" style="margin-right:10px;" >Send Feedback</button>
-								</div>
-								
 							</div>
+
 							<div class="message-body">
 								<h3>Student says: </h3> {{.Message}}
-								
 							</div>
-							<div style="background: cornflowerblue;">
 								
-								<div class="accordions">
-									
+							<div style="background: #c1bb91;">
 									<div>
 										<textarea class="feedback-editor" id="feedback-editor-{{ $index }}">{{ .Code }}</textarea>
 									</div>
-								</div>
-								<div id="feedback-block-{{ $index }}"></div>
 
+									<div class="actions">
+										<button class="button is-info help-check" id="help-check-feedback-{{ $index }}" onclick="messageFeedback( {{ $index }} ,{{ .Code }} , {{ .ID }})" style="margin-top:3px;" >Check My Feedback</button>
+										<button class="button is-info help-send" id="help-send-feedback-{{ $index }}" onclick="sendMessageFeedback( {{ $index }} ,{{ .Code }} , {{ .ID }})" style="margin-top:3px;" >Send Feedback</button>
+										
+									</div>
+									<div id="feedback-block-{{ $index }}"></div>
 							</div>
-						</article>
+						</div>
 					{{ end }}
 					{{ end }}
 					
 				{{end}}
 			</section>
 		</div>
+		{{ end }}
 
+		{{ if .Submission.Submissions}}
+		<h3>Student's submissions: </h3> 
 		<div id="submission">
 			{{range $index, $el := .Submission.Submissions}}
 				{{ if eq .Grade "" }}
-				<div class="box" style="padding: 0px">
+				<div class="box" style="padding: 0px; margin-bottom: 3.5rem; border: 5px solid; border-radius: 10px;">
 				
 					<div class="message-header">
-						<div class="column is-two-fifths">
+						<div class="column is-two-thirds">
 							<p>Submitted at {{.SubmittedAt.Format "Jan 02, 2006 3:04:05 PM"}}</p>
 							{{if eq .Grade ""}} Not Graded {{else}} Graded {{if eq .Grade "correct"}} <span class="tag is-success">correct</span> {{else if eq .Grade "incorrect"}} <span class="tag is-danger">incorrect</span> {{else}} {{.Grade}} {{end}} {{end}}
 						</div>
 
 						<div class="column buttons" style="padding-left: 1px;">
 							{{if eq .Grade ""}}
-								<button class="button"><label><input type="radio" name="grade"  value="correct" onchange="setGrade( {{ $index }}, 'correct')" />Correct </label></button>
-								<button  class="button"><label><input type="radio" name="grade"  value="incorrect" onchange="setGrade( {{ $index }}, 'incorrect')" />Incorrect </label></button>
-								<button  class="button"><label><input type="radio" name="grade" value="0" checked onchange="removeGrade( {{ $index }})" />Not Graded</label></button>
-								<button class="button is-info sub-check" id="sub-check-{{ $index }}" onclick="checkSubFeedback( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }})">Check For Suggestions</button>
-								<button class="button is-info sub-submit" id="sub-submit-{{ $index }}" onclick="sendGradeFeedback( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }})">Submit</button>
+								<button class="button"><label><input type="radio" name="grade-{{$index}}"  value="correct" onchange="setGrade( {{ $index }}, 'correct')" />Correct </label></button>
+								<button class="button"><label><input type="radio" name="grade-{{$index}}"  value="incorrect" onchange="setGrade( {{ $index }}, 'incorrect')" />Incorrect </label></button>
+								<button class="button"><label><input type="radio" name="grade-{{$index}}" value="0" checked onchange="removeGrade( {{ $index }})" />Not Graded</label></button>
 							{{end}}
 						</div>
 					</div>
@@ -1579,14 +1614,22 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 					</div>
 					-->
 					
-					<div>
-						<textarea class="submission-editor" id="editor-{{.ID}}">{{ .Code }}</textarea>
+					<div style="background: #ada192;">
+						<div>
+							<textarea class="submission-editor" id="editor-{{.ID}}">{{ .Code }}</textarea>
+						</div>
+						<div class="sub-actions">
+							<button class="button is-info sub-check" id="sub-check-{{ $index }}" onclick="checkSubFeedback( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }})" style="margin-top:3px;">Check My Feedback</button>
+							<button class="button is-info sub-submit" id="sub-submit-{{ $index }}" onclick="sendGradeFeedback( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }})" style="margin-top:3px;">Submit</button>
+						</div>
+						<div id="sub-feedback-block-{{ $index }}"></div>
 					</div>
-					<div id="sub-feedback-block-{{ $index }}"></div>
 				</div>
 				{{ end }}
 			{{end}}
 		</div>
+		{{ end }}
+	</div>
 
 
 		<script>
@@ -1594,17 +1637,16 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 				$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
 				$('#problem-dashboard-link').attr("href", "/problem_dashboard"+window.location.search+"&problem_id={{.Feedback.ProblemID}}");
 				
-				// Disable all the Send Feedback buttons
+				// Hids all the Send Feedback buttons
 				// Snapshot feedback button
-				document.getElementById("snapshot-send-feedback").setAttribute("disabled","");
+				document.getElementById("snapshot-send-feedback").classList.add("is-hidden");
 				// Ask for help feedback button
 				document.querySelectorAll('.help-send').forEach(function(button) {
-					button.setAttribute("disabled","");
+					button.classList.add("is-hidden");
 				});
-
-				// Disable submit buttons
+				// Submission feedback submit button
 				document.querySelectorAll('.sub-submit').forEach(function(button) {
-					button.setAttribute("disabled","");
+					button.classList.add("is-hidden")
 				});
 
 			});
@@ -1650,7 +1692,8 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 				code.on('change', (code) => {
 					submissionChangedCode[i] = code.doc.getValue()
 					if (subfeedbackCounter === 0 ){
-						document.getElementById("sub-submit-"+i).setAttribute("disabled","");
+						document.getElementById("sub-submit-"+i).classList.add('is-hidden')
+						document.getElementById("sub-check-"+i).classList.remove('is-hidden')
 					}
 				});
 			}
@@ -1672,7 +1715,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 						var pre = ''
 						var str = '';
 						data.results.forEach(function(item){
-							pre += '<div class="card" style="background-color: lightgray; margin-top: 15px"><div class="card-content"><ul style="margin:5px">'
+							pre += '<div class="card" style="margin-top: 15px"><div class="card-content"><ul style="margin:5px">'
 
 							pre += '<li><strong>' + "Feedback: " + '</strong>' + item.feedback + '</li>'
 
@@ -1700,8 +1743,10 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 					return
 				}
 				runNLP(code, snapshotCodeChanged, user_id, '#code-snapshot-feedback-block');
-				document.getElementById("snapshot-send-feedback").removeAttribute("disabled");
-				
+				// Hide the Check button & show the Send button
+				document.getElementById("snapshot-send-feedback").classList.remove('is-hidden')
+				document.getElementById("snapshot-check-feedback").classList.add('is-hidden')
+
 			}
 
 			function sendSnapshotFeedback(code, user_id) {
@@ -1724,7 +1769,9 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 				}
 
 				runNLP(code, feedbackChangedCode[i], {{ .Feedback.UserID }}, '#feedback-block-'+i );
-				document.getElementById("help-send-feedback-"+i).removeAttribute("disabled");
+				// Hide the Check button & show the Send button
+				document.getElementById("help-send-feedback-"+i).classList.remove('is-hidden')
+				document.getElementById("help-check-feedback-"+i).classList.add('is-hidden')
 			}
 
 			function sendMessageFeedback(i,code,message_id) {
@@ -1742,10 +1789,25 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 
 			function setGrade(i, grade) {
 				submissionsGrade[i] = grade;
-				document.getElementById("sub-submit-"+i).removeAttribute("disabled");
+				// document.getElementById("sub-submit-"+i).removeAttribute("disabled");
+				// Hide the Check button & show the Submit button
+				document.getElementById("sub-submit-"+i).innerHTML = "Submit Grade";
+				document.getElementById("sub-submit-"+i).classList.remove('is-hidden')
+				document.getElementById("sub-check-"+i).classList.add('is-hidden')
+
+				// check if code changed and already run through nlp
+				if (subfeedbackCounter != 0) {
+					document.getElementById("sub-submit-"+i).innerHTML = "Submit Grade and Feedback";
+				}
+
 			}
 			function removeGrade(index) {
 				submissionsGrade[index] = undefined;
+				// check if code changed and already run through nlp
+				if (subfeedbackCounter != 0) {
+					document.getElementById("sub-submit-"+index).innerHTML = "Submit Feedback";
+				}
+
 			}
 			function checkSubFeedback (i, submission_id, snapshot_id, submittedCode) {
 				// Check if the code is changed.
@@ -1757,7 +1819,16 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 
 				runNLP(submittedCode, code, {{ .Submission.UserID }}, '#sub-feedback-block-'+i );
 				subfeedbackCounter++;
-				document.getElementById("sub-submit-"+i).removeAttribute("disabled");
+				// document.getElementById("sub-submit-"+i).removeAttribute("disabled");
+				document.getElementById("sub-check-"+i).classList.add('is-hidden')
+				document.getElementById("sub-submit-"+i).classList.remove('is-hidden')
+
+				if (submissionsGrade[i] !== undefined && subfeedbackCounter != 0 ){
+					document.getElementById("sub-submit-"+i).innerHTML = "Submit Grade and Feedback";
+				} else {
+					document.getElementById("sub-submit-"+i).innerHTML = "Submit Feedback";
+				}
+				
 			}
 			
 			function sendGradeFeedback(i, submission_id, snapshot_id, submittedCode) {
