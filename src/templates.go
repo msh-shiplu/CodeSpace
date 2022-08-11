@@ -645,11 +645,24 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 			display: flex;
 			justify-content: space-between;
 		}
+		.menu {
+			padding: 10px;
+			padding-left: 100px;
+		}
+		.show {
+			top: 35px;
+			position: fixed;
+			z-index: 200;
+			background: white;
+		}
+		.content {
+			padding-top: 115px;
+		}
 	</style>
 	</head>
 	<body>
 	<div class="container">
-	<nav class="breadcrumb" aria-label="breadcrumbs">
+	<nav class="navbar is-fixed-top breadcrumb menu" role="navigation" aria-label="breadcrumbs">
 	<ul>
 	  <li>
 		<a id="view-exercise-link" href="#">
@@ -672,13 +685,20 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 			<span class="icon is-small">
 				<i class="fas fa-puzzle-piece" aria-hidden="true"></i>
 			</span>
-		  <span>Student Dashboard</span>
+		  <span>{{.StudentName}}'s Dashboard</span>
 		</a>
 	  </li>
 	</ul>
 	</nav>
-		<h2 class="title is-2">{{.StudentName}}'s Dashboard for {{.ProblemName}}</h2>
-		<div class="column is-two-thirds status">
+
+	<div class="column is-two-thirds show" style="width: 70%;">
+	<!--
+		<div class="row">
+			<h2 class="title is-2">{{.StudentName}}'s Dashboard for {{.ProblemName}}</h2>
+		</div>
+	-->
+
+		<div class="row status">
 			<span>Coding Status: <strong>{{ .Status.CodingStat }} </strong></span>
 			<span>Help Status: <strong>{{ .Status.HelpStat }} </strong></span>
 			<span>Submission Status: <strong> {{ .Status.SubmissionStat }} </strong></span>
@@ -691,8 +711,12 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 				<li class="is-active"><a>Feedback History</a></li>
 			</ul>
 		</div>
+
+	</div>
+		
+	<div class="content">
 		<div>
-			<section class="section">
+			<section class="section" style="padding: 20px">
 				{{range .Messages}}
 					<article class="message" style="margin-left: 25px; padding-bottom: 20px;">
 						<div class="message-header">
@@ -711,12 +735,20 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 										</div>
 										<div class="message-body">
 											<div class="columns">
-												<div class="column is-three-quarters">
+												<div class="column is-four-fifths">
 													<textarea class="message-feedback">{{ .Feedback }}</textarea>
 												</div>
-												<div class="column">
+												{{ if not (eq .Upvote 0) }}
+												<div class="column" style="text-align: center;">
+													<div style="font-size: 32px;">
+														{{.Upvote}}
+													</div>
+													<p> Student found it helpful.</p>
+													<!--
 													<button class="button is-info" onclick="autoFeedbackSubmit('yes', {{.FeedbackID}})" style="margin-top:3px;" >Thank you <span style="margin:5px;"> ({{.Upvote}})</span> </button>
+													-->
 												</div>
+												{{ end }}
 												
 											</div>
 
@@ -734,42 +766,44 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 				{{end}}
 			</section>
 		</div>
-		<script>
-			$(document).ready(function(){
-				$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
-				$('#problem-dashboard-link').attr("href", "/problem_dashboard"+window.location.search+"&problem_id={{.ProblemID}}");
+	</div>
+
+	<script>
+		$(document).ready(function(){
+			$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
+			$('#problem-dashboard-link').attr("href", "/problem_dashboard"+window.location.search+"&problem_id={{.ProblemID}}");
+		
+
+			var snapshotEditors = document.getElementsByClassName("message-feedback");
 			
-
-				var snapshotEditors = document.getElementsByClassName("message-feedback");
-				
-				for (let i = 0; i<snapshotEditors.length; i++){
-					var code = CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
-					code.setSize("100%", 500);
-				}
-
-			});
-
-
-
-			function autoFeedbackSubmit(backFeedback, fID) {
-				$.ajax({
-					url: "/save_snapshot_back_feedback",
-					type: "POST",
-					data:  {
-						feedback: backFeedback,
-						feedback_id: fID,
-						uid: {{.UserID}},
-						role: "{{.UserRole}}",
-						{{if ne .Password ""}}password: "{{.Password}}",{{end}}
-					},
-					success: function(data){
-						console.log("Success!")
-					}
-				});
-				
-				location.reload();
+			for (let i = 0; i<snapshotEditors.length; i++){
+				var code = CodeMirror.fromTextArea(snapshotEditors[i], {lineNumbers: true, mode: "{{getEditorMode .ProblemName}}", theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
+				code.setSize("100%", 500);
 			}
-		</script>
+
+		});
+
+
+
+		function autoFeedbackSubmit(backFeedback, fID) {
+			$.ajax({
+				url: "/save_snapshot_back_feedback",
+				type: "POST",
+				data:  {
+					feedback: backFeedback,
+					feedback_id: fID,
+					uid: {{.UserID}},
+					role: "{{.UserRole}}",
+					{{if ne .Password ""}}password: "{{.Password}}",{{end}}
+				},
+				success: function(data){
+					console.log("Success!")
+				}
+			});
+			
+			location.reload();
+		}
+	</script>
 
 	</body>
 	</html>
@@ -792,10 +826,17 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
 <script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
 
+<style>
+	.menu {
+		padding: 10px;
+		padding-left: 100px;
+	}
+
+</style>
 </head>
 <body>
 <div class="container">
-<nav class="breadcrumb" aria-label="breadcrumbs">
+<nav class="navbar is-fixed-top breadcrumb menu" role="navigation" aria-label="breadcrumbs">
 <ul>
   <li>
 	<a id="view-exercise-link" href="#">
@@ -976,67 +1017,78 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+.menu {
+	padding: 10px;
+	padding-left: 100px;
+}
+
 </style>
 <script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+
 </head>
 <body>
 <div class="container">
-	<nav class="breadcrumb" aria-label="breadcrumbs">
-	<ul>
-		<li class="is-active">
-		<a href="#">
-			<span class="icon is-small">
-			<i class="fas fa-home" aria-hidden="true"></i>
-			</span>
-			<span>Exercises</span>
-		</a>
-		</li>
-	</ul>
+	<nav class="navbar is-fixed-top breadcrumb menu" role="navigation" aria-label="breadcrumbs">
+		<ul>
+			<li class="is-active">
+			<a href="#">
+				<span class="icon is-small">
+				<i class="fas fa-home" aria-hidden="true"></i>
+				</span>
+				<span>Exercises</span>
+			</a>
+			</li>
+		</ul>
 	</nav>
-	<h2 class="title is-2">Exercises</h2>
-	{{if ne .UserRole "student"}}
-	<a id="new-problem" class="button is-success" href="">
-		<span class="icon is-small">
-		<i class="fa-solid fa-plus"></i>
-		</span>
-		<span>Broadcast New Exercise</span>
-	</a>
-	Peer Tutoring: 
-	<label class="switch">
-		<input id="peer_tutoring_button" type="checkbox">
-		<span class="slider round"></span>
-	</label>
-	{{end}}
-	<table class="table">
-			<thead>
-				<tr>
-					<th>Filename</th>
-					<th>Posted At</th>
-					<th>Attendance</th>
-					<th>Active Students</th>
-					<th>Help Requests</th>
-					<th>Correct</th>
-					<th>Incorrect</th>
-					<th>Not Graded</th>
-				</tr>
-			</thead>
-			<tbody>
-				{{range .Problems}}
-				<tr {{if eq .IsActive true}}class="is-selected"{{end}}>
-					<td><a href="/problem_dashboard?problem_id={{.ID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.Filename}}</a></td>
-					<td>{{ .UploadedAt.Format "Jan 02, 2006 3:04:05 PM" }}</td>
-					<td>{{.Attendance}}</td>
-					<td>{{.NumActive}}</td>
-					<td>{{.NumHelpRequest}}</td>
-					<td>{{.NumGradedCorrect}}</td>
-					<td>{{.NumGradedIncorrect}}</td>
-					<td>{{.NumNotGraded}}</td>
-				</tr>
-				{{end}}
-			</tbody>
-	</table>
+	<div class="content">
+		<h2 class="title is-2">Exercises</h2>
+		{{if ne .UserRole "student"}}
+		<a id="new-problem" class="button is-success" href="">
+			<span class="icon is-small">
+			<i class="fa-solid fa-plus"></i>
+			</span>
+			<span>Broadcast New Exercise</span>
+		</a>
+		Peer Tutoring: 
+		<label class="switch">
+			<input id="peer_tutoring_button" type="checkbox">
+			<span class="slider round"></span>
+		</label>
+		{{end}}
+		<table class="table sortable">
+				<thead>
+					<tr>
+						<th>Filename</th>
+						<th>Posted At</th>
+						<th>Attendance</th>
+						<th>Active Students</th>
+						<th>Help Requests</th>
+						<th>Correct</th>
+						<th>Incorrect</th>
+						<th>Not Graded</th>
+					</tr>
+				</thead>
+				<tbody>
+					{{range .Problems}}
+					<tr {{if eq .IsActive true}}class="is-selected"{{end}}>
+						<td><a href="/problem_dashboard?problem_id={{.ID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.Filename}}</a></td>
+						<td>{{ .UploadedAt.Format "Jan 02, 2006 3:04:05 PM" }}</td>
+						<td>{{.Attendance}}</td>
+						<td>{{.NumActive}}</td>
+						<td>{{.NumHelpRequest}}</td>
+						<td>{{.NumGradedCorrect}}</td>
+						<td>{{.NumGradedIncorrect}}</td>
+						<td>{{.NumNotGraded}}</td>
+					</tr>
+					{{end}}
+				</tbody>
+		</table>
+	</div>
+</div>
 <script>
 $(document).ready(function(){
 	{{if eq .PeerTutorAllowed true}}$('#peer_tutoring_button').prop('checked', true);{{end}}
@@ -1253,11 +1305,20 @@ var PROBLEM_FILE_UPLOAD_VIEW = `
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/codemirror.min.css" integrity="sha512-6sALqOPMrNSc+1p5xOhPwGIzs6kIlST+9oGWlI4Wwcbj1saaX9J3uzO3Vub016dmHV7hM+bMi/rfXLiF5DNIZg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.3/theme/monokai.min.css" integrity="sha512-R6PH4vSzF2Yxjdvb2p2FA06yWul+U0PDDav4b/od/oXf9Iw37zl10plvwOXelrjV2Ai7Eo3vyHeyFUjhXdBCVQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-   </head>
+	<style>
+		.menu {
+			padding: 10px;
+			padding-left: 100px;
+		}
+		.content {
+			padding-top: 115px;
+		}
+	</style>
+	</head>
    <body>
    <div class="container">
-   <nav class="breadcrumb" aria-label="breadcrumbs">
-	<ul>
+   <nav class="navbar is-fixed-top breadcrumb menu" role="navigation" aria-label="breadcrumbs">
+   <ul>
 		<li>
 			<a id="view-exercise-link" href="#">
 			<span class="icon is-small">
@@ -1275,43 +1336,45 @@ var PROBLEM_FILE_UPLOAD_VIEW = `
 			</a>
 		</li>
 		</ul>
-		</nav>
-   <div id="problem" class="file is-centered is-boxed is-success has-name">
-		<label class="file-label">
-			<input class="file-input" type="file" name="resume">
-			<span class="file-cta">
-			<span class="file-icon">
-				<i class="fas fa-upload"></i>
-			</span>
-			<span class="file-label">
-				Select Exercise File
-			</span>
-			</span>
-		</label>
+	</nav>
+	<div class="content">
+		<div id="problem" class="file is-centered is-boxed is-success has-name">
+				<label class="file-label">
+					<input class="file-input" type="file" name="resume">
+					<span class="file-cta">
+					<span class="file-icon">
+						<i class="fas fa-upload"></i>
+					</span>
+					<span class="file-label">
+						Select Exercise File
+					</span>
+					</span>
+				</label>
+			</div>
+		<div style="visibility:hidden;" id="editor-area">
+			<article class="message">
+					<div class="message-header">
+						<p><span id="filename"></span></p>
+					</div>
+					<div class="message-body">
+						<div>
+							<textarea id="editor"></textarea>
+						</div>
+					</div>
+				</article>
+		</div>
+		<button style="visibility:hidden" id="submit" class="button is-success is-rounded">
+				<span class="icon is-small">
+					<i class="fas fa-check"></i>
+				</span>
+				<span>Broadcast</span>
+			</button>
+			<input type="hidden" id="points" value="">
+			<input type="hidden" id="effort" value="">
+			<input type="hidden" id="attempt" value="">
+			<input type="hidden" id="tag" value="">
+		</div>
 	</div>
-   <div style="visibility:hidden;" id="editor-area">
-	<article class="message">
-			<div class="message-header">
-				<p><span id="filename"></span></p>
-			</div>
-			<div class="message-body">
-				<div>
-					<textarea id="editor"></textarea>
-				</div>
-			</div>
-		</article>
-   </div>
-   <button style="visibility:hidden" id="submit" class="button is-success is-rounded">
-		<span class="icon is-small">
-			<i class="fas fa-check"></i>
-		</span>
-		<span>Broadcast</span>
-	</button>
-	<input type="hidden" id="points" value="">
-	<input type="hidden" id="effort" value="">
-	<input type="hidden" id="attempt" value="">
-	<input type="hidden" id="tag" value="">
-  </div>
 	<script>
 	$(document).ready(function(){
 		$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
@@ -1425,23 +1488,25 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			background: darkseagreen;
 			padding: 20px;
 			margin: 30px;
-			padding-bottom: 50px
+			padding-bottom: 0px
 		}
 		#ask-for-help {
 			background: #c1bb91;
+			padding: 20px;
 			margin: 30px;
-			// padding-bottom: 30px
+			padding-bottom: 0px
 		}
 		#submission {
 			background: #ada192;;
 			padding: 20px;
 			margin: 30px;
-			padding-bottom: 10px
+			padding-bottom: 0px
 		}
 		.wrapper {
 			display: grid;
 			grid-template-columns: repeat(2, 1fr);
 			gap: 20px;
+			padding: 10px;
 		}
 		.status {
 			display: flex;
@@ -1455,13 +1520,13 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			padding-left: 100px;
 		}
 		.show {
-			top: 35px;
+			top: 38px;
 			position: fixed;
 			z-index: 200;
 			background: white;
 		}
 		.content {
-			padding-top: 100px;
+			padding-top: 135px;
 		}
 		.actions {
 			// float: right;
@@ -1497,26 +1562,30 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			<span class="icon is-small">
 				<i class="fas fa-puzzle-piece" aria-hidden="true"></i>
 			</span>
-		  <span>Student Dashboard</span>
+		  <span>{{ .Feedback.StudentName}}'s Dashboard</span>
 		</a>
 	  </li>
 	</ul>
+<!--
+	<div class="navbar-end" style="padding-right:240px;"> 
+		<div class="navbar-item">Course Name: Local Course </div>
+	</div>
+-->
 	</nav>
 
 	<div class="column is-two-thirds show" style="width: 70%;">
+	<!--
 		<div class="row">
 			<h3 class="title is-2" style="margin-bottom: 0px;">{{ .Feedback.StudentName}}'s Dashboard for {{ .Feedback.ProblemName}}</h3>
 		</div>
+	-->
 		<div class="row status">
 			<span>Coding Status: <strong>{{ .Status.CodingStat }} </strong></span>
 			<span>Help Status: <strong>{{ .Status.HelpStat }} </strong></span>
 			<span>Submission Status: <strong> {{ .Status.SubmissionStat }} </strong></span>
 			<span>Tutoring Status: <strong>{{ .Status.TutoringStat }} </strong></span>
 		</div>
-	</div>
 
-	<div class="content">
-		
 		<div class="tabs">
 			<ul>
 				<li class="is-active"><a>CodeSpace</a></li>
@@ -1524,6 +1593,9 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			</ul>
 		</div>
 
+	</div>
+
+	<div class="content">
 		<h3>Student's latest code snapshot: </h3>
 		<div id="code-snapshot">
 			<div class="box" style="padding: 0px; margin-bottom: 3.5rem; border: 5px solid; border-radius: 10px;">
@@ -1546,7 +1618,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 		{{ if .Feedback.Messages}}
 		<h3>Student's help requests: </h3>
 		<div id="ask-for-help">
-			<section class="section" style="padding: 20px">
+			<section class="section" style="padding: 0px;">
 				{{range $index, $el := .Feedback.Messages}}
 					{{ if eq .Type 0 }} <!-- Don't show regular snapshots in this block -->
 					{{ if eq (len .Feedbacks) 0 }}
@@ -1715,7 +1787,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 						var pre = ''
 						var str = '';
 						data.results.forEach(function(item){
-							pre += '<div class="card" style="margin-top: 15px"><div class="card-content"><ul style="margin:5px">'
+							pre += '<div class="card" style="margin-top: 15px; padding: 5px;"><div class="card-content"><ul style="margin:5px">'
 
 							pre += '<li><strong>' + "Feedback: " + '</strong>' + item.feedback + '</li>'
 
