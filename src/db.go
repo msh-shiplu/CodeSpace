@@ -262,13 +262,16 @@ func load_and_authorize_student(student_id int, password string) bool {
 
 //-----------------------------------------------------------------
 func load_teachers() {
-	rows, _ := Database.Query("select id, password from teacher")
+	rows, _ := Database.Query("select id,name, password from teacher")
 	defer rows.Close()
 	var password string
+	var name string
 	var id int
 	for rows.Next() {
-		rows.Scan(&id, &password)
+		rows.Scan(&id, &name, &password)
 		Teacher[id] = password
+		TeacherPass[name] = password
+
 	}
 	Passcode = RandStringRunes(20)
 }
