@@ -23,6 +23,7 @@ type DashBoardInfo struct {
 	StudentInfo        []*DashBoardStudentInfo
 	ProblemName        string
 	Code               string
+	IsActive           bool
 	ProblemID          int
 	NumActive          int
 	NumHelpRequest     int
@@ -140,14 +141,15 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 		}
 	}
 	rows.Close()
-	rows, err = Database.Query("select problem_description from problem where id=?", problemID)
+	rows, err = Database.Query("select problem_description, problem_ended_at from problem where id=?", problemID)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
 	var code string
+	var problemEndedAt time.Time
 	if rows.Next() {
-		rows.Scan(&code)
+		rows.Scan(&code, &problemEndedAt)
 	}
 	rows.Close()
 	latestSubmissionTime := getLatestSubmissionTime(problemID)
@@ -200,6 +202,7 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 		ProblemID:          problemID,
 		ProblemName:        getProblemNameFromID(problemID),
 		Code:               code,
+		IsActive:           problemEndedAt.IsZero(),
 		NumActive:          nActive,
 		NumHelpRequest:     nHelp,
 		NumGradedCorrect:   nCorrect,

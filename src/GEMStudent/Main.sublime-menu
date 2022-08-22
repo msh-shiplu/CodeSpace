@@ -9,11 +9,6 @@
                 "command": "gems_get_board_content",
             },
             {
-                "caption": "Exercises",
-                "id": "gemsViewExercises",
-                "command": "gems_view_exercises"
-            },
-            {
                 "caption": "Ask for help 🤔",
                 "id": "gemsNeedHelp",
                 "command": "gems_need_help",
@@ -25,22 +20,6 @@
             },
             {"caption":"-", "id":"side-bar-separator"},
             {
-                "caption": "View help requests",
-                "id": "gemsViewHelpRequests",
-                "command": "gems_view_help_requests"
-            },
-            {
-                "caption": "View CodeSpace",
-                "id": "gemsGetCodeSpace",
-                "command": "gems_get_code_space"
-            },
-            {
-                "caption": "Review Feedback",
-                "id": "gemsReviewFeedbackForMe",
-                "command": "gems_review_feedback_for_me"
-            },
-            {"caption":"-", "id":"side-bar-separator"},
-            {
                 "caption": "Attendance",
                 "id": "gemsAttendanceReport",
                 "command": "gems_attendance_report",
@@ -49,6 +28,11 @@
                 "caption": "Points",
                 "id": "gemsPointsReport",
                 "command": "gems_points_report",
+            },
+            {
+                "caption": "Exercises",
+                "id": "gemsViewExercises",
+                "command": "gems_view_exercises"
             },
             {"caption":"-", "id":"side-bar-separator"},
             {

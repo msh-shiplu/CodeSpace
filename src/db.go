@@ -31,7 +31,7 @@ func create_tables() {
 	execSQL("create table if not exists test_case (id integer primary key, problem_id integer, student_id integer, test_cases text, added_at timestamp)")
 	execSQL("create table if not exists code_explanation (id integer primary key, problem_id integer, student_id integer, snapshot_id integer, trying_what text, need_help_with text, code_submitted_at timestamp)")
 	execSQL("create table if not exists help_message (id integer primary key, code_explanation_id integer, student_id integer, message text, given_at timestamp, useful text, updated_at timestamp)")
-	execSQL("create table if not exists code_snapshot (id integer primary key, student_id integer, problem_id integer, code blob, last_updated_at timestamp, status int default 0)") // 0 = not submitted, 1 = submitted but not graded, 2 = submitted and incorrect, 3 = submitted and correct
+	execSQL("create table if not exists code_snapshot (id integer primary key, student_id integer, problem_id integer, code blob, last_updated_at timestamp, status int default 0, event string)") // 0 = not submitted, 1 = submitted but not graded, 2 = submitted and incorrect, 3 = submitted and correct
 	execSQL("create table if not exists snapshot_feedback (id integer primary key, snapshot_id integer, feedback text, author_id integer, author_role string, given_at timestamp)")
 	execSQL("create table if not exists snapshot_back_feedback (id integer primary key, snapshot_feedback_id integer, author_id integer, author_role string, is_helpful string, given_at timestamp)")
 	execSQL("create table if not exists message (id integer primary key, snapshot_id integer, message text, author_id integer, author_role string, given_at timestamp, type integer)")
@@ -76,7 +76,7 @@ func init_database(db_name string) {
 	AddHelpSubmissionSQL = prepare("insert into code_explanation (problem_id, student_id, snapshot_id, trying_what, need_help_with, code_submitted_at) values(?, ?, ?, ?, ?, ?)")
 	AddHelpMessageSQL = prepare("insert into help_message (code_explanation_id, student_id, message, given_at) values (?, ?, ?, ?)")
 	UpdateHelpMessageSQL = prepare("update help_message set useful=?, updated_at=? where id=?")
-	AddCodeSnapshotSQL = prepare("insert into code_snapshot (student_id, problem_id, code, status, last_updated_at) values(?, ?, ?, ?, ?)")
+	AddCodeSnapshotSQL = prepare("insert into code_snapshot (student_id, problem_id, code, status, last_updated_at, event) values(?, ?, ?, ?, ?, ?)")
 	AddSnapShotFeedbackSQL = prepare("insert into snapshot_feedback (snapshot_id, feedback, author_id, author_role, given_at) values(?, ?, ?, ?, ?)")
 	AddSnapshotBackFeedbackSQL = prepare("insert into snapshot_back_feedback (snapshot_feedback_id, author_id, author_role, is_helpful, given_at) values(?, ?, ?, ?, ?)")
 	UpdateSnapshotBackFeedbackSQL = prepare("update snapshot_back_feedback set is_helpful=?, given_at=? where snapshot_feedback_id=? and author_id=? and author_role=?")
@@ -262,13 +262,16 @@ func load_and_authorize_student(student_id int, password string) bool {
 
 //-----------------------------------------------------------------
 func load_teachers() {
-	rows, _ := Database.Query("select id, password from teacher")
+	rows, _ := Database.Query("select id,name, password from teacher")
 	defer rows.Close()
 	var password string
+	var name string
 	var id int
 	for rows.Next() {
-		rows.Scan(&id, &password)
+		rows.Scan(&id, &name, &password)
 		Teacher[id] = password
+		TeacherPass[name] = password
+
 	}
 	Passcode = RandStringRunes(20)
 }
