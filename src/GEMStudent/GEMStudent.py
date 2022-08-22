@@ -349,9 +349,13 @@ class gemsNeedHelp(sublime_plugin.TextCommand):
         content = self.view.substr(
             sublime.Region(0, self.view.size())).lstrip()
 
+        filename = os.path.basename(fname)
+        match = re.search(r'feedback-\d+-(.*)', filename)
+        if match:
+            filename = match.group(1)
         data = dict(
             content=content,
-            filename=os.path.basename(fname),
+            filename=filename,
             # trying_what=self.trying_what_message,
             need_help_with=need_help_with_message,
         )
