@@ -205,6 +205,7 @@ func init_teacher(id int, name string, password string) {
 	Teacher[id] = password
 	TeacherPass[name] = password
 	TeacherNameToId[name] = id
+	TeacherIdToName[id] = name
 }
 
 //-----------------------------------------------------------------

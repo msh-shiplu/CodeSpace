@@ -45,6 +45,7 @@ type FeedbackProvisionDashBoard struct {
 	UserID       int
 	UserRole     string
 	Password     string
+	Username     string
 }
 
 type SubmissionInfo struct {
@@ -64,12 +65,17 @@ type SubmissionDashboard struct {
 	UserID      int
 	UserRole    string
 	Password    string
+	Username    string
 }
 
 type TemplateDate struct {
 	Feedback   FeedbackProvisionDashBoard
 	Submission SubmissionDashboard
 	Status     DashBoardStudentInfo
+	UserID     int
+	UserRole   string
+	Password   string
+	Username   string
 }
 
 func getCurrentUserVote(feedbackID int, userID int, userRole string) string {
@@ -273,6 +279,7 @@ func studentDashboardFeedbackProvisionHandler(w http.ResponseWriter, r *http.Req
 		UserRole:     role,
 		Password:     r.FormValue("password"),
 		Status:       studentStats,
+		Username:     getName(uid, role),
 	}
 	w.Header().Set("Content-Type", "text/html")
 	err = t.Execute(w, data)
@@ -490,6 +497,7 @@ func studentDashboardCodeSpaceHandler(w http.ResponseWriter, r *http.Request, wh
 		UserID:      uid,
 		UserRole:    role,
 		Password:    r.FormValue("password"),
+		Username:    getName(uid, role),
 	}
 
 	// Get student status
@@ -516,6 +524,10 @@ func studentDashboardCodeSpaceHandler(w http.ResponseWriter, r *http.Request, wh
 		Submission: *submission,
 		Feedback:   *feedback,
 		Status:     studentStats,
+		UserID:     uid,
+		UserRole:   role,
+		Password:   r.FormValue("password"),
+		Username:   getName(uid, role),
 	}
 
 	w.Header().Set("Content-Type", "text/html")
