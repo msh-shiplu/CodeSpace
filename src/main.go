@@ -142,6 +142,11 @@ func init_config(filename string) *Configuration {
 		config.IP = informIPAddress()
 	}
 	config.Address = fmt.Sprintf("%s:%d", config.IP, config.Port)
+	if config.PeerTutor == 1 {
+		PeerTutorAllowed = true
+	} else {
+		PeerTutorAllowed = false
+	}
 	return config
 }
 
@@ -166,7 +171,7 @@ func get_course_specific_address(nameserver string, course string) {
 		log.Fatal(err)
 	}
 	address := string(bodyBytes)
-	fmt.Println(address)
+	fmt.Printf("* Teacher Login: %s/teacher_signin\n", address)
 }
 
 //-----------------------------------------------------------------

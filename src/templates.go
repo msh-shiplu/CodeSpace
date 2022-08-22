@@ -658,6 +658,11 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 		.content {
 			padding-top: 115px;
 		}
+		.topcorner{
+			position:absolute;
+			top:0;
+			right:0;
+		}
 	</style>
 	</head>
 	<body>
@@ -690,7 +695,8 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 	  </li>
 	</ul>
 	</nav>
-
+	<div class="content">
+	<div class="topcorner">{{.Username}}({{.UserRole}})</div>
 	<div class="column is-two-thirds show" style="width: 70%;">
 	<!--
 		<div class="row">
@@ -767,7 +773,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 			</section>
 		</div>
 	</div>
-
+	</div>
 	<script>
 		$(document).ready(function(){
 			$('#view-exercise-link').attr("href", "/view_exercises"+window.location.search);
@@ -831,7 +837,11 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 		padding: 10px;
 		padding-left: 100px;
 	}
-
+	.topcorner{
+		position:absolute;
+		top:0;
+		right:0;
+	}
 </style>
 </head>
 <body>
@@ -856,6 +866,8 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
   </li>
 </ul>
 </nav>
+<div class="content">
+<div class="topcorner">{{.Username}}({{.UserRole}})</div>
 	<h2 class="title is-2">Dashboard for {{.ProblemName}}</h2> 
 	{{if eq .UserRole "teacher"}} {{if eq .IsActive true}}<button id="deactivate-button" class="button is-danger">Deactivate!</button>{{end}}{{end}}
 	<div class="accordions">
@@ -899,16 +911,17 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			<tbody>
 				{{range .StudentInfo}}
 				<tr>
-					<td>{{if ne .CodingStat "Idle"}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}#code-snapshot{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.StudentName}}</a>{{else}}{{.StudentName}}{{end}}</td>
+					<td>{{if ne .CodingStat "Idle"}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}#code-snapshot">{{.StudentName}}</a>{{else}}{{.StudentName}}{{end}}</td>
 					<td>{{if and (eq $.IsActive true) (ne .CodingStat "Idle") (ne .LastUpdatedAt.IsZero true) }}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{ formatTimeSince .LastUpdatedAt }} ago</a>{{end}}</td>
 					<td>{{.CodingStat}}</td>
-					<td>{{if ne .HelpStat ""}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}#ask-for-help{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.HelpStat}}</a>{{end}}</td>
-					<td>{{if ne .SubmissionStat ""}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}#submission{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.SubmissionStat}}</a>{{end}}</td>
+					<td>{{if ne .HelpStat ""}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}#ask-for-help">{{.HelpStat}}</a>{{end}}</td>
+					<td>{{if ne .SubmissionStat ""}}<a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{$.ProblemID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}#submission">{{.SubmissionStat}}</a>{{end}}</td>
 					<td>{{.TutoringStat}}</td>
 				</tr>
 				{{end}}
 			</tbody>
 	</table>
+	</div>
 	<script>
 		var editor = document.getElementById("editor");
 		var myCodeMirror = CodeMirror.fromTextArea(editor, {lineNumbers: true, mode: get_editor_mode({{.ProblemName}}), theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
@@ -1023,6 +1036,12 @@ input:checked + .slider:before {
 	padding-left: 100px;
 }
 
+.topcorner{
+	position:absolute;
+	top:0;
+	right:0;
+}
+
 </style>
 <script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css" integrity="sha512-IgmDkwzs96t4SrChW29No3NXBIBv8baW490zk5aXvhCD8vuZM3yUSkbyTBcXohkySecyzIrUwiF/qV0cuPcL3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -1032,6 +1051,8 @@ input:checked + .slider:before {
 </head>
 <body>
 <div class="container">
+	
+	
 	<nav class="navbar is-fixed-top breadcrumb menu" role="navigation" aria-label="breadcrumbs">
 		<ul>
 			<li class="is-active">
@@ -1043,8 +1064,10 @@ input:checked + .slider:before {
 			</a>
 			</li>
 		</ul>
+
 	</nav>
 	<div class="content">
+	<div class="topcorner">{{.Username}}({{.UserRole}})</div>
 		<h2 class="title is-2">Exercises</h2>
 		{{if ne .UserRole "student"}}
 		<a id="new-problem" class="button is-success" href="">
@@ -1093,14 +1116,15 @@ input:checked + .slider:before {
 $(document).ready(function(){
 	{{if eq .PeerTutorAllowed true}}$('#peer_tutoring_button').prop('checked', true);{{end}}
 	$('#new-problem').attr("href", "/teacher_web_broadcast"+window.location.search);
-	$('#peer_tutoring_button').change(function(){
-		var val = document.getElementById('peer_tutoring_button').checked;
-		var valInt = 0;
-		if (val == true)
-			valInt = 1;
-		$.post("/set_peer_tutor", {turn_on: valInt, uid: {{.UserID}}, role: {{.UserRole}}{{if ne .Password ""}}, password: {{.Password}}{{end}} }, function(data, status){
-		});
-	});
+	document.getElementById("peer_tutoring_button").disabled = true;
+	// $('#peer_tutoring_button').change(function(){
+	// 	var val = document.getElementById('peer_tutoring_button').checked;
+	// 	var valInt = 0;
+	// 	if (val == true)
+	// 		valInt = 1;
+	// 	$.post("/set_peer_tutor", {turn_on: valInt, uid: {{.UserID}}, role: {{.UserRole}}{{if ne .Password ""}}, password: {{.Password}}{{end}} }, function(data, status){
+	// 	});
+	// });
 	
 });
 </script>
@@ -1125,6 +1149,13 @@ var SUBMISSION_VIEW_TEMPLATE = `
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+	<style>
+	.topcorner{
+		position:absolute;
+		top:0;
+		right:0;
+	}
+	</style>
 	</head>
 	<body>
 	<div class="container">
@@ -1156,6 +1187,7 @@ var SUBMISSION_VIEW_TEMPLATE = `
 		</li>
 		</ul>
 	</nav>
+	<div class="topcorner">{{.Username}}({{.UserRole}})</div>
 		<h2 class="title is-2">{{.StudentName}}'s Submissions for {{.ProblemName}}</h2>
 		<div class="tabs">
 			<ul>
@@ -1312,6 +1344,11 @@ var PROBLEM_FILE_UPLOAD_VIEW = `
 		}
 		.content {
 			padding-top: 115px;
+		}
+		.topcorner{
+			position:absolute;
+			top:0;
+			right:0;
 		}
 	</style>
 	</head>
@@ -1535,6 +1572,11 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 		.sub-actions {
 			margin-left: 995px
 		}
+		.topcorner{
+			position:absolute;
+			top:0;
+			right:0;
+		}
 	</style>
 	</head>
 	<body>
@@ -1572,7 +1614,8 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 	</div>
 -->
 	</nav>
-
+	<div class="content">
+	<div class="topcorner">{{.Username}}({{.UserRole}})</div>
 	<div class="column is-two-thirds show" style="width: 70%;">
 	<!--
 		<div class="row">
@@ -1656,7 +1699,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			</section>
 		</div>
 		{{ end }}
-
+		{{ if ne .UserRole "student"}}
 		{{ if .Submission.Submissions}}
 		<h3>Student's submissions: </h3> 
 		<div id="submission">
@@ -1701,8 +1744,9 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			{{end}}
 		</div>
 		{{ end }}
+		{{ end }}
 	</div>
-
+</div>
 
 		<script>
 			$(document).ready(function(){
@@ -1803,7 +1847,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 						$('<div class="wrapper">' + pre +  '</div>').appendTo( write )
 					},
 					error: function(err) {
-						alert(JSON.stringify(err));
+						// alert(JSON.stringify(err));
 					}
 				});
 			}

@@ -33,6 +33,17 @@ type DashBoardInfo struct {
 	UserID             int
 	UserRole           string
 	Password           string
+	Username           string
+}
+
+func getName(uid int, role string) string {
+	name := ""
+	if role == "teacher" {
+		name = TeacherIdToName[uid]
+	} else {
+		name = Students[uid].Name
+	}
+	return name
 }
 
 func getCurrentStudents() []int {
@@ -211,6 +222,7 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 		UserID:             uid,
 		UserRole:           role,
 		Password:           password,
+		Username:           getName(uid, role),
 	}
 	temp := template.New("")
 	ownFuncs := template.FuncMap{"formatTimeSince": formatTimeSince}

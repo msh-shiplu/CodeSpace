@@ -26,6 +26,7 @@ type ProblemListData struct {
 	UserID           int
 	UserRole         string
 	Password         string
+	Username         string
 }
 
 func problemListHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
@@ -63,6 +64,7 @@ func problemListHandler(w http.ResponseWriter, r *http.Request, who string, uid 
 		UserID:           uid,
 		UserRole:         role,
 		Password:         password,
+		Username:         getName(uid, role),
 	}
 	temp := template.New("")
 	t, err := temp.Parse(PROBLEM_LIST_TEMPLATE)
