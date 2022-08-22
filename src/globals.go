@@ -23,6 +23,7 @@ type Configuration struct {
 	Database   string
 	Address    string
 	LogFile    string
+	PeerTutor  int
 }
 
 var Config *Configuration
@@ -78,6 +79,7 @@ var UpdateMessageBackFeedbackSQL *sql.Stmt
 var Teacher = make(map[int]string)
 var TeacherPass = make(map[string]string)
 var TeacherNameToId = make(map[string]int)
+var TeacherIdToName = make(map[int]string)
 var Passcode string
 
 //---------------------------------------------------------
