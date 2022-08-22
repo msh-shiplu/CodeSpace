@@ -1,8 +1,9 @@
 {
-        "CourseId": "MyCourse",
-        "Database": "MyCourse.sqlite3",
-        "LogFile": "MyCourse.log",
-        "IP": "",
-        "Port": 8080,
-        "NameServer": "http://gem.uom.memphis.edu:8080"
+        "CourseId": "COMP1010",
+        "Database": "COMP1010.sqlite3",
+        "LogFile": "COMP1010.log",
+        "IP": "192.168.86.174",
+        "Port": 8088,
+        "NameServer": "http://192.168.86.174:8080",
+        "PeerTutor": 1
 }
