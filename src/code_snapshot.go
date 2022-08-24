@@ -121,6 +121,7 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 		Snapshot:    code,
 		Feedback:    feedback,
 		ProblemName: filename,
+		Provider:    getName(uid, authorRole),
 	})
 	addOrUpdateStudentStatus(studentID, problemID, "", "Been helped", "", "")
 	if authorRole == "student" {
@@ -170,6 +171,7 @@ func messageFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, 
 		Snapshot:    code,
 		Feedback:    feedback,
 		ProblemName: filename,
+		Provider:    getName(uid, authorRole),
 	})
 	fmt.Println("Feedback on message saved!")
 	// http.Redirect(w, r, "/get_codespace?uid="+strconv.Itoa(authorID)+"&role="+authorRole+"&password="+r.FormValue("password"), http.StatusSeeOther)

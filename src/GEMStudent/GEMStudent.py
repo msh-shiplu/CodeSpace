@@ -238,10 +238,10 @@ def gems_periodic_update():
             sublime.message_dialog(mesg)
 
         if snapshot_feedback_stat == 1:
-            sublime.message_dialog("You have got a feedback on your code.")
             resp = gemsRequest("get_snapshot_feedback", {})
             if resp is not None:
                 resp = json.loads(resp)
+                sublime.message_dialog("You have got a feedback from "+resp["Provider"]+".")
                 feedbackFolder = os.path.join(gemsFOLDER, gemsFeedbackFolder)
                 if not os.path.exists(feedbackFolder):
                     os.makedirs(feedbackFolder)
@@ -1030,7 +1030,7 @@ def check_message_feedback(feedback_id):
 class gemsEventListeners(sublime_plugin.EventListener):
 
     def on_pre_close(self, view):
-        if isRegistered == False:
+        if isRegistered == False or view is None or view.file_name() is None:
             return
         filename = os.path.basename(view.file_name())
         fn_splits = filename.split("-")
