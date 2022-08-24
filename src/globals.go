@@ -121,6 +121,7 @@ type SnapShotFeedback struct {
 	Snapshot    string
 	Feedback    string
 	ProblemName string
+	Provider    string
 }
 type StudenInfo struct {
 	Name                  string
