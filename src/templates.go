@@ -650,13 +650,13 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 			padding-left: 100px;
 		}
 		.show {
-			top: 35px;
+			top: 6%;
 			position: fixed;
 			z-index: 200;
 			background: white;
 		}
 		.content {
-			padding-top: 115px;
+			padding-top: 7%;
 		}
 		.topcorner{
 			position:absolute;
@@ -1621,13 +1621,13 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			padding-left: 100px;
 		}
 		.show {
-			top: 38px;
+			top: 6%;
 			position: fixed;
 			z-index: 200;
 			background: white;
 		}
 		.content {
-			padding-top: 6%;
+			padding-top: 7%;
 		}
 		.actions {
 			// float: right;
@@ -1680,12 +1680,12 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 	</nav>
 	<div class="content">
 	<div class="topcorner">{{.Username}}({{.UserRole}})</div>
-	<div class="column is-two-thirds show" style="width: 70%;">
-	<!--
+	<div class="column show" style="width: 70%;">
+		<!--
 		<div class="row">
 			<h3 class="title is-2" style="margin-bottom: 0px;">{{ .Feedback.StudentName}}'s Dashboard for {{ .Feedback.ProblemName}}</h3>
 		</div>
-	-->
+		-->
 		<div class="row status">
 			<span>Coding Status: <strong>{{ .Status.CodingStat }} </strong></span>
 			<span>Help Status: <strong>{{ .Status.HelpStat }} </strong></span>
