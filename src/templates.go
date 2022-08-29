@@ -1634,7 +1634,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			margin-left: 78%
 		}
 		.sub-actions {
-			margin-left: 995px;
+			margin-left: 73%;
 		}
 		.topcorner{
 			position:absolute;
