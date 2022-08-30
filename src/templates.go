@@ -650,13 +650,13 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 			padding-left: 100px;
 		}
 		.show {
-			top: 35px;
+			top: 6%;
 			position: fixed;
 			z-index: 200;
 			background: white;
 		}
 		.content {
-			padding-top: 115px;
+			padding-top: 7%;
 		}
 		.topcorner{
 			position:absolute;
@@ -816,7 +816,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 `
 var PROBLEM_DASHBOARD_TEMPLATE = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <title>Problem Dashboard</title>
 <meta http-equiv="refresh" content="10" >
@@ -841,6 +841,10 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 		position:absolute;
 		top:0;
 		right:0;
+	}
+	#deactivate-button {
+		background-color: #AE1431;
+		color: #FFFFFF;
 	}
 </style>
 </head>
@@ -869,7 +873,11 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 <div class="content">
 <div class="topcorner">{{.Username}}({{.UserRole}})</div>
 	<h2 class="title is-2">Dashboard for {{.ProblemName}}</h2> 
-	{{if eq .UserRole "teacher"}} {{if eq .IsActive true}}<button id="deactivate-button" class="button is-danger">Deactivate!</button>{{end}}{{end}}
+	{{if eq .UserRole "teacher"}} 
+		{{if eq .IsActive true}}
+			<button id="deactivate-button" class="button is-danger">Deactivate!</button>
+		{{end}}
+	{{end}}
 	<div class="accordions">
 		<h3>{{.ProblemName}}</h3>
 		<div>
@@ -966,7 +974,7 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 `
 var PROBLEM_LIST_TEMPLATE = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <title>Exercises</title>
 <meta http-equiv="refresh" content="10" >
@@ -1074,18 +1082,18 @@ input:checked + .slider:before {
 			<span class="icon is-small">
 			<i class="fa-solid fa-plus"></i>
 			</span>
-			<span>Broadcast New Exercise</span>
+			<span style="color: #242424;">Broadcast New Exercise</span>
 		</a>
-		Peer Tutoring: 
-		<label class="switch">
-			<input id="peer_tutoring_button" disabled=disabled type="checkbox">
+		Peer Tutoring:
+		<label class="switch" for="peer_tutoring_button">
+			<input id="peer_tutoring_button" disabled=disabled type="checkbox">:
 			<span class="slider round"></span>
 		</label>
 		<a id="export-button" class="button is-primary" href="">
 			<span class="icon is-small">
 			<i class="fa-solid fa-plus"></i>
 			</span>
-			<span>Export Points</span>
+			<span style="color: #242424;">Export Points</span>
 		</a>
 		{{end}}
 		<table class="table sortable">
@@ -1103,7 +1111,7 @@ input:checked + .slider:before {
 				</thead>
 				<tbody>
 					{{range .Problems}}
-					<tr {{if eq .IsActive true}}class="is-selected"{{end}}>
+					<tr {{if eq .IsActive true}}class="is-selected"{{end}} style="color: #242424;">
 						<td><a href="/problem_dashboard?problem_id={{.ID}}&uid={{$.UserID}}&role={{$.UserRole}}{{if ne $.Password ""}}&password={{$.Password}}{{end}}">{{.Filename}}</a></td>
 						<td>{{ .UploadedAt.Format "Jan 02, 2006 3:04:05 PM" }}</td>
 						<td>{{.Attendance}}</td>
@@ -1308,7 +1316,7 @@ var SUBMISSION_VIEW_TEMPLATE = `
 `
 var TEACHER_LOGIN = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
    <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -1343,7 +1351,7 @@ var TEACHER_LOGIN = `
 		</div>
 		<div class="field">
 		  <p class="control">
-		    <button id="login" class="button is-success">
+		    <button id="login" class="button is-success" style="color: #292929;">
 		      Login
 		    </button>
 		  </p>
@@ -1376,7 +1384,7 @@ var TEACHER_LOGIN = `
 `
 var PROBLEM_FILE_UPLOAD_VIEW = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
    <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -1435,7 +1443,7 @@ var PROBLEM_FILE_UPLOAD_VIEW = `
 					<span class="file-icon">
 						<i class="fas fa-upload"></i>
 					</span>
-					<span class="file-label">
+					<span class="file-label" style="color: #242424;">
 						Select Exercise File
 					</span>
 					</span>
@@ -1558,7 +1566,7 @@ var PROBLEM_FILE_UPLOAD_VIEW = `
 `
 var CODE_SNAPSHOT_TAB_TEMPLATE = `
 	<!DOCTYPE html>
-	<html>
+	<html lang="en">
 	<head>
 	<title>Student Dashboard</title>
 	<script src="https://kit.fontawesome.com/923539b4ee.js" crossorigin="anonymous"></script>
@@ -1578,19 +1586,22 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			background: darkseagreen;
 			padding: 20px;
 			margin: 30px;
-			padding-bottom: 0px
+			padding-bottom: 0px;
+			border-radius: 25px;
 		}
 		#ask-for-help {
 			background: #c1bb91;
 			padding: 20px;
 			margin: 30px;
-			padding-bottom: 0px
+			padding-bottom: 0px;
+			border-radius: 25px;
 		}
 		#submission {
 			background: #ada192;;
 			padding: 20px;
 			margin: 30px;
-			padding-bottom: 0px
+			padding-bottom: 0px;
+			border-radius: 25px;
 		}
 		.wrapper {
 			display: grid;
@@ -1610,20 +1621,20 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			padding-left: 100px;
 		}
 		.show {
-			top: 38px;
+			top: 6%;
 			position: fixed;
 			z-index: 200;
 			background: white;
 		}
 		.content {
-			padding-top: 135px;
+			padding-top: 7%;
 		}
 		.actions {
 			// float: right;
-			margin-left: 1054px
+			margin-left: 78%
 		}
 		.sub-actions {
-			margin-left: 995px
+			margin-left: 73%;
 		}
 		.topcorner{
 			position:absolute;
@@ -1669,12 +1680,12 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 	</nav>
 	<div class="content">
 	<div class="topcorner">{{.Username}}({{.UserRole}})</div>
-	<div class="column is-two-thirds show" style="width: 70%;">
-	<!--
+	<div class="column show" style="width: 70%;">
+		<!--
 		<div class="row">
 			<h3 class="title is-2" style="margin-bottom: 0px;">{{ .Feedback.StudentName}}'s Dashboard for {{ .Feedback.ProblemName}}</h3>
 		</div>
-	-->
+		-->
 		<div class="row status">
 			<span>Coding Status: <strong>{{ .Status.CodingStat }} </strong></span>
 			<span>Help Status: <strong>{{ .Status.HelpStat }} </strong></span>
@@ -1703,8 +1714,8 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 				<div style="background: darkseagreen;">
 					<textarea id="snapshot-editor"> {{ .Feedback.LastSnapshot.Code }} </textarea>
 					<div class="actions">
-							<button class="button is-info" id="snapshot-check-feedback" onclick="codeSnapshotFeedback({{ .Feedback.LastSnapshot.Code }}, {{ .Feedback.UserID }})" style="margin-top:3px;" >Check My Feedback</button>
-							<button class="button is-info" id="snapshot-send-feedback" onclick="sendSnapshotFeedback({{ .Feedback.LastSnapshot.Code }}, {{ .Feedback.UserID }})" style="margin-top:3px;" >Send Feedback</button>
+							<button class="button is-info" id="snapshot-check-feedback" onclick="codeSnapshotFeedback({{ .Feedback.LastSnapshot.Code }}, {{ .Feedback.UserID }})" style="margin-top:3px; margin-bottom: 3px; color: #000000;" >Check My Feedback</button>
+							<button class="button is-info" id="snapshot-send-feedback" onclick="sendSnapshotFeedback({{ .Feedback.LastSnapshot.Code }}, {{ .Feedback.UserID }})" style="margin-top:3px; margin-bottom: 3px; color: #000000;" >Send Feedback</button>
 					</div>
 					<div id="code-snapshot-feedback-block"></div>
 				</div> 
@@ -1738,8 +1749,8 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 									</div>
 
 									<div class="actions">
-										<button class="button is-info help-check" id="help-check-feedback-{{ $index }}" onclick="messageFeedback( {{ $index }} ,{{ .Code }} , {{ .ID }})" style="margin-top:3px;" >Check My Feedback</button>
-										<button class="button is-info help-send" id="help-send-feedback-{{ $index }}" onclick="sendMessageFeedback( {{ $index }} ,{{ .Code }} , {{ .ID }})" style="margin-top:3px;" >Send Feedback</button>
+										<button class="button is-info help-check" id="help-check-feedback-{{ $index }}" onclick="messageFeedback( {{ $index }} ,{{ .Code }} , {{ .ID }})" style="margin-top:3px; margin-bottom: 3px; color: #000000;" >Check My Feedback</button>
+										<button class="button is-info help-send" id="help-send-feedback-{{ $index }}" onclick="sendMessageFeedback( {{ $index }} ,{{ .Code }} , {{ .ID }})" style="margin-top:3px; margin-bottom: 3px; color: #000000;" >Send Feedback</button>
 										
 									</div>
 									<div id="feedback-block-{{ $index }}"></div>
@@ -1787,8 +1798,8 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 							<textarea class="submission-editor" id="editor-{{.ID}}">{{ .Code }}</textarea>
 						</div>
 						<div class="sub-actions">
-							<button class="button is-info sub-check" id="sub-check-{{ $index }}" onclick="checkSubFeedback( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }})" style="margin-top:3px;">Check My Feedback</button>
-							<button class="button is-info sub-submit" id="sub-submit-{{ $index }}" onclick="sendGradeFeedback( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }})" style="margin-top:3px;">Submit</button>
+							<button class="button is-info sub-check" id="sub-check-{{ $index }}" onclick="checkSubFeedback( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }})" style="margin-top:3px; margin-bottom: 3px; color: #000000;">Check My Feedback</button>
+							<button class="button is-info sub-submit" id="sub-submit-{{ $index }}" onclick="sendGradeFeedback( {{ $index }}, {{.ID}}, {{.SnapshotID}},{{ .Code }})" style="margin-top:3px; margin-bottom: 3px; color: #000000;">Submit</button>
 						</div>
 						<div id="sub-feedback-block-{{ $index }}"></div>
 					</div>
