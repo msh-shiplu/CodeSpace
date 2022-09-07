@@ -667,7 +667,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 	</head>
 	<body>
 	<div class="container">
-	<nav class="navbar is-fixed-top breadcrumb menu" role="navigation" aria-label="breadcrumbs">
+	<nav class="navbar breadcrumb menu" role="navigation" aria-label="breadcrumbs">
 	<ul>
 	  <li>
 		<a id="view-exercise-link" href="#">
@@ -682,7 +682,7 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 		<span class="icon is-small">
 			<i class="fas fa-book" aria-hidden="true"></i>
 		  </span>
-			<span>Problem Dashboard ({{.ProblemName}})</span>
+			<span>Dashboard for Problem: {{.ProblemName}}</span>
 		</a>
 	   </li>
 	  <li class="is-active">
@@ -695,8 +695,12 @@ var FEEDBACK_PROVISION_TEMPLATE = `
 	  </li>
 	</ul>
 	</nav>
+	<nav class="breadcrumb is-right" aria-label="breadcrumbs">
+		<ul>
+		<li class="is-active"><a href="#">{{.Username}}({{.UserRole}})</a></li>
+		</ul>
+  	</nav>
 	<div class="content">
-	<div class="topcorner">{{.Username}}({{.UserRole}})</div>
 	<div class="column is-two-thirds show" style="width: 70%;">
 	<!--
 		<div class="row">
@@ -850,7 +854,7 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 </head>
 <body>
 <div class="container">
-<nav class="navbar is-fixed-top breadcrumb menu" role="navigation" aria-label="breadcrumbs">
+<nav class="navbar breadcrumb menu" role="navigation" aria-label="breadcrumbs">
 <ul>
   <li>
 	<a id="view-exercise-link" href="#">
@@ -865,14 +869,17 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 	  <span class="icon is-small">
 		<i class="fas fa-book" aria-hidden="true"></i>
 	  </span>
-	  <span>Problem Dashboard</span>
+	  <span>Dashboard for Problem: {{.ProblemName}}</span>
 	</a>
   </li>
 </ul>
 </nav>
+<nav class="breadcrumb is-right" aria-label="breadcrumbs">
+		<ul>
+		<li class="is-active"><a href="#">{{.Username}}({{.UserRole}})</a></li>
+		</ul>
+  	</nav>
 <div class="content">
-<div class="topcorner">{{.Username}}({{.UserRole}})</div>
-	<h2 class="title is-2">Dashboard for {{.ProblemName}}</h2> 
 	{{if eq .UserRole "teacher"}} 
 		{{if eq .IsActive true}}
 			<button id="deactivate-button" class="button is-danger">Deactivate!</button>
@@ -1093,7 +1100,7 @@ input:checked + .slider:before {
 			<span class="icon is-small">
 			<i class="fa-solid fa-plus"></i>
 			</span>
-			<span style="color: #242424;">Export Points</span>
+			<span style="color: #242424;">Export Score</span>
 		</a>
 		{{end}}
 		<table class="table sortable">
@@ -1243,13 +1250,13 @@ var SUBMISSION_VIEW_TEMPLATE = `
 				<span class="icon is-small">
 					<i class="fas fa-puzzle-piece" aria-hidden="true"></i>
 				</span>
-			<span>Student Dashboard</span>
+			<span>{{.StudentName}}'s Dashboard</span>
 			</a>
 		</li>
 		</ul>
 	</nav>
 	<div class="topcorner">{{.Username}}({{.UserRole}})</div>
-		<h2 class="title is-2">{{.StudentName}}'s Submissions for {{.ProblemName}}</h2>
+		<!-- <h2 class="title is-2">{{.StudentName}}'s Submissions for {{.ProblemName}}</h2> -->
 		<div class="tabs">
 			<ul>
 				<li><a href="/student_dashboard_code_snapshot?student_id={{.StudentID}}&problem_id={{.ProblemID}}&uid={{.UserID}}&role={{.UserRole}}{{if ne .Password ""}}&password={{.Password}}{{end}}">Code Snapshot</a></li>
@@ -1645,7 +1652,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 	</head>
 	<body>
 	<div class="container">
-	<nav class="navbar is-fixed-top breadcrumb menu" role="navigation" aria-label="breadcrumbs">
+	<nav class="navbar breadcrumb menu" role="navigation" aria-label="breadcrumbs">
 	<ul>
 	  <li>
 		<a id="view-exercise-link" href="#">
@@ -1660,7 +1667,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 		<span class="icon is-small">
 			<i class="fas fa-book" aria-hidden="true"></i>
 		  </span>
-			<span>Problem Dashboard ({{ .Feedback.ProblemName}})</span>
+			<span>Dashboard for Problem: {{ .Feedback.ProblemName}}</span>
 		</a>
 	   </li>
 	  <li class="is-active">
@@ -1678,8 +1685,12 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 	</div>
 -->
 	</nav>
+	<nav class="breadcrumb is-right" aria-label="breadcrumbs">
+		<ul>
+		<li class="is-active"><a href="#">{{.Username}}({{.UserRole}})</a></li>
+		</ul>
+  	</nav>
 	<div class="content">
-	<div class="topcorner">{{.Username}}({{.UserRole}})</div>
 	<div class="column show" style="width: 70%;">
 		<!--
 		<div class="row">

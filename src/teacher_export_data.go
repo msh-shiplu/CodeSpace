@@ -48,7 +48,7 @@ func exportPointsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 		}
 		csvData = append(csvData, dt)
 	}
-	file, err := os.Create("points.csv")
+	file, err := os.Create("score.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func exportPointsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 
 	writer.WriteAll(csvData)
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+strconv.Quote("points.csv"))
+	w.Header().Set("Content-Disposition", "attachment; filename="+strconv.Quote("score.csv"))
 	w.Header().Set("Content-Type", "application/octet-stream")
 	http.ServeFile(w, r, file.Name())
 }
