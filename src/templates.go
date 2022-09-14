@@ -1871,7 +1871,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			});
 			var snapshotCounter = 0;
 			var feedbackCounter = 0;
-			var subfeedbackCounter = 0;
+			var subfeedbackCounter = 1; // should be 0 with NLP
 			
 			// var feedbackEditors = document.getElementsByClassName("feedback-editor");
 			var feedbackChangedCode = []
@@ -1895,10 +1895,11 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 				code.setSize("100%", "100%");
 				code.on('change', (code) => {
 					submissionChangedCode[i] = code.doc.getValue()
-					if (subfeedbackCounter === 0 ){
-						document.getElementById("sub-submit-"+i).classList.add('is-hidden')
-						document.getElementById("sub-check-"+i).classList.remove('is-hidden')
-					}
+					// This changes the Send Feedback into Check my feedback button
+					// if (subfeedbackCounter === 0 ){
+					// 	document.getElementById("sub-submit-"+i).classList.add('is-hidden')
+					// 	document.getElementById("sub-check-"+i).classList.remove('is-hidden')
+					// }
 				});
 			}
 
@@ -1931,8 +1932,9 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 							pre += str
 							pre += '</ul></div></div>'
 						})
-						$(write).html("");
-						$('<div class="wrapper">' + pre +  '</div>').appendTo( write )
+						// Do not show NLP classifier result
+						// $(write).html("");
+						// $('<div class="wrapper">' + pre +  '</div>').appendTo( write )
 					},
 					error: function(err) {
 						// alert(JSON.stringify(err));
@@ -1961,12 +1963,11 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 				}
 				runNLP(code, snapshotCodeChanged, user_id, '#code-snapshot-feedback-block');
 				$.post("/save_snapshot_feedback", {feedback: snapshotCodeChanged, snapshot_id: {{.Feedback.LastSnapshot.ID}}, uid: {{ .Feedback.UserID}}, role: {{ .Feedback.UserRole}}{{if ne .Feedback.Password ""}}, password: {{ .Feedback.Password}}{{end}}  }, function(data, status){
-					if (status == "success"){
-						alert("Feedback posted successfully!");
-						window.location.replace("/student_dashboard_feedback_provision?student_id={{ .Feedback.StudentID}}&problem_id={{ .Feedback.ProblemID}}&uid={{ .Feedback.UserID}}&role={{.Feedback.UserRole}}{{if ne .Feedback.Password ""}}&password={{.Feedback.Password}}{{end}}");
-					} else {
-						alert("Could not post the feedback. Please try again!");
-					}
+					alert("Feedback posted successfully!");
+					window.location.replace("/student_dashboard_feedback_provision?student_id={{ .Feedback.StudentID}}&problem_id={{ .Feedback.ProblemID}}&uid={{ .Feedback.UserID}}&role={{.Feedback.UserRole}}{{if ne .Feedback.Password ""}}&password={{.Feedback.Password}}{{end}}");
+				})
+				.fail(function() {
+					alert("Could not post the feedback. Please try again!");
 				});
 			}
 
@@ -1991,12 +1992,11 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 				}
 				runNLP(code, feedbackChangedCode[i], {{ .Feedback.UserID }}, '#feedback-block-'+i );
 				$.post("/save_message_feedback", {feedback: feedbackChangedCode[i], message_id: message_id, uid: {{ .Feedback.UserID}}, role: {{ .Feedback.UserRole}}{{if ne .Feedback.Password ""}}, password: {{ .Feedback.Password}}{{end}}  }, function(data, status){
-					if (status == "success"){
-						alert("Feedback posted successfully!");
-						window.location.replace("/student_dashboard_feedback_provision?student_id={{ .Feedback.StudentID}}&problem_id={{ .Feedback.ProblemID}}&uid={{ .Feedback.UserID}}&role={{.Feedback.UserRole}}{{if ne .Feedback.Password ""}}&password={{.Feedback.Password}}{{end}}");
-					} else {
-						alert("Could not post the feedback. Please try again!");
-					}
+					alert("Feedback posted successfully!");
+					window.location.replace("/student_dashboard_feedback_provision?student_id={{ .Feedback.StudentID}}&problem_id={{ .Feedback.ProblemID}}&uid={{ .Feedback.UserID}}&role={{.Feedback.UserRole}}{{if ne .Feedback.Password ""}}&password={{.Feedback.Password}}{{end}}");
+				})
+				.fail(function() {
+					alert("Could not post the feedback. Please try again!");
 				});
 
 			}
@@ -2010,7 +2010,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 				document.getElementById("sub-check-"+i).classList.add('is-hidden')
 
 				// check if code changed and already run through nlp
-				if (subfeedbackCounter != 0) {
+				if (subfeedbackCounter != 0 && submissionChangedCode[i] != undefined ) {
 					document.getElementById("sub-submit-"+i).innerHTML = "Submit Grade and Feedback";
 				}
 
@@ -2047,10 +2047,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			
 			function sendGradeFeedback(i, submission_id, snapshot_id, submittedCode) {
 				var code = submissionChangedCode[i]
-				if (code === undefined ) {
-					alert("Please provide in-line feedback!");
-					return
-				}
+
 				var grade = submissionsGrade[i]
 
 				// if no grade, no code change, disable submit
@@ -2058,31 +2055,36 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 				// if grade and  code change, disable submit to run it through nlp.
 				// if grade and code change and already run through nlp, enable submit. This will send both grade and feedback.
 				
-				if (subfeedbackCounter != 0 ) {
+				if (subfeedbackCounter != 0 && code !== undefined ) {
 					if (grade !== undefined ) {
 						$.post("/teacher_grades", {content: submittedCode, changed: "", decision: grade, sid: submission_id, uid: {{ .Submission.UserID}}, role: {{ .Submission.UserRole}}{{if ne .Submission.Password ""}}, password: {{ .Submission.Password}}{{end}}  }, function(data, status){
-							if (status == "success"){
 								// Save and send feedback if the code is changed
 								if (code !== undefined) {
 									runNLP(submittedCode, code, {{ .Submission.UserID }}, '#sub-feedback-block-'+i );
 									$.post("/save_snapshot_feedback", {snapshot_id: snapshot_id, feedback: code, uid: {{ .Submission.UserID}}, role: {{ .Submission.UserRole}}{{if ne .Submission.Password ""}}, password: {{ .Submission.Password}}{{end}} }, function(data1, status1){
 										alert("Graded successfully! Feedback posted successfully! ");
 										window.location.reload();
+									})
+									.fail(function() {
+										alert("Could not post the feedback. Please try again!");
 									});
-								} else {
-									alert("Graded successfully! ");
-									window.location.reload();
-								}
-							} else {
-								alert("Could not grade the submission. Please try again!");
-								return;
-							}
+								} 
+								// else {
+								// 	alert("Graded successfully! ");
+								// 	window.location.reload();
+								// }
+						})
+						.fail(function() {
+							alert("Could not grade the submission. Please try again!");
 						});
 					} else {
 						runNLP(submittedCode, code, {{ .Submission.UserID }}, '#sub-feedback-block-'+i );
 						$.post("/save_snapshot_feedback", {snapshot_id: snapshot_id, feedback: code, uid: {{ .Submission.UserID}}, role: {{ .Submission.UserRole}}{{if ne .Submission.Password ""}}, password: {{ .Submission.Password}}{{end}} }, function(data1, status1){
 							alert("Feedback posted successfully! ");
 							window.location.reload();
+						})
+						.fail(function() {
+							alert("Could not grade the submission. Please try again!");
 						});
 					}
 				}
@@ -2090,13 +2092,11 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 				if ( code === undefined ){
 					if (grade !== undefined ) {
 						$.post("/teacher_grades", {content: submittedCode, changed: "", decision: grade, sid: submission_id, uid: {{ .Submission.UserID}}, role: {{ .Submission.UserRole}}{{if ne .Submission.Password ""}}, password: {{ .Submission.Password}}{{end}}  }, function(data, status){
-							if (status == "success"){
-								alert("Graded successfully!");
-								window.location.reload();
-							} else {
-								alert("Could not grade the submission. Please try again!");
-								return;
-							}
+							alert("Graded successfully!");
+							window.location.reload();
+						})
+						.fail(function() {
+							alert("Could not grade the submission. Please try again!");
 						});
 
 					} else {

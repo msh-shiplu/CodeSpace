@@ -272,7 +272,8 @@ func load_teachers() {
 		rows.Scan(&id, &name, &password)
 		Teacher[id] = password
 		TeacherPass[name] = password
-
+		TeacherNameToId[name] = id
+		TeacherIdToName[id] = name
 	}
 	Passcode = RandStringRunes(20)
 }
