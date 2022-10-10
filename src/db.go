@@ -183,20 +183,35 @@ func addOrUpdateStudentStatus(studentID int, problemID int, codingStat string, h
 		now := time.Now()
 		rows.Close()
 		if codingStat != "" {
-			UpdateStudentCodingStatSQL.Exec(codingStat, now, studentID, problemID)
+			_, err = UpdateStudentCodingStatSQL.Exec(codingStat, now, studentID, problemID)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 		if helpStat != "" {
-			UpdateStudentHelpStatSQL.Exec(helpStat, now, studentID, problemID)
+			_, err = UpdateStudentHelpStatSQL.Exec(helpStat, now, studentID, problemID)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 		if submissionStat != "" {
-			UpdateStudentSubmissionStatSQL.Exec(submissionStat, now, studentID, problemID)
+			_, err = UpdateStudentSubmissionStatSQL.Exec(submissionStat, now, studentID, problemID)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 		if tutoringStat != "" {
-			UpdateStudentTutoringStatSQL.Exec(tutoringStat, now, studentID, problemID)
+			_, err = UpdateStudentTutoringStatSQL.Exec(tutoringStat, now, studentID, problemID)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	} else {
 		rows.Close()
-		AddStudentStatusSQL.Exec(studentID, problemID, codingStat, helpStat, submissionStat, tutoringStat, time.Now())
+		_, err = AddStudentStatusSQL.Exec(studentID, problemID, codingStat, helpStat, submissionStat, tutoringStat, time.Now())
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -206,13 +221,17 @@ func init_teacher(id int, name string, password string) {
 	TeacherPass[name] = password
 	TeacherNameToId[name] = id
 	TeacherIdToName[id] = name
+	SeenHelpSubmissions[id] = map[int]bool{}
 }
 
 //-----------------------------------------------------------------
 // initialize once per session
 //-----------------------------------------------------------------
 func init_student(student_id int, name string, password string) {
-	AddAttendanceSQL.Exec(student_id, time.Now())
+	_, err := AddAttendanceSQL.Exec(student_id, time.Now())
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	BoardsSem.Lock()
 	defer BoardsSem.Unlock()
@@ -241,6 +260,7 @@ func init_student(student_id int, name string, password string) {
 		}
 		Students[student_id].Boards = append(Students[student_id].Boards, b)
 	}
+	StudentSnapshot[student_id] = map[int]int{}
 }
 
 //-----------------------------------------------------------------

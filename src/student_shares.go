@@ -59,12 +59,18 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 					scoring_mesg = add_or_update_score("correct", pid, uid, 0, -1)
 					ActiveProblems[filename].Attempts[uid] = 0 // This prevents further submission
 					complete = true
-					IncProblemStatGradedCorrectSQL.Exec(pid)
+					_, err = IncProblemStatGradedCorrectSQL.Exec(pid)
+					if err != nil {
+						log.Fatal(err)
+					}
 					addOrUpdateStudentStatus(uid, pid, "", "", "Graded Correct", "")
 				} else if ActiveProblems[filename].Info.ExactAnswer {
 					scoring_mesg = add_or_update_score("incorrect", pid, uid, 0, -1)
 					complete = true
-					IncProblemStatGradedIncorrectSQL.Exec(pid)
+					_, err = IncProblemStatGradedIncorrectSQL.Exec(pid)
+					if err != nil {
+						log.Fatal(err)
+					}
 					addOrUpdateStudentStatus(uid, pid, "", "", "Graded Incorrect", "")
 				} else {
 					scoring_mesg = "Answer appears to be incorrect. It will be looked at."
@@ -89,10 +95,16 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			}
 			sid, _ = result.LastInsertId()
 
-			IncProblemStatSubmissionSQL.Exec(pid)
+			_, err = IncProblemStatSubmissionSQL.Exec(pid)
+			if err != nil {
+				log.Fatal(err)
+			}
 
 			if test_cases != "" {
-				rows, _ := Database.Query("select id from test_case where student_id=? and problem_id=?", uid, pid)
+				rows, err := Database.Query("select id from test_case where student_id=? and problem_id=?", uid, pid)
+				if err != nil {
+					log.Fatal(err)
+				}
 				tc_id := 0
 				for rows.Next() {
 					rows.Scan(&tc_id)
@@ -100,9 +112,12 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 				}
 				rows.Close()
 				if tc_id != 0 {
-					UpdateTestCaseSQL.Exec(test_cases, now, tc_id)
+					_, err = UpdateTestCaseSQL.Exec(test_cases, now, tc_id)
 				} else {
-					AddTestCaseSQL.Exec(pid, uid, test_cases, now)
+					_, err = AddTestCaseSQL.Exec(pid, uid, test_cases, now)
+				}
+				if err != nil {
+					log.Fatal(err)
 				}
 
 			}
@@ -114,7 +129,10 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 						// fmt.Fprintf(w, "You are now elligible to help you friends. To help please click on 'Help Friends' button.")
 						msg = msg + "\nYou are now elligible to help you friends. To help please click on 'Help Friends' button."
 
-						AddHelpEligibleSQL.Exec(pid, uid, now)
+						_, err = AddHelpEligibleSQL.Exec(pid, uid, now)
+						if err != nil {
+							log.Fatal(err)
+						}
 						addOrUpdateStudentStatus(uid, pid, "", "", "", "Qualified")
 					}
 				}

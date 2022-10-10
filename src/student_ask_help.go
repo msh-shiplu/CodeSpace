@@ -39,13 +39,14 @@ func studentAskHelpHandler(w http.ResponseWriter, r *http.Request, who string, u
 			var result sql.Result
 			// result, err = AddHelpSubmissionSQL.Exec(pid, uid, snapshotID, "", need_help_with, now)
 			result, err = AddMessageSQL.Exec(snapshotID, need_help_with, uid, "student", now, 0)
-
-			IncProblemStatHelpSQL.Exec(pid)
-
 			if err != nil {
 				log.Fatal(err)
 			}
 			sid, _ = result.LastInsertId()
+			_, err = IncProblemStatHelpSQL.Exec(pid)
+			if err != nil {
+				log.Fatal(err)
+			}
 			addOrUpdateStudentStatus(uid, pid, "", "Asked for help", "", "")
 		}
 	} else {

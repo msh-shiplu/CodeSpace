@@ -137,6 +137,9 @@ func studentSendBackFeedbackHandler(w http.ResponseWriter, r *http.Request, who 
 		}
 	} else {
 		rows.Close()
-		AddMessageBackFeedbackSQL.Exec(feedbackID, uid, authorRole, backFeedback, time.Now())
+		_, err = AddMessageBackFeedbackSQL.Exec(feedbackID, uid, authorRole, backFeedback, time.Now())
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
