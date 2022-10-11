@@ -41,7 +41,10 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 	if changed == "True" {
 		// If the original file is changed, there's feedback.  Copy it to whiteboard.
 		if prob, ok := ActiveProblems[sub.Filename]; ok {
-			AddFeedbackSQL.Exec(uid, student_id, content, time.Now(), sub.Sid)
+			_, err := AddFeedbackSQL.Exec(uid, student_id, content, time.Now(), sub.Sid)
+			if err != nil {
+				log.Fatal(err)
+			}
 			mesg = "Feedback saved to student's board."
 			BoardsSem.Lock()
 			defer BoardsSem.Unlock()
@@ -104,7 +107,10 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 					HelpEligibleStudents[pid][sub.Uid] = true
 					SeenHelpSubmissions[sub.Uid] = map[int]bool{}
 					// Add eligible timestamp to datbase
-					AddHelpEligibleSQL.Exec(pid, sub.Uid, now)
+					_, err := AddHelpEligibleSQL.Exec(pid, sub.Uid, now)
+					if err != nil {
+						log.Fatal(err)
+					}
 					subStat.Status = 5
 				}
 			}
@@ -112,7 +118,10 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 
 			// Add the correct submission to codesnapshot.
 			// addCodeSnapshot(sub.Uid, pid, content, 3, now)
-			IncProblemStatGradedCorrectSQL.Exec(pid)
+			_, err := IncProblemStatGradedCorrectSQL.Exec(pid)
+			if err != nil {
+				log.Fatal(err)
+			}
 			addOrUpdateStudentStatus(sub.Uid, pid, "", "", "Graded Correct", "")
 
 		} else {
@@ -126,7 +135,10 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 
 			// Add the incorrect submission to codesnapshot.
 			// addCodeSnapshot(sub.Uid, sub.Pid, content, 2, time.Now())
-			IncProblemStatGradedIncorrectSQL.Exec(sub.Pid)
+			_, err := IncProblemStatGradedIncorrectSQL.Exec(sub.Pid)
+			if err != nil {
+				log.Fatal(err)
+			}
 			addOrUpdateStudentStatus(sub.Uid, sub.Pid, "", "", "Graded Incorrect", "")
 		}
 

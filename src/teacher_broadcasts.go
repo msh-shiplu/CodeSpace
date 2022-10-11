@@ -61,7 +61,10 @@ func insert_problem(uid int, problem *ProblemInfo) {
 			Attempts: make(map[int]int),
 		}
 		HelpEligibleStudents[int(pid)] = map[int]bool{}
-		AddProblemStatisticsSQL.Exec(problem.Pid)
+		_, err = AddProblemStatisticsSQL.Exec(problem.Pid)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 

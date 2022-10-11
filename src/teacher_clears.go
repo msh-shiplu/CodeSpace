@@ -6,6 +6,7 @@ package main
 import (
 	// "encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	// "log"
@@ -41,7 +42,10 @@ func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request,
 				idx++
 			}
 		}
-		UpdateProblemEndTimeSQL.Exec(time.Now(), prob.Info.Pid)
+		_, err := UpdateProblemEndTimeSQL.Exec(time.Now(), prob.Info.Pid)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 	} else {
 		fmt.Fprintf(w, "-1")
