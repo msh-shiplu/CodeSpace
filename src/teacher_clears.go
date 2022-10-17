@@ -46,6 +46,14 @@ func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request,
 		if err != nil {
 			log.Fatal(err)
 		}
+		for studentID, _ := range Students {
+			for i, b := range Students[studentID].Boards {
+				if b.Pid == prob.Info.Pid {
+					Students[studentID].Boards = append(Students[studentID].Boards[:i], Students[studentID].Boards[i+1:]...)
+					break
+				}
+			}
+		}
 
 	} else {
 		fmt.Fprintf(w, "-1")
