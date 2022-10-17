@@ -1468,6 +1468,23 @@ var PROBLEM_FILE_UPLOAD_VIEW = `
 					</div>
 				</article>
 		</div>
+		
+		<div id="answer" class="file is-centered is-info has-name">
+			<label class="file-label">
+			  <input class="file-input" type="file" name="resume">
+			  <span class="file-cta">
+				<span class="file-icon">
+				  <i class="fas fa-upload"></i>
+				</span>
+				<span class="file-label">
+				Select Answer File (if any)
+				</span>
+			  </span>
+			  <span id="answer_filename" class="file-name">
+				No file selected
+			  </span>
+			</label>
+		  </div>
 		<button style="visibility:hidden" id="submit" class="button is-success is-rounded">
 				<span class="icon is-small">
 					<i class="fas fa-check"></i>
@@ -1478,6 +1495,7 @@ var PROBLEM_FILE_UPLOAD_VIEW = `
 			<input type="hidden" id="effort" value="">
 			<input type="hidden" id="attempt" value="">
 			<input type="hidden" id="tag" value="">
+			<input type="hidden" id="exact_answer" value="">
 		</div>
 	</div>
 	<script>
@@ -1524,6 +1542,18 @@ var PROBLEM_FILE_UPLOAD_VIEW = `
 		reader.readAsText(file);
 	  };
 	  
+	  document.querySelector('#answer input[type=file]').onchange = function(){
+		// document.querySelector('#answer').style.visibility = "hidden";
+		var file = this.files[0];
+		document.querySelector('#answer_filename').textContent = file.name;
+		var reader = new FileReader();
+		reader.onload = function(progressEvent){
+	  
+		  $('#exact_answer').val(this.result);
+		};
+		reader.readAsText(file);
+	  };
+
 	  function get_problem_info(content) {
 		  let regexpNames =  /\s*(\d+)\s+(\d+)\s+(\d+)(?:\s+(\w.*))?/mg;
 		let match = regexpNames.exec(content);
@@ -1556,7 +1586,8 @@ var PROBLEM_FILE_UPLOAD_VIEW = `
 			var attempt = $('#attempt').val();
 			var tag = $('#tag').val();
 			var filename = $('#filename').text();
-			$.post("/teacher_broadcasts", {role: "teacher", uid: uid, content: editor.getValue(), answer: "", merit: points, effort: effort, attempts: attempt, tag: tag, filename: filename, exact_answer: true}, function(data, status){
+			var answer = $('#exact_answer').val().trim();
+			$.post("/teacher_broadcasts", {role: "teacher", uid: uid, content: editor.getValue(), answer: answer, merit: points, effort: effort, attempts: attempt, tag: tag, filename: filename, exact_answer: "True"}, function(data, status){
 				if (status == "success"){
 					alert("Exercise broadcasted successfully!");
 					window.location.replace("/view_exercises?role=teacher&uid="+uid);

@@ -52,10 +52,12 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			attempt_number = prob.Info.Attempts - ActiveProblems[filename].Attempts[uid]
 			// Autograding if possible
 			correct_answer = ActiveProblems[filename].Info.Answer
+			decision := ""
 			addOrUpdateStudentStatus(uid, pid, "", "", "submitted", "")
 			if answer != "" {
 				scoring_mesg := ""
 				if correct_answer == answer {
+					decision = "correct"
 					scoring_mesg = add_or_update_score("correct", pid, uid, 0, -1)
 					ActiveProblems[filename].Attempts[uid] = 0 // This prevents further submission
 					complete = true
@@ -65,6 +67,7 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 					}
 					addOrUpdateStudentStatus(uid, pid, "", "", "Graded Correct", "")
 				} else if ActiveProblems[filename].Info.ExactAnswer {
+					decision = "incorrect"
 					scoring_mesg = add_or_update_score("incorrect", pid, uid, 0, -1)
 					complete = true
 					_, err = IncProblemStatGradedIncorrectSQL.Exec(pid)
@@ -99,7 +102,12 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 			if err != nil {
 				log.Fatal(err)
 			}
-
+			if complete {
+				_, err := CompleteSubmissionSQL.Exec(time.Now(), decision, sid)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
 			if test_cases != "" {
 				rows, err := Database.Query("select id from test_case where student_id=? and problem_id=?", uid, pid)
 				if err != nil {
