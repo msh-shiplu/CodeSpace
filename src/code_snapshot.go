@@ -95,10 +95,10 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 		log.Fatal(err)
 	}
 	rows, err := Database.Query("select student_id, problem_id, code, filename from code_snapshot cs, problem p where cs.problem_id=p.id and cs.id=?", snapshotID)
-	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer rows.Close()
 
 	messageID, _ := result.LastInsertId()
 	studentID := -1
@@ -109,6 +109,10 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 		rows.Scan(&studentID, &problemID, &code, &filename)
 	}
 	rows.Close()
+	if studentID == authorID {
+		fmt.Fprintf(w, "You can not give feedback to your own code.")
+		return
+	}
 	idx := StudentSnapshot[studentID][problemID]
 	Snapshots[idx].NumFeedback++
 	result, err = AddMessageFeedbackSQL.Exec(messageID, feedback, authorID, authorRole, now)
@@ -143,10 +147,10 @@ func messageFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, 
 		log.Fatal(err)
 	}
 	rows, err := Database.Query("select student_id, problem_id, code, filename, m.type from code_snapshot cs, problem p, message m where cs.problem_id=p.id and m.snapshot_id = cs.id and m.id=?", messageID)
-	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer rows.Close()
 
 	studentID := -1
 	code := ""
@@ -157,6 +161,10 @@ func messageFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, 
 		rows.Scan(&studentID, &problemID, &code, &filename, &messageType)
 	}
 	rows.Close()
+	if studentID == authorID {
+		fmt.Fprintf(w, "You can not give feedback to your own code.")
+		return
+	}
 	if messageType == 0 {
 		addOrUpdateStudentStatus(studentID, problemID, "", "Been helped", "", "")
 		if authorRole == "student" {
