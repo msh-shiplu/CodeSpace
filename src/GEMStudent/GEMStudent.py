@@ -883,7 +883,7 @@ class gemsUpdate(sublime_plugin.WindowCommand):
             urllib.request.urlretrieve(
                 "https://raw.githubusercontent.com/msh-shiplu/CodeSpace/master/src/GEMStudent/Main.sublime-menu", menu_file)
             urllib.request.urlretrieve(
-                "https://raw.githubusercontent.com/msh-shiplu/CodeSpace/master/src/GEMStudent/version.go", version_file)
+                "https://raw.githubusercontent.com/msh-shiplu/CodeSpace/master/src/version.go", version_file)
             with open(version_file) as f:
                 lines = f.readlines()
             for line in lines:
