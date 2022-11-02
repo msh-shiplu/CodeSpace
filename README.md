@@ -18,16 +18,14 @@ import os; package_path = os.path.join(sublime.packages_path(), "GEMStudent"); o
 
 
 ### Teacher's installation
-
-(1) Open Sublime Text
-
-(2) Click Show Console in the View menu.
-
-(3) Copy this code:
+Web portal
 ```
-import os; package_path = os.path.join(sublime.packages_path(), "GEMTeacher"); os.mkdir(package_path) if not os.path.isdir(package_path) else print("dir exists"); module_file = os.path.join(package_path, "GEMTeacher.py") ; menu_file = os.path.join(package_path, "Main.sublime-menu"); version_file = os.path.join(package_path, "version.go"); import urllib.request; urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMTeacher/GEMTeacher.py", module_file); urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/CodeSpace/src/GEMTeacher/Main.sublime-menu", menu_file); urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/CodeSpace/src/version.go", version_file); keymap_file = os.path.join(package_path, "Default.sublime-keymap"); urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/CodeSpace/src/GEMTeacher/Default.sublime-keymap", keymap_file); 
+    http://server_address:course_port/teacher_signin
 ```
-(4) Paste copied code to Console and hit enter.
+For example
+```
+    http://192.168.86.189:8088/teacher_signin
+```
 
 #### Running the GEM server
 
