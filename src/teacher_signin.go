@@ -5,10 +5,26 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	c, err := r.Cookie("session_token")
+	if err != nil {
+		http.Redirect(w, r, "/teacher_signin", http.StatusSeeOther)
+	} else {
+		sessionToken := c.Value
+		userSession, exists := sessions[sessionToken]
+		if !exists || userSession.isExpired() {
+			http.Redirect(w, r, "/teacher_signin", http.StatusSeeOther)
+		} else {
+			http.Redirect(w, r, "/view_exercises?role=teacher&uid="+strconv.Itoa(TeacherNameToId[userSession.username]), http.StatusFound)
+		}
+	}
+}
 
 func teacherSigninCompleteHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("username")
