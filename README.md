@@ -20,11 +20,11 @@ import os; package_path = os.path.join(sublime.packages_path(), "GEMStudent"); o
 ### Teacher's installation
 Web portal
 ```
-    http://server_address:course_port/teacher_signin
+    http://server_address:course_port/
 ```
 For example
 ```
-    http://192.168.86.189:8088/teacher_signin
+    http://192.168.86.189:8088/
 ```
 
 #### Running the GEM server
