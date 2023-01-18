@@ -1,0 +1,6 @@
+[
+    { "keys": ["ctrl+1"], "command": "gems_get_board_content" },
+    { "keys": ["ctrl+2"], "command": "gems_got_it" },
+    { "keys": ["ctrl+3"], "command": "gems_need_help" },
+    { "keys": ["ctrl+4"], "command": "gems_view_exercises" },
+]
