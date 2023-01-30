@@ -97,6 +97,7 @@ func init_handlers() {
 	http.HandleFunc("/teacher_exports_point", Authorize(exportPointsHandler, "teacher"))
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/index", indexHandler)
+	http.HandleFunc("/peer_tutoring", Authorize(peerTutorHandler, "student"))
 }
 
 //-----------------------------------------------------------------

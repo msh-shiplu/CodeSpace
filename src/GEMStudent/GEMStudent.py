@@ -1124,3 +1124,29 @@ class gemsViewExercises(sublime_plugin.ApplicationCommand):
         p = urllib.parse.urlencode(
             {'password': info['Password'], 'uid': info['Uid'], 'role': 'student'})
         webbrowser.open(gemsSERVER + '/view_exercises?'+p)
+
+
+class gemsPeerTutoring(sublime_plugin.ApplicationCommand):
+    def run(self):
+        global gemsSERVER
+        with open(gemsFILE, 'r') as f:
+            info = json.loads(f.read())
+        p = urllib.parse.urlencode(
+            {'password': info['Password'], 'uid': info['Uid'], 'role': 'student'})
+        fname = sublime.active_window().active_view().file_name()
+        if fname is None:
+            sublime.message_dialog('Unable to find filename!')
+            return
+        filename = os.path.basename(fname)
+        match = re.search(r'feedback-\d+-(.*)', filename)
+        if match:
+            filename = match.group(1)
+        data = dict(
+            filename=filename,
+            role='student',
+        )
+        response = gemsRequest(gemsSERVER + "/peer_tutoring", data)
+        if response == "redirect":
+            webbrowser.open(gemsSERVER + '/view_exercises?'+p)
+        else:
+            sublime.message_dialog(response)

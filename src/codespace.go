@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -382,4 +383,17 @@ func setPeerTutorHandler(w http.ResponseWriter, r *http.Request, who string, uid
 	} else if turnOn == 0 {
 		PeerTutorAllowed = false
 	}
+}
+
+func peerTutorHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
+	filename := r.FormValue("filename")
+	if prob, ok := ActiveProblems[filename]; ok {
+		if eligible, ok := HelpEligibleStudents[prob.Info.Pid][uid]; ok {
+			if PeerTutorAllowed && eligible {
+				fmt.Fprint(w, "redirect")
+				return
+			}
+		}
+	}
+	fmt.Fprintf(w, "You are not eligible for peer tutoring for this problem!")
 }
