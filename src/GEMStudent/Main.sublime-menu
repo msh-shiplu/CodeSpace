@@ -30,6 +30,11 @@
                 "command": "gems_points_report",
             },
             {
+                "caption": "Peer Tutoring",
+                "id": "gemsPeerTutoring",
+                "command": "gems_peer_tutoring"
+            },
+            {
                 "caption": "Exercises",
                 "id": "gemsViewExercises",
                 "command": "gems_view_exercises"
