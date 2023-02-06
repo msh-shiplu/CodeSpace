@@ -88,9 +88,9 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 
 			var result sql.Result
 			if complete {
-				result, err = AddSubmissionCompleteSQL.Exec(pid, uid, content, priority, attempt_number, now, now, snapshotID)
+				result, err = AddSubmissionCompleteSQL.Exec(pid, uid, content, priority, attempt_number, now, now, snapshotID, answer)
 			} else {
-				result, err = AddSubmissionSQL.Exec(pid, uid, content, priority, attempt_number, now, snapshotID)
+				result, err = AddSubmissionSQL.Exec(pid, uid, content, priority, attempt_number, now, snapshotID, answer)
 			}
 			if err != nil {
 
