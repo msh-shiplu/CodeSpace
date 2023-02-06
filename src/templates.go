@@ -894,12 +894,14 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			<button id="deactivate-button" class="button is-danger">Deactivate!</button>
 		{{end}}
 	{{end}}
+	<h4 class="title is-4">Exercise Statement</h4>
 	<div class="accordions">
 		<h3>{{.ProblemName}}</h3>
 		<div>
 			<textarea id="editor">{{ .Code }}</textarea>
 		</div>
 	</div>
+	<h4 class="title is-4">Statistics for {{.ProblemName}}</h4>
 	<table class="table">
 			<thead>
 				<tr>
@@ -920,7 +922,25 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 				</tr>
 			</tbody>
 	</table>
-
+	{{if gt (len .AnswerStats) 0}}
+		<h4 class="title is-4">Multiple Choice Answer Statistics</h4>
+		<table>
+			<thead>
+				<tr>
+					<th>Answer</th>
+					<th>Student submitted</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{range .AnswerStats}}
+				<tr>
+				<td>{{.Answer}}</td>
+				<td>{{.Percent}}%</td>
+				</tr>
+				{{end}}
+			</tobdy>
+		</table>
+	{{end}}
 	<table class="table sortable">
 			<thead>
 				<tr>

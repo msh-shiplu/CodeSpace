@@ -472,6 +472,7 @@ func studentDashboardCodeSpaceHandler(w http.ResponseWriter, r *http.Request, wh
 				SubmittedAt: submittedAt,
 			})
 		}
+		fmt.Printf("Submission length %d\n", len(submissions))
 		sort.SliceStable(submissions, func(i, j int) bool {
 			if submissions[i].Grade == "" && submissions[j].Grade == "" {
 				return submissions[i].SubmittedAt.After(submissions[j].SubmittedAt)

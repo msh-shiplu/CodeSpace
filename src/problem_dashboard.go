@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"log"
+	"math"
 	"net/http"
 	"sort"
 	"strconv"
@@ -19,6 +20,12 @@ type DashBoardStudentInfo struct {
 	TutoringStat   string
 }
 
+type AnswerStatInfo struct {
+	Answer  string
+	Count   int
+	Percent float64
+}
+
 type DashBoardInfo struct {
 	StudentInfo        []*DashBoardStudentInfo
 	ProblemName        string
@@ -30,6 +37,7 @@ type DashBoardInfo struct {
 	NumGradedCorrect   int
 	NumGradedIncorrect int
 	NumNotGraded       int
+	AnswerStats        []*AnswerStatInfo
 	UserID             int
 	UserRole           string
 	Password           string
@@ -208,6 +216,32 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 
 	nActive, nHelp, nNotGraded, nCorrect, nIncorrect := getProblemStats(problemID)
 
+	var answerStats []*AnswerStatInfo
+	if role != "student" {
+		rows, err = Database.Query("select answer, count(*) as cnt from submission where problem_id = ? and answer is not NULL and LENGTH(answer)>0 group by answer", problemID)
+		defer rows.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+		var ans string
+		var c int
+		var total int
+		for rows.Next() {
+			rows.Scan(&ans, &c)
+			if ans != "" {
+				answerStats = append(answerStats, &AnswerStatInfo{
+					Answer: ans,
+					Count:  c,
+				})
+			}
+			total += c
+		}
+		for i, answer := range answerStats {
+			answerStats[i].Percent = float64(answer.Count) * 100.0 / float64(total)
+			answerStats[i].Percent = math.Round(answerStats[i].Percent*100) / 100
+		}
+	}
+
 	dashBoardData := &DashBoardInfo{
 		StudentInfo:        studentInfo,
 		ProblemID:          problemID,
@@ -219,6 +253,7 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 		NumGradedCorrect:   nCorrect,
 		NumGradedIncorrect: nIncorrect,
 		NumNotGraded:       nNotGraded,
+		AnswerStats:        answerStats,
 		UserID:             uid,
 		UserRole:           role,
 		Password:           password,
