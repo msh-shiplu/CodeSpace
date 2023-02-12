@@ -240,6 +240,7 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 			answerStats[i].Percent = float64(answer.Count) * 100.0 / float64(total)
 			answerStats[i].Percent = math.Round(answerStats[i].Percent*100) / 100
 		}
+		rows.Close()
 	}
 
 	dashBoardData := &DashBoardInfo{

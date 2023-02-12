@@ -923,7 +923,7 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			</tbody>
 	</table>
 	{{if gt (len .AnswerStats) 0}}
-		<h4 class="title is-4">Multiple Choice Answer Statistics</h4>
+		<h4 class="title is-4">Answer Statistics</h4>
 		<table>
 			<thead>
 				<tr>
