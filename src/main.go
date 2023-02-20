@@ -146,11 +146,11 @@ func init_config(filename string) *Configuration {
 		config.IP = informIPAddress()
 	}
 	config.Address = fmt.Sprintf("%s:%d", config.IP, config.Port)
-	if config.PeerTutor == 1 {
-		PeerTutorAllowed = true
-	} else {
-		PeerTutorAllowed = false
-	}
+	// if config.PeerTutor == 1 {
+	// 	PeerTutorAllowed = true
+	// } else {
+	// 	PeerTutorAllowed = false
+	// }
 	return config
 }
 
