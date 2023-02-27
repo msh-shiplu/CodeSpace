@@ -35,6 +35,7 @@ func Authorize(fn func(http.ResponseWriter, *http.Request, string, int), userRol
 			return
 		}
 		uid, err := strconv.Atoi(r.FormValue("uid"))
+		msg := ""
 		if err == nil {
 			ok := false
 			var password string
@@ -42,17 +43,19 @@ func Authorize(fn func(http.ResponseWriter, *http.Request, string, int), userRol
 				password, ok = Teacher[uid]
 				if ok && password != r.FormValue("password") {
 					ok = false
+					msg += TeacherIdToName[uid] + "(Teacher): Password doesn't match. "
 				}
 				if !ok {
 					c, err := r.Cookie("session_token")
 					if err != nil {
 						ok = false
-						fmt.Println("No Token")
+						msg += "No session token exists. "
 					} else {
 						sessionToken := c.Value
 						userSession, exists := sessions[sessionToken]
 						if !exists || userSession.isExpired() {
 							ok = false
+							msg += TeacherIdToName[uid] + "(Teacher): No session token exists or session expired. "
 						} else {
 							ok = true
 						}
@@ -64,6 +67,7 @@ func Authorize(fn func(http.ResponseWriter, *http.Request, string, int), userRol
 					ok = load_and_authorize_student(uid, r.FormValue("password"))
 				} else if Students[uid].Password != r.FormValue("password") {
 					ok = false
+					msg += Students[uid].Name + "(Student): Password doesn't match. "
 				}
 			}
 			if ok {
@@ -72,7 +76,7 @@ func Authorize(fn func(http.ResponseWriter, *http.Request, string, int), userRol
 			}
 		}
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Println("Unauthorized access:", r.FormValue("name"))
+		fmt.Println("Unauthorized access:", r.FormValue("name"), msg)
 		fmt.Fprint(w, "Unauthorized access. Please register again.")
 	}
 }
