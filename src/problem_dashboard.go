@@ -83,6 +83,7 @@ func getAllStudents() map[int]string {
 		rows.Scan(&ID, &name)
 		students[ID] = name
 	}
+	rows.Close()
 	return students
 }
 
@@ -96,6 +97,7 @@ func getProblemStats(problemID int) (int, int, int, int, int) {
 	if rows.Next() {
 		rows.Scan(&active, &sub, &help, &correct, &incorrect)
 	}
+	rows.Close()
 	return active, help, sub - correct - incorrect, correct, incorrect
 }
 
