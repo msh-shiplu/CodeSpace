@@ -22,6 +22,7 @@ func teacher_deactivates_problemsHandler(w http.ResponseWriter, r *http.Request,
 	filename := r.FormValue("filename")
 	if prob, ok := ActiveProblems[filename]; ok {
 		prob.Active = false
+		PeerTutorAllowed = false
 		if len(prob.Answers) > 0 {
 			fmt.Fprintf(w, "1")
 		} else {

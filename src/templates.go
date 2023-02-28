@@ -923,7 +923,6 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			</tbody>
 	</table>
 	{{if gt (len .AnswerStats) 0}}
-		<h4 class="title is-4">Answer Statistics</h4>
 		<table>
 			<thead>
 				<tr>
@@ -1122,7 +1121,7 @@ input:checked + .slider:before {
 		</a>
 		Peer Tutoring:
 		<label class="switch" for="peer_tutoring_button">
-			<input id="peer_tutoring_button" disabled=disabled type="checkbox">:
+			<input id="peer_tutoring_button" type="checkbox">:
 			<span class="slider round"></span>
 		</label>
 		<a id="export-button" class="button is-primary" href="">
@@ -1166,15 +1165,16 @@ input:checked + .slider:before {
 $(document).ready(function(){
 	{{if eq .PeerTutorAllowed true}}$('#peer_tutoring_button').prop('checked', true);{{end}}
 	$('#new-problem').attr("href", "/teacher_web_broadcast"+window.location.search);
-	document.getElementById("peer_tutoring_button").disabled = true;
-	// $('#peer_tutoring_button').change(function(){
-	// 	var val = document.getElementById('peer_tutoring_button').checked;
-	// 	var valInt = 0;
-	// 	if (val == true)
-	// 		valInt = 1;
-	// 	$.post("/set_peer_tutor", {turn_on: valInt, uid: {{.UserID}}, role: {{.UserRole}}{{if ne .Password ""}}, password: {{.Password}}{{end}} }, function(data, status){
-	// 	});
-	// });
+	// document.getElementById("peer_tutoring_button").disabled = true;
+	$('#peer_tutoring_button').change(function(){
+		console.log("Inside function");
+		var val = document.getElementById('peer_tutoring_button').checked;
+		var valInt = 0;
+		if (val == true)
+			valInt = 1;
+		$.post("/set_peer_tutor", {turn_on: valInt, uid: {{.UserID}}, role: {{.UserRole}}{{if ne .Password ""}}, password: {{.Password}}{{end}} }, function(data, status){
+		});
+	});
 	$('#export-button').click(function(){
 
 		$.ajax({

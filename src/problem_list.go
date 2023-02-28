@@ -41,15 +41,29 @@ func problemListHandler(w http.ResponseWriter, r *http.Request, who string, uid 
 	var filename string
 	var problemUploadedAt time.Time
 	var problems = make([]*ProblemData, 0)
+
+	var problemIDs = make([]int, 0)
+	var filenameList = make([]string, 0)
+	var uploadTimeList = make([]time.Time, 0)
+	var endTimeList = make([]time.Time, 0)
+
 	for rows.Next() {
 		var problemEndedAt time.Time
 		rows.Scan(&problemID, &filename, &problemUploadedAt, &problemEndedAt)
-		nActive, nHelp, nNotGraded, nCorrect, nIncorrect := getProblemStats(problemID)
+		problemIDs = append(problemIDs, problemID)
+		filenameList = append(filenameList, filename)
+		uploadTimeList = append(uploadTimeList, problemUploadedAt)
+		endTimeList = append(endTimeList, problemEndedAt)
+	}
+	rows.Close()
+
+	for i := 0; i < len(problemIDs); i++ {
+		nActive, nHelp, nNotGraded, nCorrect, nIncorrect := getProblemStats(problemIDs[i])
 		problems = append(problems, &ProblemData{
-			ID:                 problemID,
-			Filename:           filename,
-			UploadedAt:         problemUploadedAt,
-			IsActive:           problemEndedAt.IsZero(),
+			ID:                 problemIDs[i],
+			Filename:           filenameList[i],
+			UploadedAt:         uploadTimeList[i],
+			IsActive:           endTimeList[i].IsZero(),
 			Attendance:         len(getCurrentStudents()),
 			NumActive:          nActive,
 			NumHelpRequest:     nHelp,
