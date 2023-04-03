@@ -1,6 +1,4 @@
-//
 // Author: Vinhthuy Phan, 2018
-//
 package main
 
 import (
@@ -65,10 +63,12 @@ var AddMessageSQL *sql.Stmt
 var AddMessageFeedbackSQL *sql.Stmt
 var AddProblemStatisticsSQL *sql.Stmt
 var IncProblemStatActiveSQL *sql.Stmt
+var IncProblemStatWorkingSQL *sql.Stmt
 var IncProblemStatSubmissionSQL *sql.Stmt
 var IncProblemStatHelpSQL *sql.Stmt
 var IncProblemStatGradedCorrectSQL *sql.Stmt
 var IncProblemStatGradedIncorrectSQL *sql.Stmt
+var DecProblemStatWorkingSQL *sql.Stmt
 var AddMessageBackFeedbackSQL *sql.Stmt
 var UpdateMessageBackFeedbackSQL *sql.Stmt
 
@@ -91,6 +91,7 @@ var SubSem sync.Mutex
 var BulletinSem sync.Mutex
 var HelpSubSem sync.Mutex
 var CodeSnapshotSem sync.Mutex
+var SessionSem sync.RWMutex
 
 //---------------------------------------------------------
 // Virtual boards for students and student submissions

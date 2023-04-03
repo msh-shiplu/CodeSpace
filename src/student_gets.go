@@ -1,6 +1,4 @@
-//
 // Author: Vinhthuy Phan, 2018
-//
 package main
 
 import (
@@ -23,6 +21,7 @@ func student_getsHandler(w http.ResponseWriter, r *http.Request, who string, uid
 			if b.Pid != 0 {
 				addOrUpdateStudentStatus(uid, b.Pid, "Working", "", "", "")
 				IncProblemStatActiveSQL.Exec(b.Pid)
+				IncProblemStatWorkingSQL.Exec(b.Pid)
 			}
 		}
 		Students[uid].Boards = []*Board{}

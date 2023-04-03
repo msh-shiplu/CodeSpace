@@ -1,6 +1,4 @@
-//
 // Author: Vinhthuy Phan, 2018
-//
 package main
 
 import (
@@ -130,6 +128,10 @@ func student_sharesHandler(w http.ResponseWriter, r *http.Request, who string, u
 
 			}
 			if ActiveProblems[filename].Attempts[uid] == 0 {
+				_, err = DecProblemStatWorkingSQL.Exec(pid)
+				if err != nil {
+					log.Fatal(err)
+				}
 				if PeerTutorAllowed {
 					if _, ok := HelpEligibleStudents[pid][uid]; !ok {
 						HelpEligibleStudents[pid][uid] = true

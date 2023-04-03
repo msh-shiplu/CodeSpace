@@ -1,6 +1,4 @@
-//
 // Author: Vinhthuy Phan, 2018
-//
 package main
 
 var STUDENT_MESSAGING_TEMPLATE = `
@@ -844,6 +842,7 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
 <script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
+<script src='https://cdn.plot.ly/plotly-2.18.2.min.js'></script>
 
 <style>
 	.menu {
@@ -861,6 +860,7 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 	}
 </style>
 </head>
+
 <body>
 <div class="container">
 <nav class="navbar is-fixed-top breadcrumb menu" role="navigation" aria-label="breadcrumbs">
@@ -894,19 +894,35 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			<button id="deactivate-button" class="button is-danger">Deactivate!</button>
 		{{end}}
 	{{end}}
-	<h4 class="title is-4">Exercise Statement</h4>
-	<div class="accordions">
-		<h3>{{.ProblemName}}</h3>
-		<div>
-			<textarea id="editor">{{ .Code }}</textarea>
-		</div>
-	</div>
-	<h4 class="title is-4">Statistics for {{.ProblemName}}</h4>
+	
+	{{if gt (len .AnswerStats) 0}}
+		<div id="barChart"></div>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Answer</th>
+					<th>Student (#)</th>
+					<th>Student submitted</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{range .AnswerStats}}
+				<tr {{if eq $.CorrectAnswer .Answer}}class="is-selected"{{end}}>
+				<td>{{.Answer}}</td>
+				<td>{{.NumStudent}}</td>
+				<td>{{.Percent}}%</td>
+				</tr>
+				{{end}}
+			</tobdy>
+		</table>
+	{{end}}
+	<h4 class="title is-4">Submission Status</h4>
 	<table class="table">
 			<thead>
 				<tr>
-					<th>Active Students</th>
+					<th>Submission</th>
 					<th>Help Requests</th>
+					<th>Graded</th>
 					<th>Not Graded</th>
 					<th>Correct</th>
 					<th>Incorrect</th>
@@ -914,32 +930,36 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			</thead>
 			<tbody>
 				<tr>
-					<td>{{.NumActive}}</td>
-					<td>{{.NumHelpRequest}}</td>
-					<td>{{.NumNotGraded}}</td>
-					<td>{{.NumGradedCorrect}}</td>
-					<td>{{.NumGradedIncorrect}}</td>
+					<td>{{.SubmissionStat.NumSubmission}}</td>
+					<td>{{.SubmissionStat.NumHelpRequest}}</td>
+					<td>{{.SubmissionStat.NumGraded}}</td>
+					<td>{{.SubmissionStat.NumNotGraded}}</td>
+					<td>{{.SubmissionStat.NumGradedCorrect}}</td>
+					<td>{{.SubmissionStat.NumGradedIncorrect}}</td>
 				</tr>
 			</tbody>
 	</table>
-	{{if gt (len .AnswerStats) 0}}
-		<table>
+	<h4 class="title is-4">Student Status</h4>
+	<table class="table">
 			<thead>
 				<tr>
-					<th>Answer</th>
-					<th>Student submitted</th>
+					<th>Active</th>
+					<th>Working</th>
+					<th>Submitted</th>
+					<th>Waiting for Grade</th>
+					<th>Waiting for Help</th>
 				</tr>
 			</thead>
 			<tbody>
-				{{range .AnswerStats}}
 				<tr>
-				<td>{{.Answer}}</td>
-				<td>{{.Percent}}%</td>
+					<td>{{.StudentStat.NumActive}}</td>
+					<td>{{.StudentStat.NumWorking}}</td>
+					<td>{{.StudentStat.NumSubmitted}}</td>
+					<td>{{.StudentStat.NumWaitingGrade}}</td>
+					<td>{{.StudentStat.NumWaitingHelp}}</td>
 				</tr>
-				{{end}}
-			</tobdy>
-		</table>
-	{{end}}
+			</tbody>
+	</table>
 	<table class="table sortable">
 			<thead>
 				<tr>
@@ -964,8 +984,37 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 				{{end}}
 			</tbody>
 	</table>
+	<div class="accordions">
+		<h3>{{.ProblemName}}</h3>
+		<div>
+			<textarea id="editor">{{ .Code }}</textarea>
+		</div>
+	</div>
 	</div>
 	<script>
+	{{if gt (len .AnswerStats) 0}}
+		var barX = [];
+		var barY = [];
+		var color = [];
+		{{range .AnswerStats}}
+		barX.push("{{.Answer}}");
+		barY.push({{.Count}});
+			{{if eq $.CorrectAnswer .Answer}}
+			color.push("green");
+			{{else}}
+			color.push("red");
+			{{end}}
+		{{end}}
+		var barData = [
+			{
+			x: barX,
+			y: barY,
+			marker: { color: color},
+			type: 'bar'
+			}
+		];
+		Plotly.newPlot('barChart', barData);
+	{{end}}
 		var editor = document.getElementById("editor");
 		var myCodeMirror = CodeMirror.fromTextArea(editor, {lineNumbers: true, mode: get_editor_mode({{.ProblemName}}), theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});
 		myCodeMirror.setSize("100%", 400)
@@ -1001,7 +1050,17 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 				}
 			});
 		  });
-		  $(".accordions").accordion({ header: "h3", active: false, collapsible: true });
+		  $(".accordions").accordion({ header: "h3", active: (localStorage.accordionState && localStorage.accordionState=='active')?0:false, collapsible: true, activate: function (event, ui) {
+			if (localStorage.accordionState){
+				if(localStorage.accordionState == 'active') {
+					localStorage.accordionState = 'inactive';
+				} else {
+					localStorage.accordionState = 'active';
+				}
+			} else {
+				localStorage.accordionState = 'active';
+			}
+		  } });
 		  $(".accordions").show();
 	</script>
 </body>

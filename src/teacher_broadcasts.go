@@ -102,8 +102,8 @@ func teacher_broadcastsHandler(w http.ResponseWriter, r *http.Request, who strin
 	defer BoardsSem.Unlock()
 	for student_id, _ := range Students {
 		b := &Board{
-			Content:      problem.Description,
-			Answer:       problem.Answer,
+			Content: problem.Description,
+			// Answer:       problem.Answer,
 			Attempts:     problem.Attempts,
 			Filename:     problem.Filename,
 			Pid:          problem.Pid,

@@ -1,6 +1,4 @@
-//
 // Author: Vinhthuy Phan, 2018
-//
 package main
 
 import (
@@ -98,10 +96,16 @@ func teacher_gradesHandler(w http.ResponseWriter, r *http.Request, who string, u
 				AttemptNumber: sub.AttemptNumber,
 				Status:        4,
 			}
-
-			now := time.Now()
-			ActiveProblems[sub.Filename].Attempts[student_id] = 0 // This prevents further submission.
 			pid := sub.Pid
+			now := time.Now()
+			if ActiveProblems[sub.Filename].Attempts[student_id] > 0 {
+				_, err := DecProblemStatWorkingSQL.Exec(pid)
+				if err != nil {
+					log.Fatal(err)
+				}
+			}
+			ActiveProblems[sub.Filename].Attempts[student_id] = 0 // This prevents further submission.
+
 			if PeerTutorAllowed {
 				if _, ok := HelpEligibleStudents[pid][sub.Uid]; !ok {
 					HelpEligibleStudents[pid][sub.Uid] = true
