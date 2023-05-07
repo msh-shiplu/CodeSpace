@@ -897,6 +897,10 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 	
 	{{if gt (len .AnswerStats) 0}}
 		<div id="barChart"></div>
+		<label class="checkbox">
+			<input type="checkbox" id="showCorrectAnswer">
+			Show correct answer
+		</label>
 		<table class="table">
 			<thead>
 				<tr>
@@ -907,7 +911,7 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 			</thead>
 			<tbody>
 				{{range .AnswerStats}}
-				<tr {{if eq $.CorrectAnswer .Answer}}class="is-selected"{{end}}>
+				<tr {{if eq $.CorrectAnswer .Answer}} id="correctRow"{{end}}>
 				<td>{{.Answer}}</td>
 				<td>{{.NumStudent}}</td>
 				<td>{{.Percent}}%</td>
@@ -992,28 +996,52 @@ var PROBLEM_DASHBOARD_TEMPLATE = `
 	</div>
 	</div>
 	<script>
+		function showBarChart(barX, barY, showCorrectAnswer = "no", correctIndex = -1) {
+			var color = Array(barX.length).fill("mediumblue");
+			if (showCorrectAnswer == "yes") {
+				color = Array(barX.length).fill("red");
+				color[correctIndex] = "green";
+			}
+			var barData = [
+				{
+				x: barX,
+				y: barY,
+				marker: { color: color},
+				type: 'bar'
+				}
+			];
+			Plotly.newPlot('barChart', barData);
+		}
 	{{if gt (len .AnswerStats) 0}}
 		var barX = [];
 		var barY = [];
-		var color = [];
-		{{range .AnswerStats}}
-		barX.push("{{.Answer}}");
-		barY.push({{.Count}});
+		var correctIndex = -1;
+		{{range $idx, $ans := .AnswerStats}}
+		barX.push("{{$ans.Answer}}");
+		barY.push({{$ans.Count}});
 			{{if eq $.CorrectAnswer .Answer}}
-			color.push("green");
-			{{else}}
-			color.push("red");
+				correctIndex = {{$idx}};
 			{{end}}
 		{{end}}
-		var barData = [
-			{
-			x: barX,
-			y: barY,
-			marker: { color: color},
-			type: 'bar'
+		if (localStorage.checkBoxState && localStorage.checkBoxState == 'checked'){
+			$('#showCorrectAnswer').prop('checked', true);
+			showBarChart(barX, barY, "yes", correctIndex);
+			$('#correctRow').addClass('is-selected');
+		} else {
+			showBarChart(barX, barY);
+		}
+		
+		$('#showCorrectAnswer').change(function() {
+			if (this.checked) {
+				showBarChart(barX, barY, "yes", correctIndex);
+				localStorage.checkBoxState = 'checked';
+				$('#correctRow').addClass('is-selected');
+			} else {
+				showBarChart(barX, barY);
+				localStorage.checkBoxState = 'not checked';
+				$('#correctRow').removeClass('is-selected');
 			}
-		];
-		Plotly.newPlot('barChart', barData);
+		});
 	{{end}}
 		var editor = document.getElementById("editor");
 		var myCodeMirror = CodeMirror.fromTextArea(editor, {lineNumbers: true, mode: get_editor_mode({{.ProblemName}}), theme: "monokai", matchBrackets: true, indentUnit: 4, indentWithTabs: true, readOnly: "nocursor"});

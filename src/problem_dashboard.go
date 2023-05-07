@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -21,27 +22,43 @@ type DashBoardStudentInfo struct {
 }
 
 type AnswerStatInfo struct {
-	Answer  string
-	Count   int
-	Percent float64
+	Answer     string
+	Count      int
+	Percent    float64
+	NumStudent int
+}
+
+type StudentStatInfo struct {
+	NumActive       int
+	NumWorking      int
+	NumSubmitted    int
+	NumWaitingGrade int
+	NumWaitingHelp  int
+}
+
+type SubmissionStatInfo struct {
+	NumSubmission      int
+	NumHelpRequest     int
+	NumGraded          int
+	NumNotGraded       int
+	NumGradedCorrect   int
+	NumGradedIncorrect int
 }
 
 type DashBoardInfo struct {
-	StudentInfo        []*DashBoardStudentInfo
-	ProblemName        string
-	Code               string
-	IsActive           bool
-	ProblemID          int
-	NumActive          int
-	NumHelpRequest     int
-	NumGradedCorrect   int
-	NumGradedIncorrect int
-	NumNotGraded       int
-	AnswerStats        []*AnswerStatInfo
-	UserID             int
-	UserRole           string
-	Password           string
-	Username           string
+	StudentInfo    []*DashBoardStudentInfo
+	ProblemName    string
+	Code           string
+	IsActive       bool
+	ProblemID      int
+	StudentStat    *StudentStatInfo
+	SubmissionStat *SubmissionStatInfo
+	AnswerStats    []*AnswerStatInfo
+	CorrectAnswer  string
+	UserID         int
+	UserRole       string
+	Password       string
+	Username       string
 }
 
 func getName(uid int, role string) string {
@@ -101,6 +118,51 @@ func getProblemStats(problemID int) (int, int, int, int, int) {
 	return active, help, sub - correct - incorrect, correct, incorrect
 }
 
+func getStudentAndSubmissionStatsForProblem(problemID int) (StudentStatInfo, SubmissionStatInfo) {
+	rows, err := Database.Query("select active, working, submission, help_request, graded_correct, graded_incorrect from problem_statistics where problem_id = ?", problemID)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var studentStat StudentStatInfo
+	var subStat SubmissionStatInfo
+	if rows.Next() {
+		rows.Scan(&studentStat.NumActive, &studentStat.NumWorking, &subStat.NumSubmission, &subStat.NumHelpRequest, &subStat.NumGradedCorrect, &subStat.NumGradedIncorrect)
+	}
+	rows.Close()
+	subStat.NumNotGraded = subStat.NumSubmission - subStat.NumGradedCorrect - subStat.NumGradedIncorrect
+	subStat.NumGraded = subStat.NumSubmission - subStat.NumNotGraded
+
+	rows, err = Database.Query("select count(distinct student_id) from submission where problem_id=?", problemID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if rows.Next() {
+		rows.Scan(&studentStat.NumSubmitted)
+	}
+	rows.Close()
+
+	rows, err = Database.Query("select count(distinct student_id) from submission where problem_id=? and verdict is NULL", problemID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if rows.Next() {
+		rows.Scan(&studentStat.NumWaitingGrade)
+	}
+	rows.Close()
+
+	rows, err = Database.Query("select count(distinct c.student_id) from message m, code_snapshot c where m.snapshot_id=c.id and c.problem_id=? and m.id not in (select message_id from message_feedback)", problemID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if rows.Next() {
+		rows.Scan(&studentStat.NumWaitingHelp)
+	}
+	rows.Close()
+
+	return studentStat, subStat
+}
+
 func getProblemNameFromID(problemID int) string {
 	rows, err := Database.Query("Select filename from problem where id = ?", problemID)
 	defer rows.Close()
@@ -135,6 +197,20 @@ func getLatestSubmissionTime(problemID int) map[int]time.Time {
 	return latestSubmissions
 }
 
+func getNumStudentForAnswer(answer string) int {
+	rows, err := Database.Query("select count(DISTINCT student_id) as cnt from submission where answer is not NULL and answer = ?", answer)
+	numStudent := 0
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if rows.Next() {
+		rows.Scan(&numStudent)
+	}
+	rows.Close()
+	return numStudent
+}
+
 func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string, uid int) {
 	problemID, _ := strconv.Atoi(r.FormValue("problem_id"))
 	role := r.FormValue("role")
@@ -162,15 +238,17 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 		}
 	}
 	rows.Close()
-	rows, err = Database.Query("select problem_description, problem_ended_at from problem where id=?", problemID)
+	rows, err = Database.Query("select filename, problem_description, answer, problem_ended_at from problem where id=?", problemID)
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
 	var code string
 	var problemEndedAt time.Time
+	var filename string
+	var answer string
 	if rows.Next() {
-		rows.Scan(&code, &problemEndedAt)
+		rows.Scan(&filename, &code, &answer, &problemEndedAt)
 	}
 	rows.Close()
 	latestSubmissionTime := getLatestSubmissionTime(problemID)
@@ -216,7 +294,7 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 		return true
 	})
 
-	nActive, nHelp, nNotGraded, nCorrect, nIncorrect := getProblemStats(problemID)
+	stStat, subStat := getStudentAndSubmissionStatsForProblem(problemID)
 
 	var answerStats []*AnswerStatInfo
 	if role != "student" {
@@ -230,6 +308,7 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 		var total int
 		for rows.Next() {
 			rows.Scan(&ans, &c)
+			// ans = strings.TrimSpace(ans)
 			if ans != "" {
 				answerStats = append(answerStats, &AnswerStatInfo{
 					Answer: ans,
@@ -238,29 +317,29 @@ func problemDashboardHandler(w http.ResponseWriter, r *http.Request, who string,
 			}
 			total += c
 		}
+		rows.Close()
 		for i, answer := range answerStats {
 			answerStats[i].Percent = float64(answer.Count) * 100.0 / float64(total)
 			answerStats[i].Percent = math.Round(answerStats[i].Percent*100) / 100
+
+			answerStats[i].NumStudent = getNumStudentForAnswer(answer.Answer)
 		}
-		rows.Close()
 	}
 
 	dashBoardData := &DashBoardInfo{
-		StudentInfo:        studentInfo,
-		ProblemID:          problemID,
-		ProblemName:        getProblemNameFromID(problemID),
-		Code:               code,
-		IsActive:           problemEndedAt.IsZero(),
-		NumActive:          nActive,
-		NumHelpRequest:     nHelp,
-		NumGradedCorrect:   nCorrect,
-		NumGradedIncorrect: nIncorrect,
-		NumNotGraded:       nNotGraded,
-		AnswerStats:        answerStats,
-		UserID:             uid,
-		UserRole:           role,
-		Password:           password,
-		Username:           getName(uid, role),
+		StudentInfo:    studentInfo,
+		ProblemID:      problemID,
+		ProblemName:    filename,
+		Code:           code,
+		IsActive:       problemEndedAt.IsZero(),
+		StudentStat:    &stStat,
+		SubmissionStat: &subStat,
+		AnswerStats:    answerStats,
+		CorrectAnswer:  strings.TrimSpace(answer),
+		UserID:         uid,
+		UserRole:       role,
+		Password:       password,
+		Username:       getName(uid, role),
 	}
 	temp := template.New("")
 	ownFuncs := template.FuncMap{"formatTimeSince": formatTimeSince}
