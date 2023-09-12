@@ -1,6 +1,4 @@
-//
 // Author: Vinhthuy Phan, 2018
-//
 package main
 
 import (
@@ -267,13 +265,16 @@ func init_student(student_id int, name string, password string) {
 func load_and_authorize_student(student_id int, password string) bool {
 	var pw, name string
 	found := false
-	rows, _ := Database.Query("select name, password from student where id=?", student_id)
+	rows, err := Database.Query("select name, password from student where id=?", student_id)
+	defer rows.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
 	for rows.Next() {
 		rows.Scan(&name, &pw)
 		found = true
 		break
 	}
-	rows.Close()
 	if !found || pw != password {
 		return false
 	}
