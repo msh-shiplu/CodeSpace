@@ -103,6 +103,21 @@ func init_database(db_name string) {
 	}
 }
 
+func databaseTransaction(stmt *sql.Stmt, args ...any) (sql.Result, error) {
+	tx, err := Database.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+	result, err := tx.Stmt(stmt).Exec(args...)
+	if err != nil {
+		fmt.Println("doing rollback")
+		tx.Rollback()
+	} else {
+		tx.Commit()
+	}
+	return result, err
+}
+
 //-----------------------------------------------------------------
 // Add or update score based on a decision. If decision is "correct"
 // a new problem, if there's one, is added to student's board.
@@ -181,34 +196,34 @@ func addOrUpdateStudentStatus(studentID int, problemID int, codingStat string, h
 		now := time.Now()
 		rows.Close()
 		if codingStat != "" {
-			_, err = UpdateStudentCodingStatSQL.Exec(codingStat, now, studentID, problemID)
+			_, err = databaseTransaction(UpdateStudentCodingStatSQL, codingStat, now, studentID, problemID)
 			if err != nil {
-				log.Fatal(err)
+				log.Print(err)
 			}
 		}
 		if helpStat != "" {
-			_, err = UpdateStudentHelpStatSQL.Exec(helpStat, now, studentID, problemID)
+			_, err = databaseTransaction(UpdateStudentHelpStatSQL, helpStat, now, studentID, problemID)
 			if err != nil {
-				log.Fatal(err)
+				log.Print(err)
 			}
 		}
 		if submissionStat != "" {
-			_, err = UpdateStudentSubmissionStatSQL.Exec(submissionStat, now, studentID, problemID)
+			_, err = databaseTransaction(UpdateStudentSubmissionStatSQL, submissionStat, now, studentID, problemID)
 			if err != nil {
-				log.Fatal(err)
+				log.Print(err)
 			}
 		}
 		if tutoringStat != "" {
-			_, err = UpdateStudentTutoringStatSQL.Exec(tutoringStat, now, studentID, problemID)
+			_, err = databaseTransaction(UpdateStudentTutoringStatSQL, tutoringStat, now, studentID, problemID)
 			if err != nil {
-				log.Fatal(err)
+				log.Print(err)
 			}
 		}
 	} else {
 		rows.Close()
-		_, err = AddStudentStatusSQL.Exec(studentID, problemID, codingStat, helpStat, submissionStat, tutoringStat, time.Now())
+		_, err = databaseTransaction(AddStudentStatusSQL, studentID, problemID, codingStat, helpStat, submissionStat, tutoringStat, time.Now())
 		if err != nil {
-			log.Fatal(err)
+			log.Print(err)
 		}
 	}
 }
