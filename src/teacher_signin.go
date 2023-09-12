@@ -38,10 +38,12 @@ func teacherSigninCompleteHandler(w http.ResponseWriter, r *http.Request) {
 	sessionToken := uuid.NewString()
 	expiresAt := time.Now().Add(3 * time.Hour)
 
+	SessionSem.Lock()
 	sessions[sessionToken] = session{
 		username: name,
 		expiry:   expiresAt,
 	}
+	SessionSem.Unlock()
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",
 		Value:   sessionToken,

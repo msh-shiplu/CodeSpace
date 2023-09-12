@@ -1,6 +1,4 @@
-//
 // Author: Vinhthuy Phan, 2018
-//
 package main
 
 import (
@@ -52,7 +50,9 @@ func Authorize(fn func(http.ResponseWriter, *http.Request, string, int), userRol
 						msg += "No session token exists. "
 					} else {
 						sessionToken := c.Value
+						SessionSem.RLock()
 						userSession, exists := sessions[sessionToken]
+						SessionSem.RUnlock()
 						if !exists || userSession.isExpired() {
 							ok = false
 							msg += r.FormValue("uid") + " (Teacher): No session token exists or session expired. "
