@@ -79,21 +79,3 @@ Run the server
 ```
     ./go run *.go -c config.json
 ```
-
-### TA's installation
-
-(1) Open Sublime Text
-
-(2) Click Show Console in the View menu.
-
-(3) Copy this code:
-```
-import os; package_path = os.path.join(sublime.packages_path(), "GEMAssistant"); os.mkdir(package_path) if not os.path.isdir(package_path) else print("dir exists"); module_file = os.path.join(package_path, "GEMAssistant.py") ; menu_file = os.path.join(package_path, "Main.sublime-menu"); version_file = os.path.join(package_path, "version.go"); import urllib.request; urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMAssistant/GEMAssistant.py", module_file); urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMAssistant/Main.sublime-menu", menu_file); urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/version.go", version_file); keymap_file = os.path.join(package_path, "Default.sublime-keymap"); urllib.request.urlretrieve("https://raw.githubusercontent.com/vtphan/GEM/master/src/GEMAssistant/Default.sublime-keymap", keymap_file); 
-
-```
-
-(4) Paste copied code to Console and hit enter.
-
-(5) in Sublime Text: (i) specify a folder on their computers to store local files, (ii) set the server address, which is shown when the server is run, and (iii) complete the registration by simply entering your given username.
-
-
