@@ -196,34 +196,34 @@ func addOrUpdateStudentStatus(studentID int, problemID int, codingStat string, h
 		now := time.Now()
 		rows.Close()
 		if codingStat != "" {
-			_, err = databaseTransaction(UpdateStudentCodingStatSQL, codingStat, now, studentID, problemID)
+			_, err = UpdateStudentCodingStatSQL.Exec(codingStat, now, studentID, problemID)
 			if err != nil {
-				log.Print(err)
+				log.Fatal(err)
 			}
 		}
 		if helpStat != "" {
-			_, err = databaseTransaction(UpdateStudentHelpStatSQL, helpStat, now, studentID, problemID)
+			_, err = UpdateStudentHelpStatSQL.Exec(helpStat, now, studentID, problemID)
 			if err != nil {
-				log.Print(err)
+				log.Fatal(err)
 			}
 		}
 		if submissionStat != "" {
-			_, err = databaseTransaction(UpdateStudentSubmissionStatSQL, submissionStat, now, studentID, problemID)
+			_, err = UpdateStudentSubmissionStatSQL.Exec(submissionStat, now, studentID, problemID)
 			if err != nil {
-				log.Print(err)
+				log.Fatal(err)
 			}
 		}
 		if tutoringStat != "" {
-			_, err = databaseTransaction(UpdateStudentTutoringStatSQL, tutoringStat, now, studentID, problemID)
+			_, err = UpdateStudentTutoringStatSQL.Exec(tutoringStat, now, studentID, problemID)
 			if err != nil {
-				log.Print(err)
+				log.Fatal(err)
 			}
 		}
 	} else {
 		rows.Close()
-		_, err = databaseTransaction(AddStudentStatusSQL, studentID, problemID, codingStat, helpStat, submissionStat, tutoringStat, time.Now())
+		_, err = AddStudentStatusSQL.Exec(studentID, problemID, codingStat, helpStat, submissionStat, tutoringStat, time.Now())
 		if err != nil {
-			log.Print(err)
+			log.Fatal(err)
 		}
 	}
 }

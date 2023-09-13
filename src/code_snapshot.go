@@ -10,9 +10,9 @@ import (
 )
 
 func addCodeSnapshot(studentID int, problemID int, code string, status int, lastUpdate time.Time, event string) int {
-	result, err := databaseTransaction(AddCodeSnapshotSQL, studentID, problemID, code, status, lastUpdate, event)
+	result, err := AddCodeSnapshotSQL.Exec(studentID, problemID, code, status, lastUpdate, event)
 	if err != nil {
-		log.Print("Could not save the snapshot for error: ", err)
+		log.Fatal("Could not save the snapshot for error: ", err)
 		return -1
 	}
 	snapshotID, _ := result.LastInsertId()
@@ -69,7 +69,6 @@ func addCodeSnapshot(studentID int, problemID int, code string, status int, last
 			NumFeedback: Snapshots[idx].NumFeedback,
 		}
 	}
-	fmt.Println("Code snapshot saved!")
 	return int(snapshotID)
 }
 
@@ -91,10 +90,10 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 	authorRole := r.FormValue("role")
 	now := time.Now()
 
-	result, err := databaseTransaction(AddMessageSQL, snapshotID, "", authorID, authorRole, now, 1)
+	result, err := AddMessageSQL.Exec(snapshotID, "", authorID, authorRole, now, 1)
 	if err != nil {
-		log.Print("Could not save feedback for error: ", err)
-		fmt.Fprintf(w, "Could not save feedback")
+		log.Fatal("Could not save feedback for error: ", err)
+		// fmt.Fprintf(w, "Could not save feedback")
 		return
 	}
 	rows, err := Database.Query("select student_id, problem_id, code, filename from code_snapshot cs, problem p where cs.problem_id=p.id and cs.id=?", snapshotID)
@@ -118,10 +117,10 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 	}
 	idx := StudentSnapshot[studentID][problemID]
 	Snapshots[idx].NumFeedback++
-	result, err = databaseTransaction(AddMessageFeedbackSQL, messageID, feedback, authorID, authorRole, now)
+	result, err = AddMessageFeedbackSQL.Exec(messageID, feedback, authorID, authorRole, now)
 	if err != nil {
-		log.Print("Could not save feedback for error: ", err)
-		fmt.Fprintf(w, "Could not save feedback")
+		log.Fatal("Could not save feedback for error: ", err)
+		// fmt.Fprintf(w, "Could not save feedback")
 		return
 	}
 	feedbackID, _ := result.LastInsertId()
@@ -147,10 +146,10 @@ func messageFeedbackHandler(w http.ResponseWriter, r *http.Request, who string, 
 	authorRole := r.FormValue("role")
 	now := time.Now()
 
-	result, err := databaseTransaction(AddMessageFeedbackSQL, messageID, feedback, authorID, authorRole, now)
+	result, err := AddMessageFeedbackSQL.Exec(messageID, feedback, authorID, authorRole, now)
 	if err != nil {
-		log.Print("Could not save the feedback for error: ", err)
-		fmt.Fprintf(w, "Could not save the feedback.")
+		log.Fatal("Could not save the feedback for error: ", err)
+		// fmt.Fprintf(w, "Could not save the feedback.")
 		return
 	}
 	rows, err := Database.Query("select student_id, problem_id, code, filename, m.type from code_snapshot cs, problem p, message m where cs.problem_id=p.id and m.snapshot_id = cs.id and m.id=?", messageID)

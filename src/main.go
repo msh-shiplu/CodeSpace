@@ -1,6 +1,4 @@
-//
 // Author: Vinhthuy Phan, 2018
-//
 package main
 
 import (
@@ -180,6 +178,7 @@ func get_course_specific_address(nameserver string, course string) {
 
 //-----------------------------------------------------------------
 func main() {
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 	rand.Seed(time.Now().UnixNano())
 	config_file, teacher_file, student_file := "", "", ""
 	flag.StringVar(&config_file, "c", config_file, "json-formatted configuration file.")
