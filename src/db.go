@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func create_tables() {
@@ -18,27 +18,27 @@ func create_tables() {
 		}
 		sql_stmt.Exec()
 	}
-	execSQL("create table if not exists student (id integer primary key, name text unique, password text)")
-	execSQL("create table if not exists teacher (id integer primary key, name text unique, password text)")
-	execSQL("create table if not exists attendance (id integer primary key, student_id integer, attendance_at timestamp)")
-	execSQL("create table if not exists tag (id integer primary key, topic_description text unique)")
-	execSQL("create table if not exists problem (id integer primary key, teacher_id integer, problem_description blob, answer text, filename text, merit integer, effort integer, attempts integer, topic_id integer, tag integer, problem_uploaded_at timestamp, problem_ended_at timestamp)")
-	execSQL("create table if not exists submission (id integer primary key, problem_id integer, student_id integer, student_code blob, snapshot_id integer default 0, submission_category integer, code_submitted_at timestamp, completed timestamp, verdict text, attempt_number integer, answer text)")
-	execSQL("create table if not exists score (id integer primary key, problem_id integer, student_id integer, teacher_id integer, score integer, graded_submission_number integer, score_given_at timestamp, unique(problem_id,student_id))")
-	execSQL("create table if not exists feedback (id integer primary key, teacher_id integer, student_id integer, feedback text, feedback_given_at timestamp, submission_id integer)")
-	execSQL("create table if not exists test_case (id integer primary key, problem_id integer, student_id integer, test_cases text, added_at timestamp)")
-	execSQL("create table if not exists code_explanation (id integer primary key, problem_id integer, student_id integer, snapshot_id integer, trying_what text, need_help_with text, code_submitted_at timestamp)")
-	execSQL("create table if not exists help_message (id integer primary key, code_explanation_id integer, student_id integer, message text, given_at timestamp, useful text, updated_at timestamp)")
-	execSQL("create table if not exists code_snapshot (id integer primary key, student_id integer, problem_id integer, code blob, last_updated_at timestamp, status int default 0, event string)") // 0 = not submitted, 1 = submitted but not graded, 2 = submitted and incorrect, 3 = submitted and correct
-	execSQL("create table if not exists snapshot_feedback (id integer primary key, snapshot_id integer, feedback text, author_id integer, author_role string, given_at timestamp)")
-	execSQL("create table if not exists snapshot_back_feedback (id integer primary key, snapshot_feedback_id integer, author_id integer, author_role string, is_helpful string, given_at timestamp)")
-	execSQL("create table if not exists message (id integer primary key, snapshot_id integer, message text, author_id integer, author_role string, given_at timestamp, type integer)")
-	execSQL("create table if not exists message_feedback (id integer primary key, message_id integer, feedback text, author_id integer, author_role string, given_at timestamp)")
-	execSQL("create table if not exists message_back_feedback (id integer primary key, message_feedback_id integer, author_id integer, author_role string, useful string, given_at timestamp)")
-	execSQL("create table if not exists help_eligible (id integer primary key, problem_id integer, student_id integer, became_eligible_at timestamp)")
-	execSQL("create table if not exists user_event_log (id integer primary key, name string, user_id integer, user_type string, event_type string, referral_info string, event_time timestamp)")
-	execSQL("create table if not exists student_status (id integer primary key, student_id integer, problem_id integer, coding_stat string, help_stat string, submission_stat string, tutoring_stat string, last_updated_at timestamp)")
-	execSQL("create table if not exists problem_statistics (id integer primary key, problem_id integer not null, active integer default 0, submission integer default 0, help_request integer default 0, graded_correct integer default 0, graded_incorrect integer default 0)")
+	execSQL("create table if not exists student (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(100) unique, password VARCHAR(100), PRIMARY KEY (`id`))")
+	execSQL("create table if not exists teacher (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(100) unique, password VARCHAR(100), PRIMARY KEY (`id`))")
+	execSQL("create table if not exists attendance (id INT AUTO_INCREMENT NOT NULL, student_id INT NOT NULL, attendance_at timestamp, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists tag (id INT AUTO_INCREMENT NOT NULL, topic_description VARCHAR(200) unique, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists problem (id INT AUTO_INCREMENT NOT NULL, teacher_id INT, problem_description text, answer text, filename text, merit INT, effort INT, attempts INT, topic_id INT, tag INT, problem_uploaded_at timestamp, problem_ended_at timestamp, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists submission (id INT AUTO_INCREMENT NOT NULL, problem_id INT NOT NULL, student_id INT NOT NULL, student_code text, snapshot_id INT default 0, submission_category INT, code_submitted_at timestamp, completed timestamp, verdict text, attempt_number INT, answer text, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists score (id INT AUTO_INCREMENT NOT NULL, problem_id INT NOT NULL, student_id INT, teacher_id INT, score INT, graded_submission_number INT, score_given_at timestamp, unique(problem_id,student_id), PRIMARY KEY (`id`))")
+	execSQL("create table if not exists feedback (id INT AUTO_INCREMENT NOT NULL, teacher_id INT, student_id INT, feedback text, feedback_given_at timestamp, submission_id INT, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists test_case (id INT AUTO_INCREMENT NOT NULL, problem_id INT, student_id INT, test_cases text, added_at timestamp, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists code_explanation (id INT AUTO_INCREMENT NOT NULL, problem_id INT, student_id INT, snapshot_id INT, trying_what text, need_help_with text, code_submitted_at timestamp, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists help_message (id INT AUTO_INCREMENT NOT NULL, code_explanation_id INT, student_id INT, message text, given_at timestamp, useful text, updated_at timestamp, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists code_snapshot (id INT AUTO_INCREMENT NOT NULL, student_id INT, problem_id INT, code text, last_updated_at timestamp, status int default 0, event VARCHAR(50), PRIMARY KEY (`id`))") // 0 = not submitted, 1 = submitted but not graded, 2 = submitted and incorrect, 3 = submitted and correct
+	execSQL("create table if not exists snapshot_feedback (id INT AUTO_INCREMENT NOT NULL, snapshot_id INT, feedback text, author_id INT, author_role VARCHAR(50), given_at timestamp, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists snapshot_back_feedback (id INT AUTO_INCREMENT NOT NULL, snapshot_feedback_id INT, author_id INT, author_role VARCHAR(50), is_helpful VARCHAR(50), given_at timestamp, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists message (id INT AUTO_INCREMENT NOT NULL, snapshot_id INT, message text, author_id INT, author_role VARCHAR(50), given_at timestamp, type INT, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists message_feedback (id INT AUTO_INCREMENT NOT NULL, message_id INT, feedback text, author_id INT, author_role VARCHAR(50), given_at timestamp, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists message_back_feedback (id INT AUTO_INCREMENT NOT NULL, message_feedback_id INT, author_id INT, author_role VARCHAR(50), useful VARCHAR(50), given_at timestamp, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists help_eligible (id INT AUTO_INCREMENT NOT NULL, problem_id INT, student_id INT, became_eligible_at timestamp, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists user_event_log (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(50), user_id INT, user_type VARCHAR(50), event_type VARCHAR(50), referral_info VARCHAR(50), event_time timestamp, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists student_status (id INT AUTO_INCREMENT NOT NULL, student_id INT, problem_id INT, coding_stat VARCHAR(50), help_stat VARCHAR(50), submission_stat VARCHAR(50), tutoring_stat VARCHAR(50), last_updated_at timestamp, PRIMARY KEY (`id`))")
+	execSQL("create table if not exists problem_statistics (id INT AUTO_INCREMENT NOT NULL, problem_id INT not null, active INT default 0, submission INT default 0, help_request INT default 0, graded_correct INT default 0, graded_incorrect INT default 0, PRIMARY KEY (`id`))")
 	// foreign key example: http://www.sqlitetutorial.net/sqlite-foreign-key/
 }
 
@@ -53,7 +53,19 @@ func init_database(db_name string) {
 		return stmt
 	}
 
-	Database, err = sql.Open("sqlite3", db_name)
+	Database, err = sql.Open("mysql", "root:Shiplu1235@tcp(127.0.0.1:3306)/")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = Database.Exec("CREATE DATABASE IF NOT EXISTS " + db_name)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// _, err = Database.Exec("USE " + db_name)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	Database, err = sql.Open("mysql", "root:Shiplu1235@tcp(127.0.0.1:3306)/"+db_name)
 	if err != nil {
 		log.Fatal(err)
 	}
