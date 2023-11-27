@@ -1802,7 +1802,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 		<div id="ask-for-help">
 			<section class="section" style="padding: 0px;">
 				{{range $index, $el := .Feedback.Messages}}
-					{{ if eq .Type 0 }} <!-- Don't show regular snapshots in this block -->
+					{{ if eq $el.Type 0 }} <!-- Don't show regular snapshots in this block -->
 					{{ if eq (len .Feedbacks) 0 }}
 						<div class="box" style="padding: 0px; margin-bottom: 3.5rem; border: 5px solid; border-radius: 10px;">
 							<div class="message-header">

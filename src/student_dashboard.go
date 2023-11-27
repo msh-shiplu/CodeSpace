@@ -398,7 +398,7 @@ func studentDashboardCodeSpaceHandler(w http.ResponseWriter, r *http.Request, wh
 	var messages = make([]*MessageDashBoard, 0)
 	_, ok := HelpEligibleStudents[problemID][uid]
 	if role == "teacher" || uid == studentID || (PeerTutorAllowed && ok) {
-		rows, err := Database.Query("select M.id, M.snapshot_id, M.message, M.author_id, M.author_role, M.given_at, M.type, C.Code, C.event from message M, code_snapshot C where M.snapshot_id = C.id and C.problem_id = ? and C.student_id = ?", problemID, studentID)
+		rows, err := Database.Query("select M.id, M.snapshot_id, M.message, M.author_id, M.author_role, M.type, C.Code, C.event, M.given_at from message M, code_snapshot C where M.snapshot_id = C.id and C.problem_id = ? and C.student_id = ?", problemID, studentID)
 		defer rows.Close()
 		if err != nil {
 			log.Fatal(err)
@@ -407,7 +407,7 @@ func studentDashboardCodeSpaceHandler(w http.ResponseWriter, r *http.Request, wh
 		var message, authorRole, code, event string
 		var givenAt time.Time
 		for rows.Next() {
-			rows.Scan(&messageID, &snapshotID, &message, &authorID, &authorRole, &givenAt, &messageType, &code, &event)
+			rows.Scan(&messageID, &snapshotID, &message, &authorID, &authorRole, &messageType, &code, &event, &givenAt)
 			name := ""
 			if authorRole == "teacher" {
 				name = getTeacherName(authorID)
@@ -448,6 +448,7 @@ func studentDashboardCodeSpaceHandler(w http.ResponseWriter, r *http.Request, wh
 		Password:     r.FormValue("password"),
 	}
 
+	fmt.Printf("%+v\n", feedback.Messages[0])
 	// Get all submissions from DB.
 	var submissions = make([]*SubmissionInfo, 0)
 	_, ok = HelpEligibleStudents[problemID][uid]
