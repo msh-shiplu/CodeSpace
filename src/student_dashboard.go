@@ -448,7 +448,6 @@ func studentDashboardCodeSpaceHandler(w http.ResponseWriter, r *http.Request, wh
 		Password:     r.FormValue("password"),
 	}
 
-	fmt.Printf("%+v\n", feedback.Messages[0])
 	// Get all submissions from DB.
 	var submissions = make([]*SubmissionInfo, 0)
 	_, ok = HelpEligibleStudents[problemID][uid]
