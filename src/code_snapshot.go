@@ -111,7 +111,7 @@ func codeSnapshotFeedbackHandler(w http.ResponseWriter, r *http.Request, who str
 		rows.Scan(&studentID, &problemID, &code, &filename)
 	}
 	rows.Close()
-	if studentID == authorID {
+	if authorRole == "student" && studentID == authorID {
 		fmt.Fprintf(w, "You can not give feedback to your own code.")
 		return
 	}
