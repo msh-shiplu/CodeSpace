@@ -17,13 +17,18 @@ import (
 //---------------------------------------------------------
 type Configuration struct {
 	CourseId   string
+	CourseName string
 	NameServer string
 	IP         string
 	Port       int
 	Database   string
+	DBServerIP string
+	DBUserName string
+	DBPassWord string
 	Address    string
 	LogFile    string
 	PeerTutor  int
+	ChatgptaServer string
 }
 
 var Config *Configuration
@@ -285,3 +290,5 @@ func getLinesOfCode(code string) int {
 
 // PeerTutorAllowed is the flag that decides whether peers are allowed to help other students or not.
 var PeerTutorAllowed = false
+
+var ChatGPTServerAddress = "http://141.225.10.71:8000"

@@ -69,13 +69,15 @@ type SubmissionDashboard struct {
 }
 
 type TemplateDate struct {
-	Feedback   FeedbackProvisionDashBoard
-	Submission SubmissionDashboard
-	Status     DashBoardStudentInfo
-	UserID     int
-	UserRole   string
-	Password   string
-	Username   string
+	Feedback   	   FeedbackProvisionDashBoard
+	Submission     SubmissionDashboard
+	Status         DashBoardStudentInfo
+	ChatgptaServer string
+	UserID         int
+	UserRole       string
+	Password       string
+	Username       string
+	CourseName	   string
 }
 
 func getCurrentUserVote(feedbackID int, userID int, userRole string) string {
@@ -521,13 +523,15 @@ func studentDashboardCodeSpaceHandler(w http.ResponseWriter, r *http.Request, wh
 	rows.Close()
 
 	data := TemplateDate{
-		Submission: *submission,
-		Feedback:   *feedback,
-		Status:     studentStats,
-		UserID:     uid,
-		UserRole:   role,
-		Password:   r.FormValue("password"),
-		Username:   getName(uid, role),
+		Submission:     *submission,
+		Feedback:       *feedback,
+		Status:         studentStats,
+		ChatgptaServer: Config.ChatgptaServer,
+		UserID:         uid,
+		UserRole:       role,
+		Password:       r.FormValue("password"),
+		Username:       getName(uid, role),
+		CourseName:		Config.CourseName,
 	}
 
 	w.Header().Set("Content-Type", "text/html")

@@ -43,7 +43,7 @@ func create_tables() {
 }
 
 //-----------------------------------------------------------------
-func init_database(db_name string) {
+func init_database(db_name string, username string, pass string, server string) {
 	var err error
 	prepare := func(s string) *sql.Stmt {
 		stmt, err := Database.Prepare(s)
@@ -53,7 +53,7 @@ func init_database(db_name string) {
 		return stmt
 	}
 
-	Database, err = sql.Open("mysql", "root:Shiplu1235@tcp(127.0.0.1:3306)/")
+	Database, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/", username, pass, server))
 	if err != nil {
 		log.Fatal(err)
 	}

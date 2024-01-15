@@ -193,7 +193,7 @@ func main() {
 	if Config.NameServer != "" {
 		inform_name_server()
 	}
-	init_database(Config.Database)
+	init_database(Config.Database, Config.DBUserName, Config.DBPassWord, Config.DBServerIP)
 	if teacher_file != "" {
 		add_multiple(teacher_file, "teacher")
 	}
