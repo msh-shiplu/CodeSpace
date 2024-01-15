@@ -18,6 +18,11 @@
                 "id": "gemsGotIt",
                 "command": "gems_got_it",
             },
+            {
+                "caption": "View exercises",
+                "id": "gemsViewExercises",
+                "command": "gems_view_exercises"
+            },
             {"caption":"-", "id":"side-bar-separator"},
             {
                 "caption": "Attendance",
@@ -28,16 +33,6 @@
                 "caption": "Points",
                 "id": "gemsPointsReport",
                 "command": "gems_points_report",
-            },
-            {
-                "caption": "Peer Tutoring",
-                "id": "gemsPeerTutoring",
-                "command": "gems_peer_tutoring"
-            },
-            {
-                "caption": "Exercises",
-                "id": "gemsViewExercises",
-                "command": "gems_view_exercises"
             },
             {"caption":"-", "id":"side-bar-separator"},
             {

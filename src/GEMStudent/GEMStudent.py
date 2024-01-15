@@ -17,7 +17,7 @@ import re
 
 gemsUpdateIntervalLong = 20000  # Update interval
 gemsUpdateIntervalShort = 10000  # When submission is being looked at
-gemsCodeSnapshotInterval = 60000
+gemsCodeSnapshotInterval = 15000
 gemsFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "info")
 gemsFOLDER = ""
 gemsTIMEOUT = 7
@@ -936,15 +936,15 @@ class gemsUpdate(sublime_plugin.WindowCommand):
             menu_file = os.path.join(package_path, "Main.sublime-menu")
             version_file = os.path.join(package_path, "version.go")
             urllib.request.urlretrieve(
-                "https://raw.githubusercontent.com/msh-shiplu/CodeSpace/master/src/GEMStudent/GEMStudent.py",
+                "https://raw.githubusercontent.com/msh-shiplu/CodeSpace/2.0/src/GEMStudent/GEMStudent.py",
                 module_file,
             )
             urllib.request.urlretrieve(
-                "https://raw.githubusercontent.com/msh-shiplu/CodeSpace/master/src/GEMStudent/Main.sublime-menu",
+                "https://raw.githubusercontent.com/msh-shiplu/CodeSpace/2.0/src/GEMStudent/Main.sublime-menu",
                 menu_file,
             )
             urllib.request.urlretrieve(
-                "https://raw.githubusercontent.com/msh-shiplu/CodeSpace/master/src/version.go",
+                "https://raw.githubusercontent.com/msh-shiplu/CodeSpace/2.0/src/version.go",
                 version_file,
             )
             with open(version_file) as f:
