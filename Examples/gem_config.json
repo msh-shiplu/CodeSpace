@@ -1,9 +1,14 @@
 {
         "CourseId": "COMP1010",
-        "Database": "COMP1010.sqlite3",
+        "CourseName": "CS1",
+        "Database": "COMP1010_003",
+        "DBServerIP": "127.0.0.1",
+        "DBUserName": "(mysql user)",
+        "DBPassword": "(mysql user pass)",
         "LogFile": "COMP1010.log",
         "IP": "",
         "Port": 8088,
-        "NameServer": "gem.uom.memphis.edu:8080",
-        "PeerTutor": 0
+        "NameServer": "http://141.225.10.71:8080",
+        "PeerTutor": 0,
+        "ChatgptaServer": "http://141.225.10.71:9000"
 }
