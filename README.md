@@ -104,3 +104,12 @@ Run the server
 ```
     ./go run *.go -c config.json
 ```
+#### Run ChatGPTA Server (Optional)
+To get feedback from ChatGPT, we need to run the ChatGPTA server independently and provide the server address to the config file.
+1. Clone the repository `git clone https://github.com/vtphan/chatGPTA.git`
+2. Enter into the repository folder and run the following command
+```
+cd chatGPTA/src
+go run *.go & > chatgpt.log
+```
+Omit the `&` if you don't want to run the ChatGPTA server in background. 
