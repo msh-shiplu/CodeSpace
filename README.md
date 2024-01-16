@@ -58,13 +58,38 @@ These steps are done only once.  In subsequent usage, there is no need to go thr
 
 #### Development mode
 
+##### Install Go
 Install latest version of [Go](https://golang.org/dl/). Run these on the command line inside `src` folder.
 * go mod init GEM
 * go mod tidy
-* go get github.com/mattn/go-sqlite3
+
+##### Install MySQL Server
+The current version of Codespace need MySQL server pre-installed and running beforehand. The MySQL server can be installed using the following resources.
+* [Debian (version 11)](https://www.devart.com/dbforge/mysql/install-mysql-on-debian/).
+* [Ubuntu](https://ubuntu.com/server/docs/databases-mysql)
+* [Windows](https://dev.mysql.com/doc/refman/8.2/en/windows-installation.html)
+
+##### Create New MySQL User and Grant Previlege
+Enter into MySQL CLI using the following command
+```
+myql -u root -p
+```
+Create a new user e.g. `gem`
+```
+CREATE USER 'gem'@'localhost' IDENTIFIED BY 'password';
+```
+Grant the user previleges for all databases (the system will create a database for each of the course).
+```
+GRANT ALL PRIVILEGES ON *.* TO 'gem'@'localhost' WITH GRANT OPTION;
+```
+
+##### Install MySQL Driver for Go
+```
+go install github.com/go-sql-driver/mysql@latest
+```
 
 
-(6) First-time configuration:
+##### First-time configuration:
 Add teachers
 ```
     ./go run *.go -c config.json -add_teachers teachers.txt
