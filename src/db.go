@@ -65,7 +65,7 @@ func init_database(db_name string, username string, pass string, server string) 
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
-	Database, err = sql.Open("mysql", "root:Shiplu1235@tcp(127.0.0.1:3306)/"+db_name+"?parseTime=true")
+	Database, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", username, pass, server, db_name))
 	if err != nil {
 		log.Fatal(err)
 	}
