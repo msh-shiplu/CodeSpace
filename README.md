@@ -74,6 +74,10 @@ Enter into MySQL CLI using the following command
 ```
 myql -u root -p
 ```
+Update SQL mode (needs to avoid conflict with Go library).
+```
+SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
+```
 Create a new user e.g. `gem`
 ```
 CREATE USER 'gem'@'localhost' IDENTIFIED BY 'password';
