@@ -69,6 +69,7 @@ func init_database(db_name string, username string, pass string, server string) 
 	if err != nil {
 		log.Fatal(err)
 	}
+	Database.SetConnMaxLifetime(time.Minute * 3)
 	create_tables()
 	AddStudentSQL = prepare("insert into student (name, password) values (?, ?)")
 	AddTeacherSQL = prepare("insert into teacher (name, password) values (?, ?)")
