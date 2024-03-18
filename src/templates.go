@@ -1924,7 +1924,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			});
 			var snapshotCounter = 0;
 			var feedbackCounter = 0;
-			var subfeedbackCounter = 1; // should be 0 with NLP
+			var subfeedbackCounter = 0; // should be 0 with NLP
 			
 			// var feedbackEditors = document.getElementsByClassName("feedback-editor");
 			var feedbackChangedCode = []
@@ -1949,10 +1949,10 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 				code.on('change', (code) => {
 					submissionChangedCode[i] = code.doc.getValue()
 					// This changes the Send Feedback into Check my feedback button
-					// if (subfeedbackCounter === 0 ){
-					// 	document.getElementById("sub-submit-"+i).classList.add('is-hidden')
-					// 	document.getElementById("sub-check-"+i).classList.remove('is-hidden')
-					// }
+					if (subfeedbackCounter === 0 ){
+						document.getElementById("sub-submit-"+i).classList.add('is-hidden')
+						document.getElementById("sub-check-"+i).classList.remove('is-hidden')
+					}
 				});
 			}
 			{{if ne $.ChatgptaServer ""}}
@@ -2000,7 +2000,7 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 			function runNLP(student_code, ta_code, user_id, write) {
 				return $.ajax({
 					// url: "http://127.0.0.1:5000/feedback_classify",
-					url: "http://delphinus.cs.memphis.edu:5000/feedback_classify",
+					url: "http://141.225.10.71:5000/feedback_classify",
 					type: "POST",
 					data: JSON.stringify({
 							student_code: student_code,
@@ -2027,8 +2027,8 @@ var CODE_SNAPSHOT_TAB_TEMPLATE = `
 							pre += '</ul></div></div>'
 						})
 						// Do not show NLP classifier result
-						// $(write).html("");
-						// $('<div class="wrapper">' + pre +  '</div>').appendTo( write )
+						$(write).html("");
+						$('<div class="wrapper">' + pre +  '</div>').appendTo( write )
 					},
 					error: function(err) {
 						// alert(JSON.stringify(err));
